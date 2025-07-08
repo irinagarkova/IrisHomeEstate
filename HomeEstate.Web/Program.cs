@@ -8,19 +8,32 @@ namespace HomeEstate
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<HomeEstateDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services
+              .AddDefaultIdentity<IdentityUser>(options =>
+              {
+                  options.SignIn.RequireConfirmedEmail = false;
+                  options.SignIn.RequireConfirmedAccount = false;
+                  options.SignIn.RequireConfirmedPhoneNumber = false;
+
+                  options.Password.RequiredLength = 3;
+                  options.Password.RequireDigit = false;
+                  options.Password.RequireNonAlphanumeric = false;
+                  options.Password.RequireLowercase = false;
+                  options.Password.RequireUppercase = false;
+                  options.Password.RequiredUniqueChars = 0;
+              })
+              .AddEntityFrameworkStores<HomeEstateDbContext>()
+              .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
             builder.Services.AddControllersWithViews();
 
-            var app = builder.Build();
+            WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -39,6 +52,7 @@ namespace HomeEstate
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

@@ -3,7 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate", "HomeEstate\HomeEstate.csproj", "{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Web", "HomeEstate.Web\HomeEstate.Web.csproj", "{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{96692E63-36A6-4495-ACDC-D469355D1F9C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Data", "HomeEstate.Data\HomeEstate.Data.csproj", "{81C18241-C648-40C0-B6CF-16BC96F1622A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Data.Common", "HomeEstate.Data.Common\HomeEstate.Data.Common.csproj", "{A252201C-542E-4DE0-9E85-4C210806829F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Data.Models", "HomeEstate.Data.Models\HomeEstate.Data.Models.csproj", "{57AA5A2D-25F4-465D-809D-6FC868AD7164}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{7D2C2B30-A751-44F6-982A-99EBEC1B4218}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Services.Core", "HomeEstate.Services.Core\HomeEstate.Services.Core.csproj", "{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Services.Common", "HomeEstate.Services.Common\HomeEstate.Services.Common.csproj", "{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{D48848E2-50DC-4A1E-B427-004D6CE343E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +31,37 @@ Global
 		{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81C18241-C648-40C0-B6CF-16BC96F1622A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81C18241-C648-40C0-B6CF-16BC96F1622A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81C18241-C648-40C0-B6CF-16BC96F1622A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81C18241-C648-40C0-B6CF-16BC96F1622A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A252201C-542E-4DE0-9E85-4C210806829F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A252201C-542E-4DE0-9E85-4C210806829F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A252201C-542E-4DE0-9E85-4C210806829F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A252201C-542E-4DE0-9E85-4C210806829F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57AA5A2D-25F4-465D-809D-6FC868AD7164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57AA5A2D-25F4-465D-809D-6FC868AD7164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57AA5A2D-25F4-465D-809D-6FC868AD7164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57AA5A2D-25F4-465D-809D-6FC868AD7164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{60C6EBAF-44A8-42DB-A4F2-CF3E6A9B1351} = {D48848E2-50DC-4A1E-B427-004D6CE343E1}
+		{81C18241-C648-40C0-B6CF-16BC96F1622A} = {96692E63-36A6-4495-ACDC-D469355D1F9C}
+		{A252201C-542E-4DE0-9E85-4C210806829F} = {96692E63-36A6-4495-ACDC-D469355D1F9C}
+		{57AA5A2D-25F4-465D-809D-6FC868AD7164} = {96692E63-36A6-4495-ACDC-D469355D1F9C}
+		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA} = {7D2C2B30-A751-44F6-982A-99EBEC1B4218}
+		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071} = {7D2C2B30-A751-44F6-982A-99EBEC1B4218}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {18DE518C-A3F7-4434-9954-4BB47EDD4E1A}

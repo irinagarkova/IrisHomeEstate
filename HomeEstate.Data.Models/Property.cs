@@ -17,12 +17,6 @@ namespace HomeEstate.Models
         [Comment("Property Price")]
         public decimal Price { get; set; }
 
-        [Comment("Property Address")]
-        public string Address { get; set; } = null!;
-
-        [Comment("Property City")]
-        public string City { get; set; } = null!;
-
         [Comment("Property Area")]
         public int Area { get; set; }
 
@@ -41,7 +35,6 @@ namespace HomeEstate.Models
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        // Навигационно prop за снимки ПИТАЙ СТЕФАН 
         [Comment("Images url")]
         public virtual ICollection<PropertyImage> Images { get; set; } 
             = new HashSet<PropertyImage>();

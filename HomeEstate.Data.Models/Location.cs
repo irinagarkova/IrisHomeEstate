@@ -8,6 +8,7 @@ namespace HomeEstate.Models
         public int Id { get; set; }
 
         [Comment("Location CityName")]
-        public string CityName { get; set; } = null!;
+        public string City { get; set; } = null!;
+        public string Address{ get; set; } = null!;
     }
 }
