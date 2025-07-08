@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HomeEstate.Data\HomeEstate.Data.csproj" />
+    <ProjectReference Include="..\HomeEstate.Services.Core\HomeEstate.Services.Core.csproj" />
   </ItemGroup>
 
 </Project>
