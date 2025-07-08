@@ -11,5 +11,6 @@ namespace HomeEstate.Models
 
         [Comment("PropertyImage ImageUrl")]
         public string ImageUrl { get; set; } = null!;
+        public bool IsDeleted { get; set; }
     }
 }

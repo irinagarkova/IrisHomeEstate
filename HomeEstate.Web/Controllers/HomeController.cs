@@ -1,8 +1,9 @@
 using HomeEstate.Models;
+using HomeEstate.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace HomeEstate.Controllers
+namespace HomeEstate.Web.Controllers
 {
     public class HomeController : Controller
     {

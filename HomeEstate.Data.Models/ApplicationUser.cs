@@ -8,6 +8,7 @@ namespace HomeEstate.Models
 
         // Всеки потребител може да има много имоти
         public virtual ICollection<Property> Properties { get; set; } = new HashSet<Property>();
+        public bool IsDeleted { get; set; }
 
         // Всеки потребител може да има много любими имоти
         public virtual ICollection<FavoriteProperty> FavoriteProperties { get; set; }
