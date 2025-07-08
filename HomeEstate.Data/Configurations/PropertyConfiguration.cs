@@ -28,16 +28,6 @@ namespace HomeEstate.HomeEstate.Data.Configurations
                 .HasColumnType("decimal(18,2)");
 
             builder
-                 .Property(p => p.Address)
-                 .IsRequired(true)
-                 .HasMaxLength(AddressMaxLength);
-
-            builder
-                .Property(p => p.City)
-                .IsRequired(true)
-                .HasMaxLength(CityMaxLength);
-
-            builder
                 .Property(p => p.Area)
                 .IsRequired(true);
 
