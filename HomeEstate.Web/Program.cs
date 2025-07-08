@@ -13,10 +13,9 @@ namespace HomeEstate
             // Add services to the container.
             builder.Services.AddDbContext<HomeEstateDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+            
             builder.Services
-              .AddDefaultIdentity<IdentityUser>(options =>
+              .AddIdentity<IdentityUser, IdentityRole>(options =>
               {
                   options.SignIn.RequireConfirmedEmail = false;
                   options.SignIn.RequireConfirmedAccount = false;
@@ -38,7 +37,7 @@ namespace HomeEstate
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseMigrationsEndPoint();
+                
             }
             else
             {
