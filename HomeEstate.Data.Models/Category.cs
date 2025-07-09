@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace HomeEstate.Models
 {
     public class Category
     {
+       
         [Comment("Category identifier")]
 
         public int Id { get; set; }

@@ -1,9 +1,37 @@
-﻿@using HomeEstate.Models
-@model Property
+﻿@model ICollection<PropertyViewModel>
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
+
+        <h1>Заглавие</h1>
+        <table>
+            <tr>
+                <th>Id</th>
+                <th>Tittle</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Area</th>
+                <th>CreatedOn</th>
+                <th>IsDeleted</th>
+            </tr>
+            @foreach(var property in Model)
+            {
+                <tr>
+                    <td>@property.Id</td>
+                    <td>@property.Title</td>
+                    <td>@property.Description</td>
+                    <td>@property.Price</td>
+                    <td>@property.Area</td>
+                    <td>@property.CreatedOn</td>
+                    <td>@property.IsDeleted</td>
+                    <td> 
+                        <a asp-action="Update" asp-route-id="@property.Id" class ="btn btn-primary">Детайли</a>
+                    </td>
+                </tr>
+            }
+        </table>
    
+ 
 </div>

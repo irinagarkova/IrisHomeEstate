@@ -1,6 +1,8 @@
 using HomeEstate.Data;
-using HomeEstate.Services.Core;
 using HomeEstate.Services.Core.Interfaces;
+using HomeEstate.Services.Core.Mappings;
+using HomeEstate.Services.Core.Services;
+using HomeEstate.Web.Mappings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +17,16 @@ namespace HomeEstate
             // Add services to the container.
             builder.Services.AddDbContext<HomeEstateDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            
+
+
+            builder.Services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<PropertyMappingProfile>();
+                cfg.AddProfile<PropertyWebMappingProfile>();
+            });
+
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+
             builder.Services
               .AddIdentity<IdentityUser, IdentityRole>(options =>
               {
