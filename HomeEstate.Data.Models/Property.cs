@@ -32,6 +32,9 @@ namespace HomeEstate.Models
         public string OwnerId { get; set; } = null!;
         public ApplicationUser Owner { get; set; } = null!;
 
+        public int LocationId { get; set; }
+        public Location Location { get; set; } = null!;
+
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 

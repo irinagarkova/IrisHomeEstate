@@ -1,7 +1,9 @@
-﻿using HomeEstate.Models;
+﻿using HomeEstate.Data.Seeds;
+using HomeEstate.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace HomeEstate.Data
 {
@@ -22,9 +24,15 @@ namespace HomeEstate.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);
+            builder.ApplyConfiguration(new CategorySeeder());
+            builder.ApplyConfiguration(new PropertySeeder());
+            builder.ApplyConfiguration(new LocationSeeder());
+            builder.ApplyConfiguration(new PropertyImageSeeder());
+            builder.ApplyConfiguration(new ApplicationUserSeeder());
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(builder);
+
         }
     }
 }
