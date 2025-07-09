@@ -16,7 +16,7 @@ namespace HomeEstate.Data.Seeds
             builder.HasData(
                 new ApplicationUser
                 {
-                    Id = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
+                    Id = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                     Email = "nqkuv@email.com"
                 });
         }

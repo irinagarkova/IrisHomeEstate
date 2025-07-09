@@ -53,6 +53,12 @@ namespace HomeEstate.HomeEstate.Data.Configurations
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder
+                .HasOne(p => p.Location)
+                .WithMany()
+                .HasForeignKey(p => p.LocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             
             builder
                 .HasMany(p => p.Images)

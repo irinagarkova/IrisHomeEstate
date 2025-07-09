@@ -1,4 +1,6 @@
 using HomeEstate.Data;
+using HomeEstate.Services.Core;
+using HomeEstate.Services.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +33,8 @@ namespace HomeEstate
               .AddEntityFrameworkStores<HomeEstateDbContext>()
               .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
             builder.Services.AddControllersWithViews();
-
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddRazorPages();
             WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -48,7 +51,7 @@ namespace HomeEstate
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.MapRazorPages();
             app.UseRouting();
 
             app.UseAuthentication();

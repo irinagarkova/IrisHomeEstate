@@ -26,7 +26,7 @@ namespace HomeEstate.Data.Configurations
                 .Property(l => l.Address)
                 .IsRequired(true)
                 .HasMaxLength(200); 
-
+            
     
             builder
                 .Property<bool>("IsDeleted")

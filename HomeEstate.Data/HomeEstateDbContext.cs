@@ -24,11 +24,11 @@ namespace HomeEstate.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new CategorySeeder());
-            builder.ApplyConfiguration(new PropertySeeder());
-            builder.ApplyConfiguration(new LocationSeeder());
-            builder.ApplyConfiguration(new PropertyImageSeeder());
-            builder.ApplyConfiguration(new ApplicationUserSeeder());
+            //builder.ApplyConfiguration(new CategorySeeder());
+            //builder.ApplyConfiguration(new PropertySeeder());
+            //builder.ApplyConfiguration(new LocationSeeder());
+            //builder.ApplyConfiguration(new PropertyImageSeeder());
+            //builder.ApplyConfiguration(new ApplicationUserSeeder());
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             base.OnModelCreating(builder);
