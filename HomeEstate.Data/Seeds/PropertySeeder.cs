@@ -23,7 +23,7 @@ namespace HomeEstate.Data.Seeds
                     Area = 120,
                     CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
-                    OwnerId = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
+                    OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                     CategoryId = 1,
                     LocationId = 1
                 },
@@ -36,7 +36,7 @@ namespace HomeEstate.Data.Seeds
                     Area = 200,
                     CreatedOn = new DateTime(2025, 7, 3),
                     IsDeleted = false,
-                    OwnerId = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
+                    OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                     CategoryId = 2,
                     LocationId = 2
                 },
@@ -49,34 +49,35 @@ namespace HomeEstate.Data.Seeds
                     Area = 180,
                     CreatedOn = DateTime.UtcNow,
                     IsDeleted = false,
-                    OwnerId = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
+                    OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                     CategoryId = 3,
                     LocationId = 3
                 },
                  new Property
                  {
-                     Id = 3,
+                     Id = 4,
                      Title = "Luxury Apartment with Pool",
                      Description = "High-end condo with premium amenities, pool access, and concierge services.",
                      Price = 27500000m,
                      Area = 800,
                      CreatedOn = DateTime.Now.AddMonths(-9),
                      IsDeleted = false,
-                     OwnerId = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
+                     OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                      CategoryId = 1,
                      LocationId = 1
                  },
                  new Property
                  {
-                     Id = 4,
+                     Id = 5,
                      Title = "Spacious Family House",
                      Description = "Perfect family home with large backyard, garage, and excellent school district.",
                      Price = 450000.00m,
                      Area = 2500,
                      CreatedOn = DateTime.Now.AddMonths(-3),
                      IsDeleted = false,
-                     OwnerId = new Guid("4adc1994-f20e-441b-8142-8743e575d5a0").ToString(),
-                     CategoryId = 4
+                     OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
+                     CategoryId = 4,
+                     LocationId = 4
                  }
             );
         }

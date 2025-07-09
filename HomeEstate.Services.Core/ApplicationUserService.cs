@@ -1,11 +1,12 @@
 ﻿using HomeEstate.Models;
+using HomeEstate.Services.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HomeEstate.Services.Core.Interfaces
+namespace HomeEstate.Services.Core
 {
     public class ApplicationUserService : IApplicationUserService
     {

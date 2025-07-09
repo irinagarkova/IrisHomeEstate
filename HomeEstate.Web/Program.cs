@@ -35,7 +35,6 @@ namespace HomeEstate
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddRazorPages();
-
             WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
