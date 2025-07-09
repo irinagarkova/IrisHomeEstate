@@ -11,4 +11,8 @@
     <ProjectReference Include="..\HomeEstate.Data\HomeEstate.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.0" />
+  </ItemGroup>
+
 </Project>

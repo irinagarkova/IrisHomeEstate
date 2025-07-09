@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HomeEstate.Services.Core
+namespace HomeEstate.Services.Core.Services
 {
     public class ApplicationUserService : IApplicationUserService
     {
