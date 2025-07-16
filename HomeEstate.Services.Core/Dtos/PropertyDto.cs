@@ -20,7 +20,7 @@ namespace HomeEstate.Services.Core.Dtos
         public bool IsDeleted { get; set; }
 
         public string OwnerId { get; set; } = null!;
-        public ApplicationUser Owner { get; set; } = null!;
+        public ApplicationUserDto Owner { get; set; } = null!;
 
         public int LocationId { get; set; }
         public Location Location { get; set; } = null!;
@@ -28,7 +28,7 @@ namespace HomeEstate.Services.Core.Dtos
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        public virtual ICollection<PropertyImage> Images { get; set; }
-            = new List<PropertyImage>();
+        public virtual ICollection<PropertyImageDto> Images { get; set; }
+            = new List<PropertyImageDto>();
     }
 }
