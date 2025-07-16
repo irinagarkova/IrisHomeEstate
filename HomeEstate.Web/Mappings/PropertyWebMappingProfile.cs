@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
 using HomeEstate.Web.Models;
 
@@ -29,6 +30,9 @@ namespace HomeEstate.Web.Mappings
                 .ForMember(dest => dest.ImageUrl, opt=> opt.MapFrom(x=>x.Property.Images.First().ImageUrl))
                 .ReverseMap();
 
+            CreateMap<RegisterViewModel, ApplicationUser>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
+               
         }
     }
 }
