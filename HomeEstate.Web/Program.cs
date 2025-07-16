@@ -1,4 +1,5 @@
 using HomeEstate.Data;
+using HomeEstate.Models;
 using HomeEstate.Services.Core.Interfaces;
 using HomeEstate.Services.Core.Mappings;
 using HomeEstate.Services.Core.Services;
@@ -29,7 +30,7 @@ namespace HomeEstate
 			builder.Services.AddScoped<IFavoritePropertyService, FavoritePropertyService>();
 
 			builder.Services
-			  .AddIdentity<IdentityUser, IdentityRole>(options =>
+			  .AddIdentity<ApplicationUser, IdentityRole>(options =>
 			  {
 				  options.SignIn.RequireConfirmedEmail = false;
 				  options.SignIn.RequireConfirmedAccount = false;
