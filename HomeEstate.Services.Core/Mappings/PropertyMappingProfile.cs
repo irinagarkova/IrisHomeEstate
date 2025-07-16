@@ -21,7 +21,17 @@ namespace HomeEstate.Services.Core.Mappings
                 //.ForMember(dest => dest.Images, opt => opt.MapFrom(p => p.Images))
                 .ForMember(dest => dest.Category, opt => opt.Ignore())
                 .ForMember(dest => dest.Location, opt => opt.Ignore())
-                .ForMember(dest => dest.Owner, opt => opt.Ignore()).ReverseMap();
+                .ForMember(dest => dest.Owner, opt => opt.Ignore())
+                .ForMember(dest => dest.Images, opt=> opt.MapFrom(s=>s.Images))
+                .ReverseMap();
+
+            CreateMap<FavoriteProperty,FavoritePropertyDto>()
+                .ForMember(dest => dest.Property, opt => opt.MapFrom(s=> s.Property))
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ReverseMap();
+
+            CreateMap<PropertyImage, PropertyImageDto>().ReverseMap();
         }   
+
     }
 }

@@ -21,14 +21,6 @@ namespace HomeEstate.Web.Controllers
             this.mapper = mapper;
         }
 
-        //BasovClass moita figura = new Triugulnik
-
-        //figura.SmetniPlo6t = \
-        //figura = new Pravoulnik.
-        //figura.SmmetniPlo6t
-
-
-
         public async Task<IActionResult> Index()
         {
 
@@ -59,7 +51,7 @@ namespace HomeEstate.Web.Controllers
             var newDto = await propertyService.GetPropertyAsync(id);
             var propertyToUpdate = mapper.Map<AddAndUpdatePropertyViewModel>(newDto);
             return View(propertyToUpdate);
-            
+
         }
         [HttpPost]
         public async Task<IActionResult> Update(AddAndUpdatePropertyViewModel model)
@@ -74,8 +66,23 @@ namespace HomeEstate.Web.Controllers
 
             return RedirectToAction("Index");
         }
+        public async Task<IActionResult> Details(int id)
+        {
+            var property = await propertyService.GetPropertyAsync(id);
+            var mappedProp = mapper.Map<DetailsViewModel>(property);
 
+            return View(mappedProp);
+        }
+        public async Task<IActionResult> Delete(int id)
+        {
+            var prop = await propertyService.GetPropertyAsync(id);
+            var mappedProp = mapper.Map<PropertyViewModel>(prop);
 
+            return View(mappedProp);
+           
+        }
+       
+    
     }
 
 }

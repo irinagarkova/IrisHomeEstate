@@ -1,0 +1,36 @@
+﻿@model IEnumerable<HomeEstate.Web.Models.FavoritePropertyViewModel>
+
+@{
+    ViewData["Title"] = "My Favorite Properties";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!Model.Any())
+{
+    <p>You have no favorite properties yet.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var property in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@property.ImageUrl" class="card-img-top" alt="@property.Title">
+                    <div class="card-body">
+                        <h5 class="card-title">@property.Title</h5>
+                        <p class="card-text">
+                            <strong>Address:</strong> @property.Address <br />
+                            <strong>Price:</strong> @property.Price.ToString("C")
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-controller="Property" asp-action="Details" asp-route-id="@property.PropertyId" class="btn btn-primary">View Details</a>
+                        <a asp-controller="Favorite" asp-action="Remove" asp-route-id="@property.PropertyId" class="btn btn-danger">Remove</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
