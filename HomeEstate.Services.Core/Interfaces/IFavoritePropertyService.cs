@@ -9,9 +9,9 @@ namespace HomeEstate.Services.Core.Interfaces
 {
 	public interface IFavoritePropertyService
 	{
-		Task AddPropertyToFavoriteAsync(FavoritePropertyDto property);
-		Task RemovePropertyFromFavoriteAsync(PropertyDto property);
-		Task<ICollection<FavoritePropertyDto>> GetAllFavoritePropertiesAsync();
+		Task AddPropertyToFavoriteAsync(int id, string email);
+		Task RemovePropertyFromFavoriteAsync(int id, string email);
+		Task<ICollection<FavoritePropertyDto>> GetAllFavoritePropertiesAsync(string email);
 
 
 	}

@@ -1,4 +1,5 @@
 ﻿using HomeEstate.Models;
+using HomeEstate.Services.Core.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,9 @@ namespace HomeEstate.Services.Core.Interfaces
 {
     public interface IApplicationUserService
     {
-        Task<ApplicationUser> GetApplicationUser(int id); //Details
-        Task CreateApplicationUserAsync(ApplicationUser applicationUser);
-        Task<ApplicationUser> UpdateApplicationUser (ApplicationUser applicationUser); //Edit
+        Task<ApplicationUser> GetApplicationUser(string email); 
+        Task<ApplicationUser> UpdateApplicationUser (ApplicationUserDto applicationUser); 
         Task DeleteApplicationUser (int id);
-        Task<ICollection<FavoriteProperty>> GetFavoritePropertiesAsync(int id);
-
-        //images
-        
 
     }
 }

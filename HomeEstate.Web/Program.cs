@@ -28,8 +28,9 @@ namespace HomeEstate
 
 			builder.Services.AddScoped<IPropertyService, PropertyService>();
 			builder.Services.AddScoped<IFavoritePropertyService, FavoritePropertyService>();
-
-			builder.Services
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+			builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+            builder.Services
 			  .AddIdentity<ApplicationUser, IdentityRole>(options =>
 			  {
 				  options.SignIn.RequireConfirmedEmail = false;
@@ -46,7 +47,7 @@ namespace HomeEstate
 			  .AddEntityFrameworkStores<HomeEstateDbContext>()
 			  .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
 			builder.Services.AddControllersWithViews();
-			builder.Services.AddScoped<IPropertyService, PropertyService>();
+			
 			builder.Services.AddRazorPages();
 			WebApplication app = builder.Build();
 
