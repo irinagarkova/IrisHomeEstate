@@ -13,6 +13,7 @@ namespace HomeEstate.Services.Core.Interfaces
         Task CreatePropertyAsync(PropertyDto property); 
         Task UpdatePropertyAsync(PropertyDto property); //Edit
         Task DeletePropertyAsync(int id);
+        Task<ICollection<PropertyDto>> GetPropertiesByUserIdAsync(string userId);
         Task<ICollection<PropertyDto>> GetAllPropertiesAsync();
 
 

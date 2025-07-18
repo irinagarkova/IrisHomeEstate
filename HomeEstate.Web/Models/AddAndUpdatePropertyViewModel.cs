@@ -21,5 +21,7 @@ namespace HomeEstate.Web.Models
         [Required]
         public int CategoryId { get; set; }
 
+        public List<IFormFile> Images { get; set; } = new();
+
     }
 }

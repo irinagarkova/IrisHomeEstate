@@ -1,17 +1,24 @@
 ﻿@model ICollection<PropertyViewModel>
 
 @{
-    ViewData["Title"] = "Properties";
+    ViewData["Title"] = "My Properties";
 }
 
 <h1 class="text-center">@ViewData["Title"]</h1>
 
 @if (!Model.Any())
 {
-    <p class="text-center">Няма налични имоти.</p>
+    <p class="text-center">Все още нямате създадени имоти.</p>
+    <div class="text-center">
+        <a asp-controller="Property" asp-action="Create" class="btn btn-success">Създай нов имот</a>
+    </div>
 }
 else
 {
+    <div class="text-center mb-3">
+        <a asp-controller="Property" asp-action="Create" class="btn btn-success">Създай нов имот</a>
+    </div>
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var property in Model)
         {
@@ -42,31 +49,14 @@ else
                     </div>
 
                     <div class="card-footer d-flex justify-content-between">
-                        <a asp-controller="Property" asp-action="Details" asp-route-id="@property.Id" class="btn btn-primary">View Details</a>
-
-                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == @property.OwnerId)
-                        {
-                            <a asp-action="Update" asp-route-id="@property.Id" class="btn btn-warning">Edit</a>
-                        }
-
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <form asp-controller="FavoriteProperty" asp-action="Add" method="post">
-                                <input type="hidden" name="id" value="@property.Id" />
-                                <button type="submit" class="btn btn-primary">Add to Favorite</button>
-                            </form>
-                        }
-                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == @property.OwnerId)
-                        {
-                            <form asp-controller="Property" asp-action="Delete" method="post">
-                                <input type="hidden" name="id" value="@property.Id" />
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        }
+                        <a asp-controller="Property" asp-action="Details" asp-route-id="@property.Id" class="btn btn-primary">Виж детайли</a>
+                        <a asp-controller="Property" asp-action="Edit" asp-route-id="@property.Id" class="btn btn-warning">Редактирай</a>
+                        <form asp-controller="Property" asp-action="Delete" asp-route-id="@property.Id" method="post">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Сигурни ли сте, че искате да изтриете този имот?');">Изтрий</button>
+                        </form>
                     </div>
                 </div>
             </div>
         }
     </div>
 }
-

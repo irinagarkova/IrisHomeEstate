@@ -18,12 +18,21 @@ namespace HomeEstate.Services.Core.Mappings
             // var destination = new PropertyDto();
             CreateMap<Property, PropertyDto>()
                 // destination.Images = soruce.Images
-                //.ForMember(dest => dest.Images, opt => opt.MapFrom(p => p.Images))
                 .ForMember(dest => dest.Category, opt => opt.Ignore())
                 .ForMember(dest => dest.Location, opt => opt.Ignore())
                 .ForMember(dest => dest.Owner, opt => opt.Ignore())
-                .ForMember(dest => dest.Images, opt=> opt.MapFrom(s=>s.Images))
-                .ReverseMap();
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(s => s.Images));
+
+            // ->   
+            CreateMap<PropertyDto, Property>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Не обновявайте ID
+                .ForMember(dest => dest.CreatedOn, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.Owner, opt => opt.Ignore())
+                .ForMember(dest => dest.Location, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Images, opt => opt.Ignore());
+               
 
             CreateMap<FavoriteProperty,FavoritePropertyDto>()
                 .ForMember(dest => dest.Property, opt => opt.MapFrom(s=> s.Property))
@@ -31,6 +40,7 @@ namespace HomeEstate.Services.Core.Mappings
                 .ReverseMap();
 
             CreateMap<PropertyImage, PropertyImageDto>().ReverseMap();
+            CreateMap<ApplicationUserDto, ApplicationUser>().ReverseMap();
         }   
 
     }

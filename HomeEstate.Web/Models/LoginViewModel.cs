@@ -5,7 +5,7 @@ namespace HomeEstate.Web.Models
 	public class LoginViewModel
 	{
 		[Required]
-		[EmailAddress]
+		//[EmailAddress]
 		[Display(Name = "Email")]
 		public string Email { get; set; } = string.Empty;
 

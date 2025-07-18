@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HomeEstate.Models;
+using HomeEstate.Services.Core.Interfaces;
 using HomeEstate.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +13,20 @@ namespace HomeEstate.Web.Controllers
 		private readonly SignInManager<ApplicationUser> signInManager;
 		private readonly RoleManager<IdentityRole> roleManager;
 		private readonly IMapper mapper;
+        private readonly IApplicationUserService userService;
 
-		public AuthController(UserManager<ApplicationUser> userManager,
+        public AuthController(UserManager<ApplicationUser> userManager,
                               SignInManager<ApplicationUser> signInManager,
                               RoleManager<IdentityRole> roleManager,
-							  IMapper mapper)
+							  IMapper mapper,
+							  IApplicationUserService userService)
         {
 			this.userManager = userManager;
 			this.signInManager = signInManager;
 			this.roleManager = roleManager;
 			this.mapper = mapper;
-		}
+            this.userService = userService;
+        }
 
 		public IActionResult Register()
 		{
@@ -43,7 +47,7 @@ namespace HomeEstate.Web.Controllers
 			}
 
 			var user = mapper.Map<ApplicationUser>(model);
-			var result = await userManager.CreateAsync(user);
+			var result = await userManager.CreateAsync(user, model.Password);
 			if (result.Succeeded)
 			{
 				await userManager.AddToRoleAsync(user, "User");

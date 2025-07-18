@@ -1,6 +1,6 @@
 ﻿@model AddAndUpdatePropertyViewModel
 <h1>Add Property Form</h1>
-<form asp-action="Add">
+<form asp-action="Add" enctype="multipart/form-data">
 	<div asp-validation-summary="All" class="text-danger mb-3"></div>
     <div class="row">
         <div class="col-md-6">
@@ -15,53 +15,60 @@
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="Description" class="form-label">Title</label>
+                <label asp-for="Description" class="form-label">Description</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Description" class="form-control" placeholder="Title" />
+                    <input asp-for="Description" class="form-control" placeholder="Description" />
                 </div>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="Price" class="form-label">Title</label>
+                <label asp-for="Price" class="form-label">Price</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Price" class="form-control" placeholder="Title" />
+                    <input asp-for="Price" class="form-control" placeholder="Price" />
                 </div>
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="Area" class="form-label">Title</label>
+                <label asp-for="Area" class="form-label">Area</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Area" class="form-control" placeholder="Title" />
+                    <input asp-for="Area" class="form-control" placeholder="Area" />
                 </div>
                 <span asp-validation-for="Area" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="LocationId" class="form-label">Title</label>
+                <label asp-for="LocationId" class="form-label">LocationId</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="LocationId" class="form-control" placeholder="Title" />
+                    <input asp-for="LocationId" class="form-control" placeholder="LocationId" />
                 </div>
                 <span asp-validation-for="LocationId" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="CategoryId" class="form-label">Title</label>
+                <label asp-for="CategoryId" class="form-label">CategoryId</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="CategoryId" class="form-control" placeholder="Title" />
+                    <input asp-for="CategoryId" class="form-control" placeholder="CategoryId" />
                 </div>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
+
+            <div class="col-md-12 mb-3">
+                <label asp-for="Images" class="form-label">Upload Images</label>
+                <input asp-for="Images" class="form-control" type="file" multiple />
+                <span asp-validation-for="Images" class="text-danger"></span>
+            </div>
+
         </div>
         </div>
         <input  type="submit" value="Submit"/>

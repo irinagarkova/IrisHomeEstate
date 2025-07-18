@@ -51,7 +51,7 @@ namespace HomeEstate.Services.Core.Services
 
         public async Task<PropertyDto> GetPropertyAsync(int id)
         {
-            
+         
             var property = await getProperty(id);
             var mappedProp = mapper.Map<PropertyDto>(property);
 
@@ -59,7 +59,9 @@ namespace HomeEstate.Services.Core.Services
         }
        private async Task<Property> getProperty(int id)
        {
-            var property = await dbContext.Properties.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+            var property = await dbContext.Properties
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (property == null)
             {
                 throw new NotFoundException("Property", id);
@@ -67,30 +69,49 @@ namespace HomeEstate.Services.Core.Services
 
             return property;
 
-       }
+        }
         public async Task UpdatePropertyAsync(PropertyDto property)
         {
+
             var errors = new Dictionary<string, string>();
             if (property.Area <= 0)
             {
-                errors.Add("Area", "Trqbva da e pone 1");
+                errors.Add("Area", "Трябва да е поне 1");
             }
 
             if (property.Title.Length < 5 || property.Title.Length > 20)
             {
-                errors.Add("Tittle", "Trqbwa da e pone 5");
+                errors.Add("Title", "Трябва да е поне 5 символа");
             }
 
             if (errors.Any())
             {
                 throw new CustomValidationException("", errors);
             }
+            var propertyToUpdate = await dbContext.Properties
+                .FirstOrDefaultAsync(p => p.Id == property.Id);
 
-            var propertyToUpdate = await getProperty(property.Id);
-            
-            propertyToUpdate = mapper.Map<Property>(property);
-            dbContext.Properties .Update(propertyToUpdate);
+            if (propertyToUpdate == null)
+            {
+                throw new NotFoundException("Property", property.Id);
+            }
+
+            mapper.Map(property, propertyToUpdate);
+
             await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<ICollection<PropertyDto>> GetPropertiesByUserIdAsync(string userId)
+        {
+            var properties = await dbContext.Properties
+                .Where(p => p.OwnerId == userId && !p.IsDeleted)
+                .Include(p => p.Images)
+                .Include(p => p.Location)
+                .Include(p => p.Category)
+                .ToListAsync();
+
+            var property = properties.Select(p => mapper.Map<PropertyDto>(p)).ToList();
+            return property;
         }
     }
 }

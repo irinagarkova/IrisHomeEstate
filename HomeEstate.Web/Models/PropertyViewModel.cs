@@ -19,6 +19,8 @@ namespace HomeEstate.Web.Models
 
         public bool IsDeleted { get; set; }
 
+        public bool IsFavorite { get; set; }
+        public string OwnerId { get; set; } = null!;
         public ApplicationUser Owner { get; set; } = null!;
 
         public Location Location { get; set; } = null!;
