@@ -11,6 +11,7 @@ namespace HomeEstate.Services.Core.Interfaces
 	{
 		Task AddPropertyToFavoriteAsync(int id, string email);
 		Task RemovePropertyFromFavoriteAsync(int id, string email);
+		Task<int> GetFavoriteCountForPropertyAsync(int propertyId);
 		Task<ICollection<FavoritePropertyDto>> GetAllFavoritePropertiesAsync(string email);
 
 

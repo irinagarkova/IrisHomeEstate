@@ -25,7 +25,7 @@ namespace HomeEstate.Services.Core.Mappings
 
             // ->   
             CreateMap<PropertyDto, Property>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Не обновявайте ID
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) 
                 .ForMember(dest => dest.CreatedOn, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.Owner, opt => opt.Ignore())

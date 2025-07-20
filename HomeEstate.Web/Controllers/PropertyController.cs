@@ -20,20 +20,42 @@ namespace HomeEstate.Web.Controllers
         private readonly IPropertyService propertyService;
         private readonly IMapper mapper;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IFavoritePropertyService favoritePropertyService;
 
-        public PropertyController(IPropertyService propertyService, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public PropertyController(IPropertyService propertyService,
+                                  IMapper mapper,
+                                  UserManager<ApplicationUser> userManager, 
+                                  IFavoritePropertyService favoritePropertyService)
         {
             this.propertyService = propertyService;
             this.mapper = mapper;
             this.userManager = userManager;
+            this.favoritePropertyService = favoritePropertyService;
         }
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-
             var propertyDtos = await propertyService.GetAllPropertiesAsync();
-            var mappedProperties = propertyDtos.Select(x => mapper.Map<PropertyViewModel>(x)).ToList();
-           
+
+            var userName = User.Identity?.Name;
+            var favoriteIds = new HashSet<int>();
+
+            if (User.Identity != null && User.Identity.IsAuthenticated && !string.IsNullOrEmpty(userName))
+            {
+                var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(userName);
+                favoriteIds = favorites.Select(f => f.PropertyId).ToHashSet();
+            }
+
+            var mappedProperties = new List<PropertyViewModel>();
+
+            foreach (var p in propertyDtos)
+            {
+                var vm = mapper.Map<PropertyViewModel>(p);
+                vm.IsFavorite = favoriteIds.Contains(p.Id);
+                vm.FavoriteCount = await favoritePropertyService.GetFavoriteCountForPropertyAsync(p.Id); 
+                mappedProperties.Add(vm);
+            }
+
             return View(mappedProperties);
 
         }
@@ -145,7 +167,7 @@ namespace HomeEstate.Web.Controllers
                 }
 
                 var propertyDto = mapper.Map<PropertyDto>(model);
-                propertyDto.OwnerId = userId; // Запазете OwnerId!
+                propertyDto.OwnerId = userId; 
 
                 await propertyService.UpdatePropertyAsync(propertyDto);
                 return RedirectToAction("Index");
@@ -179,7 +201,7 @@ namespace HomeEstate.Web.Controllers
         }
        
         [HttpGet]
-        public async Task<IActionResult> MyProperties()
+        public async Task<IActionResult> MyProperty()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -192,6 +214,7 @@ namespace HomeEstate.Web.Controllers
             var viewModel = myProps.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
 
             return View(viewModel);
+        
         }
 
       
@@ -209,8 +232,8 @@ namespace HomeEstate.Web.Controllers
             try
             {
                 await propertyService.DeletePropertyAsync(id);
-                return RedirectToAction("Index");
-            }
+				return RedirectToAction("MyProperty");
+			}
             catch (NotFoundException)
             {
                 return NotFound();

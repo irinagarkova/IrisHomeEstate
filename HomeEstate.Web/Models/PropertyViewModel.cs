@@ -16,10 +16,8 @@ namespace HomeEstate.Web.Models
         public int Area { get; set; }
 
         public DateTime CreatedOn { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public bool IsFavorite { get; set; }
+		public int FavoriteCount { get; set; }
+		public bool IsFavorite { get; set; }
         public string OwnerId { get; set; } = null!;
         public ApplicationUser Owner { get; set; } = null!;
 

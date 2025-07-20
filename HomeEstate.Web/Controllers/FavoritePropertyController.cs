@@ -33,17 +33,29 @@ namespace HomeEstate.Web.Controllers
         }
 
 		[HttpPost]
-		public  async Task<IActionResult>Add(int id)
+		public  async Task<IActionResult>Add(int id, string returnUrl)
 		{
 			await favoritePropertyService.AddPropertyToFavoriteAsync(id, User.Identity.Name);
-			return RedirectToAction("Index");
-			
+	
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("Index"); 
+
         }
 
         [HttpPost]
-        public async Task<IActionResult> Remove(int id)
+        public async Task<IActionResult> Remove(int id, string returnUrl)
         {
             await favoritePropertyService.RemovePropertyFromFavoriteAsync(id, User.Identity.Name);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index");
         }
 
