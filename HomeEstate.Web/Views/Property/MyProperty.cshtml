@@ -1,7 +1,7 @@
 ﻿@model ICollection<PropertyViewModel>
 
 @{
-    ViewData["Title"] = "My Properties";
+    ViewData["Title"] = "My Property";
 }
 
 <h1 class="text-center">@ViewData["Title"]</h1>
@@ -10,13 +10,13 @@
 {
     <p class="text-center">Все още нямате създадени имоти.</p>
     <div class="text-center">
-        <a asp-controller="Property" asp-action="Create" class="btn btn-success">Създай нов имот</a>
+        <a asp-controller="Property" asp-action="Add" class="btn btn-success">Създай нов имот</a>
     </div>
 }
 else
 {
     <div class="text-center mb-3">
-        <a asp-controller="Property" asp-action="Create" class="btn btn-success">Създай нов имот</a>
+        <a asp-controller="Property" asp-action="Add" class="btn btn-success">Създай нов имот</a>
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -44,7 +44,6 @@ else
                             <strong>Price:</strong> @property.Price.ToString("C") <br />
                             <strong>Area:</strong> @property.Area m²<br />
                             <strong>Created On:</strong> @property.CreatedOn.ToShortDateString() <br />
-                            <strong>Is Deleted:</strong> @(property.IsDeleted ? "Yes" : "No")
                         </p>
                     </div>
 

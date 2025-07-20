@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\Property\MyProperty.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.17">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,10 +26,6 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Views\Property\MyProperty.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Views\Property\MyProperty.cshtml" />
   </ItemGroup>
 
 </Project>

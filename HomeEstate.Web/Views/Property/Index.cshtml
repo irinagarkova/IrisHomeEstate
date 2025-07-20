@@ -37,7 +37,7 @@ else
                             <strong>Price:</strong> @property.Price.ToString("C") <br />
                             <strong>Area:</strong> @property.Area m²<br />
                             <strong>Created On:</strong> @property.CreatedOn.ToShortDateString() <br />
-                            <strong>Is Deleted:</strong> @(property.IsDeleted ? "Yes" : "No")
+                            <strong>Added to favorite: </strong> @property.FavoriteCount
                         </p>
                     </div>
 
@@ -51,10 +51,24 @@ else
 
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <form asp-controller="FavoriteProperty" asp-action="Add" method="post">
-                                <input type="hidden" name="id" value="@property.Id" />
-                                <button type="submit" class="btn btn-primary">Add to Favorite</button>
-                            </form>
+                            if (!property.IsFavorite)
+                            {
+                                <!-- Добавяне в любими -->
+                                <form asp-controller="FavoriteProperty" asp-action="Add" method="post">
+                                    <input type="hidden" name="id" value="@property.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                    <button type="submit" class="btn btn-outline-danger">Add to Favorite</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <!-- Премахване от любими -->
+                                <form asp-controller="FavoriteProperty" asp-action="Remove" method="post">
+                                    <input type="hidden" name="id" value="@property.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                    <button type="submit" class="btn btn-outline-secondary">Remove from Favorite</button>
+                                </form>
+                            }
                         }
                         @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == @property.OwnerId)
                         {

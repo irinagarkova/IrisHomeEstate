@@ -1,52 +1,54 @@
-﻿@model DetailsViewModel
+﻿@using Azure.Core
+@model DetailsViewModel
 
 <h1>Details</h1>
 
 <h2>@Model.Title</h2>
 
 <div class="property-details">
-    <h3>Description</h3>
-    <p>@Model.Description</p>
+	<h3>Description</h3>
+	<p>@Model.Description</p>
 
-    <h3>Price</h3>
-    <p>@Model.Price.ToString("C")</p>
+	<h3>Price</h3>
+	<p>@Model.Price.ToString("C")</p>
 
-    <h3>Area</h3>
-    <p>@Model.Area</p>
+	<h3>Area</h3>
+	<p>@Model.Area</p>
 
-    <h3>Created on:</h3>
-    <p>@Model.CreatedOn.ToString("dd.MM.yyyy")</p>
+	<h3>Created on:</h3>
+	<p>@Model.CreatedOn.ToString("dd.MM.yyyy")</p>
 
-    <h3>Category</h3>
-    <p>@Model.Category?.Id ?? "N/A"</p>
+	<h3>Category</h3>
+	<p>@Model.Category?.Id ?? "N/A"</p>
 
-    <h3>Location</h3>
-    <p>@Model.Location?.City ?? "N/A"</p>
+	<h3>Location</h3>
+	<p>@Model.Location?.City ?? "N/A"</p>
 
-    <h3>Owner</h3>
-    <p>@Model.Owner?.Id ?? "N/A"</p>
+	<h3>Owner</h3>
+	<p>@Model.Owner?.Id ?? "N/A"</p>
 
-    <h3>Photos</h3>
-    <!-- Примерно ако имаш снимки -->
-    @if (Model.Images != null && Model.Images.Any())
-    {
-        foreach (var imageUrl in Model.Images)
-        {
-            <img src="@imageUrl" alt="Photo" style="max-width: 300px; margin: 5px;" />
-        }
-    }
-    else
-    {
-        <p>No photos available.</p>
-    }
+	<h3>Photos</h3>
+	<!-- Примерно ако имаш снимки -->
+	@if (Model.Images != null && Model.Images.Any())
+	{
+		foreach (var imageUrl in Model.Images)
+		{
+			<img src="@imageUrl" alt="Photo" style="max-width: 300px; margin: 5px;" />
+		}
+	}
+	else
+	{
+		<p>No photos available.</p>
+	}
 
-    @foreach (var imagePath in Model.Images)
-    {
-        <img src="@imagePath" alt="Property Image" style="max-width: 300px; margin: 10px;" />
-    }
+	@foreach (var imagePath in Model.Images)
+	{
+		<img src="@imagePath" alt="Property Image" style="max-width: 300px; margin: 10px;" />
+	}
 </div>
 
 <div class="mt-4">
-    <a asp-action="Edit" asp-route-id="@Model.Title" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Go back</a>
+
+	<button onclick="history.back()">Go Back</button>
+
 </div>

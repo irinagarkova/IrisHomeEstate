@@ -67,7 +67,13 @@ namespace HomeEstate.Services.Core.Services
             return mapp;
         }
 
-        public async Task RemovePropertyFromFavoriteAsync(int id, string email)
+		public async Task<int> GetFavoriteCountForPropertyAsync(int propertyId)
+		{
+            return await dbContext.FavoriteProperties
+                  .CountAsync(fp => fp.PropertyId == propertyId);
+		}
+
+		public async Task RemovePropertyFromFavoriteAsync(int id, string email)
         {
             var user = await applicationUserService.GetApplicationUser(email);
             var favoriteprop = await dbContext.FavoriteProperties.FirstOrDefaultAsync(fp => fp.PropertyId == id && fp.UserId == user.Id);
