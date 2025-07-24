@@ -18,30 +18,32 @@ namespace HomeEstate.Services.Core.Mappings
             // var destination = new PropertyDto();
             CreateMap<Property, PropertyDto>()
                 // destination.Images = soruce.Images
-                .ForMember(dest => dest.Category, opt => opt.Ignore())
-                .ForMember(dest => dest.Location, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(s => s.Category))
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(s => s.Location))
                 .ForMember(dest => dest.Owner, opt => opt.Ignore())
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(s => s.Images));
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(s => s.Images)).ReverseMap();
 
-            // ->   
-            CreateMap<PropertyDto, Property>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) 
-                .ForMember(dest => dest.CreatedOn, opt => opt.Ignore())
-                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-                .ForMember(dest => dest.Owner, opt => opt.Ignore())
-                .ForMember(dest => dest.Location, opt => opt.Ignore())
-                .ForMember(dest => dest.Category, opt => opt.Ignore())
-                .ForMember(dest => dest.Images, opt => opt.Ignore());
-               
 
-            CreateMap<FavoriteProperty,FavoritePropertyDto>()
-                .ForMember(dest => dest.Property, opt => opt.MapFrom(s=> s.Property))
+            CreateMap<FavoriteProperty, FavoritePropertyDto>()
+                .ForMember(dest => dest.Property, opt => opt.MapFrom(s => s.Property))
                 .ForMember(dest => dest.User, opt => opt.Ignore())
                 .ReverseMap();
 
-            CreateMap<PropertyImage, PropertyImageDto>().ReverseMap();
-            CreateMap<ApplicationUserDto, ApplicationUser>().ReverseMap();
-        }   
+            CreateMap<PropertyImage, PropertyImageDto>()
+                .ForMember(dest => dest.PropertyId, opt => opt.MapFrom(s => s.Property.Id))
+                .ReverseMap();
+
+            CreateMap<Category, CategoryDto>().ReverseMap();
+
+            CreateMap<Location, LocationDto>().ReverseMap();
+
+            CreateMap<ApplicationUser, ApplicationUserDto>().ReverseMap();
+                //.ForMember(dest => dest.Id, opt => opt.MapFrom(s => s.Id))
+                //.ForMember(dest => dest.UserName, opt => opt.MapFrom(s => s.UserName))
+
+
+        }
+
 
     }
 }

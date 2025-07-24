@@ -1,7 +1,7 @@
 ﻿@model AddAndUpdatePropertyViewModel
 <h1>Add Property Form</h1>
 <form asp-action="Add" enctype="multipart/form-data">
-	<div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">
@@ -45,17 +45,18 @@
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="LocationId" class="form-label">LocationId</label>
+                <label asp-for="LocationId" class="form-label">City</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="LocationId" class="form-control" placeholder="LocationId" />
+                    <span class="input-group-text"><i class="fas fa-city"></i></span>
+                    <select asp-for="LocationId" asp-items="Model.Locations" class="form-control"></select>
                 </div>
                 <span asp-validation-for="LocationId" class="text-danger"></span>
             </div>
+
         </div>
         <div class="col-md-6">
             <div class="mb-3">
-                <label asp-for="CategoryId" class="form-label">CategoryId</label>
+                <label asp-for="CategoryId" class="form-label">Category</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                     <input asp-for="CategoryId" class="form-control" placeholder="CategoryId" />
@@ -70,7 +71,7 @@
             </div>
 
         </div>
-        </div>
-        <input  type="submit" value="Submit"/>
-    
+    </div>
+    <input type="submit" value="Submit" />
+
 </form>

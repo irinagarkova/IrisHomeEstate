@@ -3,84 +3,497 @@
 @{
     ViewData["Title"] = "Properties";
 }
+<div class="container-fluid mt-4">
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Search Properties</h4>
+                    <form id="searchForm" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" id="searchLocation" name="Location" placeholder="City or neighborhood">
 
-<h1 class="text-center">@ViewData["Title"]</h1>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Property Type</label>
+                            <select class="form-select" id="searchCategory">
+                                <option value="">All Types</option>
+                                <option value="1" >Apartment</option>
+                                <option value="2" >House</option>
+                                <option value="3" >Office</option>
+                                <option value="4" >Villa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Max Price</label>
+                            <input type="number" class="form-control" id="maxPrice" placeholder="Any">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Sort By</label>
+                            <select class="form-select" id="sortBy">
+                                <option value="newest">Newest First</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="area">Area: Largest First</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-@if (!Model.Any())
-{
-    <p class="text-center">Няма налични имоти.</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var property in Model)
-        {
-            <div class="col">
-                <div class="card h-100">
+    <!-- Results Summary -->
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h5 id="resultCount" class="mb-0">Showing @Model.Count() properties</h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary active" id="gridView">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="listView">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
-                    @if (property.Images != null && property.Images.Any())
-                    {
-                        <img src="@property.Images.First()" class="card-img-top" alt="Property image"
-                             style="height: 200px; object-fit: cover;">
-                    }
-                    else
-                    {
-                        <img src="/images/no-image.png" class="card-img-top" alt="No image"
-                             style="height: 200px; object-fit: cover;">
-                    }
-
-                    <div class="card-body">
-                        <h5 class="card-title">@property.Title</h5>
-                        <p class="card-text">
-                            <strong>ID:</strong> @property.Id <br />
-                            <strong>Description:</strong> @property.Description <br />
-                            <strong>Price:</strong> @property.Price.ToString("C") <br />
-                            <strong>Area:</strong> @property.Area m²<br />
-                            <strong>Created On:</strong> @property.CreatedOn.ToShortDateString() <br />
-                            <strong>Added to favorite: </strong> @property.FavoriteCount
-                        </p>
-                    </div>
-
-                    <div class="card-footer d-flex justify-content-between">
-                        <a asp-controller="Property" asp-action="Details" asp-route-id="@property.Id" class="btn btn-primary">View Details</a>
-
-                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == @property.OwnerId)
-                        {
-                            <a asp-action="Update" asp-route-id="@property.Id" class="btn btn-warning">Edit</a>
-                        }
-
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            if (!property.IsFavorite)
+    <!-- Properties Grid -->
+    <div id="propertiesContainer">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="propertiesGrid">
+            @foreach (var property in Model)
+            {
+                <div class="col property-item" data-property-id="@property.Id">
+                    <div class="card h-100 property-card">
+                        <div class="position-relative">
+                            @if (property.Images != null && property.Images.Any())
                             {
-                                <!-- Добавяне в любими -->
-                                <form asp-controller="FavoriteProperty" asp-action="Add" method="post">
-                                    <input type="hidden" name="id" value="@property.Id" />
-                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                                    <button type="submit" class="btn btn-outline-danger">Add to Favorite</button>
-                                </form>
+                                <div id="carousel-@property.Id" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        @{
+                                            var first = true;
+                                            foreach (var image in property.Images.Take(3))
+                                            {
+                                                <div class="carousel-item @(first ? "active" : "")">
+                                                    <img src="@image.ImageUrl" class="d-block w-100" alt="Property image" style="height: 250px; object-fit: cover;">
+                                                </div>
+                                                first = false;
+                                            }
+                                        }
+                                    </div>
+                                    @if (property.Images.Count() > 1)
+                                    {
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@property.Id" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel-@property.Id" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    }
+                                </div>
                             }
                             else
                             {
-                                <!-- Премахване от любими -->
-                                <form asp-controller="FavoriteProperty" asp-action="Remove" method="post">
-                                    <input type="hidden" name="id" value="@property.Id" />
-                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                                    <button type="submit" class="btn btn-outline-secondary">Remove from Favorite</button>
-                                </form>
+                                <img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">
                             }
-                        }
-                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == @property.OwnerId)
-                        {
-                            <form asp-controller="Property" asp-action="Delete" method="post">
-                                <input type="hidden" name="id" value="@property.Id" />
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        }
+
+                            <!-- Property Badge -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-primary">For Sale</span>
+                            </div>
+
+                            <!-- Favorite Button -->
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <button class="btn btn-sm btn-light rounded-circle favorite-btn" data-property-id="@property.Id" data-is-favorite="@property.IsFavorite.ToString().ToLower()">
+                                        <i class="@(property.IsFavorite ? "fas" : "far") fa-heart text-danger"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">@property.Title</h5>
+                            <p class="card-text text-primary fs-4 fw-bold mb-2">@property.Price.ToString("C")</p>
+
+                            <div class="d-flex justify-content-between text-muted small mb-2">
+                                <span><i class="fas fa-bed"></i> 3 Beds</span>
+                                <span><i class="fas fa-bath"></i> 2 Baths</span>
+                                <span><i class="fas fa-expand"></i> @property.Area m²</span>
+                            </div>
+
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "Unknown")
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="far fa-heart"></i> @property.FavoriteCount favorites
+                                </small>
+                                <small class="text-muted">
+                                    <i class="far fa-clock"></i> @property.CreatedOn.ToString("MMM dd")
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="/Property/Details/@property.Id" class="btn btn-outline-primary btn-sm">
+                                    View Details <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-}
+            }
+        </div>
 
+        <!-- List View (Hidden by default) -->
+        <div class="d-none" id="propertiesList">
+            @foreach (var property in Model)
+            {
+                <div class="card mb-3 property-item" data-property-id="@property.Id">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            @if (property.Images != null && property.Images.Any())
+                            {
+                                <img src="@property.Images.First().ImageUrl" class="img-fluid rounded-start h-100" alt="Property image" style="object-fit: cover;">
+                            }
+                            else
+                            {
+                                <img src="/images/no-image.png" class="img-fluid rounded-start h-100" alt="No image" style="object-fit: cover;">
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title">@property.Title</h5>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <button class="btn btn-sm btn-light rounded-circle favorite-btn" data-property-id="@property.Id" data-is-favorite="@property.IsFavorite.ToString().ToLower()">
+                                            <i class="@(property.IsFavorite ? "fas" : "far") fa-heart text-danger"></i>
+                                        </button>
+                                    }
+                                </div>
+                                <p class="card-text">@property.Description</p>
+                                <p class="card-text">
+                                    <span class="text-primary fs-4 fw-bold">@property.Price.ToString("C")</span>
+                                    <span class="ms-3"><i class="fas fa-expand"></i> @property.Area m²</span>
+                                    <span class="ms-3"><i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "Unknown")</span>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Posted on @property.CreatedOn.ToString("MMM dd, yyyy")</small>
+                                    <a href="/Property/Details/@property.Id" class="btn btn-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResults" class="text-center d-none">
+        <img src="/images/no-results.svg" alt="No results" style="max-width: 300px;" class="mb-3">
+        <h5>No properties found</h5>
+        <p class="text-muted">Try adjusting your search criteria</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Complete AJAX search implementation for property search
+        $(document).ready(function () {
+            // View toggle functionality
+            $('#gridView').click(function () {
+                $(this).addClass('active');
+                $('#listView').removeClass('active');
+                $('#propertiesGrid').parent().removeClass('d-none');
+                $('#propertiesList').addClass('d-none');
+            });
+
+            $('#listView').click(function () {
+                $(this).addClass('active');
+                $('#gridView').removeClass('active');
+                $('#propertiesGrid').parent().addClass('d-none');
+                $('#propertiesList').removeClass('d-none');
+            });
+
+            // Search form submission
+            $('#searchForm').submit(function (e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            // Favorite button click handler
+            $(document).on('click', '.favorite-btn', function (e) {
+                e.preventDefault();
+                var btn = $(this);
+                var propertyId = btn.data('property-id');
+                var isFavorite = btn.data('is-favorite') === 'true';
+
+                $.ajax({
+                    url: isFavorite ? '/FavoriteProperty/Remove' : '/FavoriteProperty/Add',
+                    type: 'POST',
+                    data: {
+                        id: propertyId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var icon = btn.find('i');
+                            if (isFavorite) {
+                                icon.removeClass('fas').addClass('far');
+                                btn.data('is-favorite', 'false');
+                            } else {
+                                icon.removeClass('far').addClass('fas');
+                                btn.data('is-favorite', 'true');
+                            }
+                            updateFavoriteCount(propertyId, response.favoriteCount);
+                        } else {
+                            alert(response.message || 'An error occurred');
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while updating favorites');
+                    }
+                });
+            });
+
+            // Main search function
+            function performSearch() {
+                var searchData = {
+                    Location: $('#searchLocation').val(),
+                    CategoryId: $('#searchCategory').val(),
+                    MinPrice: $('#minPrice').val(),
+                    MaxPrice: $('#maxPrice').val(),
+                    SortBy: $('#sortBy').val(),
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                };
+
+                $('#loadingSpinner').removeClass('d-none');
+                $('#propertiesContainer').addClass('d-none');
+
+                $.ajax({
+                    url: '/Property/Search',
+                    type: 'POST', // Changed to POST to match your controller action
+                    data: searchData,
+                    success: function (response) {
+                        $('#loadingSpinner').addClass('d-none');
+
+                        if (response.success && response.properties && response.properties.length > 0) {
+                            updatePropertyDisplay(response.properties);
+                            $('#resultCount').text('Showing ' + response.properties.length + ' properties');
+                            $('#propertiesContainer').removeClass('d-none');
+                            $('#noResults').addClass('d-none');
+                        } else {
+                            $('#propertiesContainer').addClass('d-none');
+                            $('#noResults').removeClass('d-none');
+                            $('#resultCount').text('No properties found');
+                        }
+                    },
+                    error: function () {
+                        $('#loadingSpinner').addClass('d-none');
+                        alert('An error occurred while searching');
+                    }
+                });
+            }
+
+            // Function to update property display dynamically
+            function updatePropertyDisplay(properties) {
+                var gridHtml = '';
+                var listHtml = '';
+
+                // Build grid view HTML
+                properties.forEach(function (property) {
+                    // Grid view card
+                    gridHtml += `
+                        <div class="col property-item" data-property-id="${property.id}">
+                            <div class="card h-100 property-card">
+                                <div class="position-relative">
+                                    ${buildImageCarousel(property)}
+
+                                    <!-- Property Badge -->
+                                    <div class="position-absolute top-0 start-0 m-2">
+                                        <span class="badge bg-primary">For Sale</span>
+                                    </div>
+
+                                    <!-- Favorite Button -->
+                                    ${buildFavoriteButton(property)}
+                                </div>
+
+                                <div class="card-body">
+                                    <h5 class="card-title text-truncate">${property.title}</h5>
+                                    <p class="card-text text-primary fs-4 fw-bold mb-2">${formatPrice(property.price)}</p>
+
+                                    <div class="d-flex justify-content-between text-muted small mb-2">
+                                        <span><i class="fas fa-bed"></i> ${property.bedrooms || 3} Beds</span>
+                                        <span><i class="fas fa-bath"></i> ${property.bathrooms || 2} Baths</span>
+                                        <span><i class="fas fa-expand"></i> ${property.area} m²</span>
+                                    </div>
+
+                                    <p class="card-text small text-muted">
+                                        <i class="fas fa-map-marker-alt"></i> ${property.location?.city || property.city || 'Unknown'}
+                                    </p>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <small class="text-muted">
+                                            <i class="far fa-heart"></i> ${property.favoriteCount || 0} favorites
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="far fa-clock"></i> ${formatDate(property.createdOn)}
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-grid gap-2">
+                                        <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
+                                            View Details <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // List view card
+                    listHtml += `
+                        <div class="card mb-3 property-item" data-property-id="${property.id}">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    ${buildListImage(property)}
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h5 class="card-title">${property.title}</h5>
+                                            ${buildFavoriteButton(property)}
+                                        </div>
+                                        <p class="card-text">${property.description || ''}</p>
+                                        <p class="card-text">
+                                            <span class="text-primary fs-4 fw-bold">${formatPrice(property.price)}</span>
+                                            <span class="ms-3"><i class="fas fa-expand"></i> ${property.area} m²</span>
+                                            <span class="ms-3"><i class="fas fa-map-marker-alt"></i> ${property.location?.city || property.city || 'Unknown'}</span>
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Posted on ${formatDate(property.createdOn)}</small>
+                                            <a href="/Property/Details/${property.id}" class="btn btn-primary btn-sm">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Update the DOM
+                $('#propertiesGrid').html(gridHtml);
+                $('#propertiesList').html(listHtml);
+            }
+
+            // Helper function to build image carousel
+            function buildImageCarousel(property) {
+                if (property.images && property.images.length > 0) {
+                    var carouselHtml = `
+                        <div id="carousel-${property.id}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                    `;
+
+                    property.images.slice(0, 3).forEach(function (image, index) {
+                        carouselHtml += `
+                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                <img src="${image.imageUrl || image.url}" class="d-block w-100" alt="Property image" style="height: 250px; object-fit: cover;">
+                            </div>
+                        `;
+                    });
+
+                    carouselHtml += '</div>';
+
+                    if (property.images.length > 1) {
+                        carouselHtml += `
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        `;
+                    }
+
+                    carouselHtml += '</div>';
+                    return carouselHtml;
+                } else {
+                    return '<img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">';
+                }
+            }
+
+            // Helper function to build list view image
+            function buildListImage(property) {
+                if (property.images && property.images.length > 0) {
+                    return `<img src="${property.images[0].imageUrl || property.images[0].url}" class="img-fluid rounded-start h-100" alt="Property image" style="object-fit: cover;">`;
+                } else {
+                    return '<img src="/images/no-image.png" class="img-fluid rounded-start h-100" alt="No image" style="object-fit: cover;">';
+                }
+            }
+
+            // Helper function to build favorite button (only if user is authenticated)
+            function buildFavoriteButton(property) {
+                // Check if user is authenticated (you might need to adjust this check)
+                var isAuthenticated = $('input[name="__RequestVerificationToken"]').length > 0;
+
+                if (isAuthenticated) {
+                    var isFavorite = property.isFavorite || false;
+                    return `
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <button class="btn btn-sm btn-light rounded-circle favorite-btn" data-property-id="${property.id}" data-is-favorite="${isFavorite.toString().toLowerCase()}">
+                                <i class="${isFavorite ? 'fas' : 'far'} fa-heart text-danger"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+                return '';
+            }
+
+            // Helper function to format price
+            function formatPrice(price) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD' // Change to your currency
+                }).format(price);
+            }
+
+            // Helper function to format date
+            function formatDate(dateString) {
+                var date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            // Function to update favorite count
+            function updateFavoriteCount(propertyId, count) {
+                var propertyItems = $('[data-property-id="' + propertyId + '"]');
+                propertyItems.find('small:contains("favorites")').html('<i class="far fa-heart"></i> ' + count + ' favorites');
+            }
+        });
+    </script>
+}
