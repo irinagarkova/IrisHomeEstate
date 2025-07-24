@@ -1,4 +1,5 @@
 ﻿using HomeEstate.Models;
+using HomeEstate.Services.Core.Dtos;
 using System.ComponentModel.DataAnnotations;
 
 namespace HomeEstate.Web.Models
@@ -18,15 +19,13 @@ namespace HomeEstate.Web.Models
         public DateTime CreatedOn { get; set; }
 		public int FavoriteCount { get; set; }
 		public bool IsFavorite { get; set; }
-        public string OwnerId { get; set; } = null!;
-        public ApplicationUser Owner { get; set; } = null!;
+      
+        public ApplicationUserDto Owner { get; set; }
 
-        public Location Location { get; set; } = null!;
+        public LocationDto Location { get; set; }
 
-        public Category Category { get; set; } = null!;
+        public CategoryDto Category { get; set; }
 
-    
-        public virtual ICollection<PropertyImage> Images { get; set; }
-            = new List<PropertyImage>();
+        public ICollection<PropertyImageDto> Images { get; set; }
     }
 }

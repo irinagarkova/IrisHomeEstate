@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HomeEstate.Data.Models.Enum;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Sockets;
 
 namespace HomeEstate.Models
@@ -37,6 +38,31 @@ namespace HomeEstate.Models
 
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
+
+        [Comment("Property Listing Type - Sale, Rent or Both")]
+        public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale;
+
+        [Comment("Monthly rent if property is for rent")]
+        public decimal? MonthlyRent { get; set; }
+
+        [Comment("Security deposit for rental properties")]
+        public decimal? SecurityDeposit { get; set; }
+
+        [Comment("Minimum lease period in months")]
+        public int? MinimumLeasePeriod { get; set; }
+
+        [Comment("Indicates if pets are allowed for rentals")]
+        public bool? PetsAllowed { get; set; }
+
+        [Comment("Indicates if property is furnished")]
+        public bool? IsFurnished { get; set; }
+
+        public bool? IsParking { get; set; }
+
+        public PropertyType PropertyType { get; set; }
+
+        [Comment("Available from date")]
+        public DateTime? AvailableFrom { get; set; }
 
         [Comment("Images url")]
         public virtual ICollection<PropertyImage> Images { get; set; } 

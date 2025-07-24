@@ -15,7 +15,7 @@ namespace HomeEstate.Web.Mappings
             CreateMap<PropertyDto, PropertyViewModel>()
                 // destination.Images = soruce.Images
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(p => p.Images))
-                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(s => s.Category))
                 .ForMember(dest => dest.Location, opt => opt.Ignore())
                 .ForMember(dest => dest.Owner, opt => opt.Ignore());
 
@@ -35,8 +35,9 @@ namespace HomeEstate.Web.Mappings
 
 
             CreateMap<RegisterViewModel, ApplicationUser>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
-               
+             .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
+
+            CreateMap<SearchViewModel, SearchPropertyDto>().ReverseMap();
         }
     }
 }

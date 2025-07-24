@@ -1,4 +1,6 @@
-﻿using HomeEstate.Models;
+﻿
+using HomeEstate.Data.Models.Enum;
+using HomeEstate.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace HomeEstate.Services.Core.Dtos
@@ -23,12 +25,22 @@ namespace HomeEstate.Services.Core.Dtos
         public ApplicationUserDto Owner { get; set; } = null!;
 
         public int LocationId { get; set; }
-        public Location Location { get; set; } = null!;
+        public LocationDto Location { get; set; } = null!;
 
         public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
+        public CategoryDto Category { get; set; } = null!;
 
-        public virtual ICollection<PropertyImageDto> Images { get; set; }
+        public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale;
+        public decimal? MonthlyRent { get; set; }
+        public decimal? SecurityDeposit { get; set; }
+        public int? MinimumLeasePeriod { get; set; }
+        public bool? PetsAllowed { get; set; }
+        public bool? IsFurnished { get; set; }
+        public DateTime? AvailableFrom { get; set; }
+		public bool? IsParking { get; set; }
+
+		public PropertyType PropertyType { get; set; }
+		public virtual ICollection<PropertyImageDto> Images { get; set; }
             = new List<PropertyImageDto>();
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HomeEstate.Models;
+﻿
+using HomeEstate.Data.Models.Enum;
 using HomeEstate.Services.Core.Dtos;
 namespace HomeEstate.Services.Core.Interfaces
 {
@@ -15,7 +11,17 @@ namespace HomeEstate.Services.Core.Interfaces
         Task DeletePropertyAsync(int id);
         Task<ICollection<PropertyDto>> GetPropertiesByUserIdAsync(string userId);
         Task<ICollection<PropertyDto>> GetAllPropertiesAsync();
+        Task<ICollection<PropertyDto>> GetAllPropertiesAsync(SearchPropertyDto search); // Search
 
+        // New methods for rent/sale functionality
+        Task<ICollection<PropertyDto>> GetPropertiesByTypeAsync(PropertyListingType type);
+        Task<ICollection<PropertyDto>> GetPropertiesForSaleAsync();
+        Task<ICollection<PropertyDto>> GetPropertiesForRentAsync();
+        Task<ICollection<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria);
+        Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId);
 
-    }
+		IEnumerable<LocationDto> GetAllLocations();
+	}
+
 }
+

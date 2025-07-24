@@ -1,6 +1,7 @@
-﻿namespace HomeEstate.Web.Models
-{
-    using global::HomeEstate.Models;
+﻿using HomeEstate.Data.Models.Enum;
+
+namespace HomeEstate.Web.Models
+{ 
 
     public class DetailsViewModel
     {
@@ -14,15 +15,17 @@
 
         public DateTime CreatedOn { get; set; }
 
-        public ApplicationUser Owner { get; set; } = null!;
+        public string OwnerFullName { get; set; } = null!;
 
-        public Location Location { get; set; } = null!;
+        public string LocationName { get; set; } = null!;
 
-        public Category Category { get; set; } = null!;
+        public string CategoryName { get; set; } = null!;
 
+        public List<string> Images { get; set; } = new();
 
-        public virtual ICollection<PropertyImage> Images { get; set; }
-            = new List<PropertyImage>();
-    }
+		public PropertyListingType ListingType { get; internal set; }
+		//public virtual ICollection<PropertyImage> Images { get; set; }
+		//     = new List<PropertyImage>();
+	}
 }
  

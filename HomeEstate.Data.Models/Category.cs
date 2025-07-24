@@ -12,7 +12,6 @@ namespace HomeEstate.Models
 
         [Comment("Category name")]
         public string Name { get; set; } = null!;
-  
-
+     
     }
 }

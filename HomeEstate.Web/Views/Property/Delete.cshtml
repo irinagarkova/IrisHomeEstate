@@ -18,13 +18,13 @@
     <p>@Model.CreatedOn.ToString("dd.MM.yyyy")</p>
 
     <h3>Category</h3>
-    <p>@Model.Category?.Id ?? "N/A"</p>
+    <p>@Model.CategoryName? ?? "N/A"</p>
 
     <h3>Location</h3>
-    <p>@Model.Location?.City ?? "N/A"</p>
+    <p>@Model.LocationName? ?? "N/A"</p>
 
     <h3>Owner</h3>
-    <p>@Model.Owner?.Id ?? "N/A"</p>
+    <p>@Model.OwnerFullName? ?? "N/A"</p>
 
     <h3>Photos</h3>
     <!-- Примерно ако имаш снимки -->

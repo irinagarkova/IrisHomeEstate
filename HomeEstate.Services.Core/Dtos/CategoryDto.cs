@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace HomeEstate.Services.Core.Dtos
 {
-    public class LocationDto
+    public class CategoryDto
     {
-		public int Id { get; set; } 
-        public string City { get; set; } = null!;
-        public string Address { get; set; } = null!;
-    }
+        public int Id { get; set; }
+        public string Name { get; set; } = null!;
 
+        public int PropertyCount { get; set; }
+
+    }
 }

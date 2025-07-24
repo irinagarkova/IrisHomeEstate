@@ -4,6 +4,7 @@ using HomeEstate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeEstate.Data.Migrations
 {
     [DbContext(typeof(HomeEstateDbContext))]
-    partial class HomeEstateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250724130404_AddedRent")]
+    partial class AddedRent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,13 +103,13 @@ namespace HomeEstate.Data.Migrations
                         {
                             Id = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "af9789d6-c161-49e5-8f96-a28a90239956",
+                            ConcurrencyStamp = "3538844c-61d7-4b42-b608-dc1945f65a9c",
                             Email = "nqkuv@email.com",
                             EmailConfirmed = false,
                             IsDeleted = false,
                             LockoutEnabled = false,
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3ce8cef9-7f3f-4c1b-af7d-a242c498754e",
+                            SecurityStamp = "40cb2b2d-ba3a-4069-9a24-ed483a9c90ae",
                             TwoFactorEnabled = false
                         });
                 });
@@ -238,144 +241,6 @@ namespace HomeEstate.Data.Migrations
                             Id = 4,
                             Address = "78 Central Square",
                             City = "Burgas"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Address = "",
-                            City = "Vidin"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Address = "",
-                            City = "Vratsa"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Address = "",
-                            City = "Gabrovo"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Address = "",
-                            City = "Kardzhali"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Address = "",
-                            City = "Kyustendil"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Address = "",
-                            City = "Lovech"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Address = "",
-                            City = "Montana"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Address = "",
-                            City = "Pazardzhik"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Address = "",
-                            City = "Pernik"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Address = "",
-                            City = "Pleven"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Address = "",
-                            City = "Veliko Tarnovo"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            Address = "",
-                            City = "Razgrad"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            Address = "",
-                            City = "Ruse"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Address = "",
-                            City = "Silistra"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Address = "",
-                            City = "Sliven"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Address = "",
-                            City = "Smolyan"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Address = "",
-                            City = "Blagoevgrad"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            Address = "",
-                            City = "Stara Zagora"
-                        },
-                        new
-                        {
-                            Id = 23,
-                            Address = "",
-                            City = "Targovishte"
-                        },
-                        new
-                        {
-                            Id = 24,
-                            Address = "",
-                            City = "Haskovo"
-                        },
-                        new
-                        {
-                            Id = 25,
-                            Address = "",
-                            City = "Shumen"
-                        },
-                        new
-                        {
-                            Id = 26,
-                            Address = "",
-                            City = "Yambol"
-                        },
-                        new
-                        {
-                            Id = 27,
-                            Address = "",
-                            City = "Dobrich"
                         });
                 });
 
@@ -421,9 +286,6 @@ namespace HomeEstate.Data.Migrations
                         .HasColumnType("bit")
                         .HasComment("Indicates if property is furnished");
 
-                    b.Property<bool?>("IsParking")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ListingType")
                         .HasColumnType("int")
                         .HasComment("Property Listing Type - Sale, Rent or Both");
@@ -452,9 +314,6 @@ namespace HomeEstate.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasComment("Property Price");
 
-                    b.Property<int>("PropertyType")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("SecurityDeposit")
                         .HasColumnType("decimal(18,2)")
                         .HasComment("Security deposit for rental properties");
@@ -481,14 +340,13 @@ namespace HomeEstate.Data.Migrations
                             Id = 1,
                             Area = 120,
                             CategoryId = 1,
-                            CreatedOn = new DateTime(2025, 7, 24, 15, 8, 6, 501, DateTimeKind.Utc).AddTicks(2931),
+                            CreatedOn = new DateTime(2025, 7, 24, 13, 4, 3, 758, DateTimeKind.Utc).AddTicks(6464),
                             Description = "Modern apartment located in the city center with great amenities.",
                             IsDeleted = false,
                             ListingType = 1,
                             LocationId = 1,
                             OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             Price = 250000m,
-                            PropertyType = 0,
                             Title = "Luxury Apartment in Sofia"
                         },
                         new
@@ -503,7 +361,6 @@ namespace HomeEstate.Data.Migrations
                             LocationId = 2,
                             OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             Price = 180000m,
-                            PropertyType = 0,
                             Title = "Cozy House in the Countryside"
                         },
                         new
@@ -511,14 +368,13 @@ namespace HomeEstate.Data.Migrations
                             Id = 3,
                             Area = 180,
                             CategoryId = 3,
-                            CreatedOn = new DateTime(2025, 7, 24, 15, 8, 6, 501, DateTimeKind.Utc).AddTicks(2941),
+                            CreatedOn = new DateTime(2025, 7, 24, 13, 4, 3, 758, DateTimeKind.Utc).AddTicks(6472),
                             Description = "Prime commercial location with modern infrastructure and ample parking.",
                             IsDeleted = false,
                             ListingType = 1,
                             LocationId = 3,
                             OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             Price = 16000m,
-                            PropertyType = 0,
                             Title = "Commercial Office Space"
                         },
                         new
@@ -526,14 +382,13 @@ namespace HomeEstate.Data.Migrations
                             Id = 4,
                             Area = 800,
                             CategoryId = 1,
-                            CreatedOn = new DateTime(2024, 10, 24, 18, 8, 6, 501, DateTimeKind.Local).AddTicks(2950),
+                            CreatedOn = new DateTime(2024, 10, 24, 16, 4, 3, 758, DateTimeKind.Local).AddTicks(6478),
                             Description = "High-end condo with premium amenities, pool access, and concierge services.",
                             IsDeleted = false,
                             ListingType = 1,
                             LocationId = 1,
                             OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             Price = 27500000m,
-                            PropertyType = 0,
                             Title = "Luxury Apartment with Pool"
                         },
                         new
@@ -541,14 +396,13 @@ namespace HomeEstate.Data.Migrations
                             Id = 5,
                             Area = 2500,
                             CategoryId = 4,
-                            CreatedOn = new DateTime(2025, 4, 24, 18, 8, 6, 501, DateTimeKind.Local).AddTicks(3005),
+                            CreatedOn = new DateTime(2025, 4, 24, 16, 4, 3, 758, DateTimeKind.Local).AddTicks(6533),
                             Description = "Perfect family home with large backyard, garage, and excellent school district.",
                             IsDeleted = false,
                             ListingType = 1,
                             LocationId = 4,
                             OwnerId = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                             Price = 450000.00m,
-                            PropertyType = 0,
                             Title = "Spacious Family House"
                         });
                 });

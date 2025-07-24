@@ -6,58 +6,91 @@
     <title>@ViewData["Title"] - HomeEstate</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/HomeEstate.styles.css" asp-append-version="true" />
+
+    
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HomeEstate</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Property" asp-action="Index">Properties</a>
-                        </li>
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Property" asp-action="Add">Add Prop</a>
-                            </li>
-                        }
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Property" asp-action="MyProperty">My Property</a>
-                            </li>
-                        }
-                    </ul>
-
-                    <partial name="_LoginPartial" />
-                </div>
+            <nav>
+            <div class="logo">
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Iris Home Estate</a>
             </div>
-        </nav>
+                <ul class="nav-links">          
+                    <li>
+                        <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Index">Properties</a>
+                    </li>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li>
+                            <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Add">Add Prop</a>
+                        </li>
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li>
+                        <a class="nav-link " asp-area= "" asp-controller="Property" asp-action="MyProperty">My Property</a>
+                        </li>
+                    }
+                 <partial name="_LoginPartial" />
+                </ul>
+            </nav>
+       
     </header>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Prime Properties</h4>
+                <p>Your trusted partner in real estate, offering premium properties and exceptional service since 2020.</p>
+            </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - HomeEstate - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Properties for Sale</a></li>
+                    <li><a href="#">List Your Property</a></li>
+                    <li><a href="#">Privacy policy</a></li>
+                    <li><a href="#">Terms of service</a></li>
+
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Find us</h4>
+                <div class="social-icons">
+                    <span class="social-icon facebook"><i class="fab fa-facebook-f"></i></span>
+                    <span class="social-icon google"><i class="fab fa-google"></i></span>
+                    <span class="social-icon linkedin"><i class="fab fa-linkedin-in"></i></span>
+                    <span class="social-icon reddit"><i class="fab fa-reddit-alien"></i></span>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>📞 (+359) 881234567</p>
+                <p>✉️ info@irishomeproperties.com</p>
+                <p>📍 Sofia, Bulgaria</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Iris Home Estate. All rights reserved.</p>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+    <button id="backToTopBtn" class="back-to-top" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
