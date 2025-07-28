@@ -18,7 +18,7 @@ namespace HomeEstate.Data.Configurations
 
             builder
                 .HasOne(fp => fp.Property)
-                .WithMany()
+                .WithMany(u => u.FavoriteProperties)
                 .HasForeignKey(fp => fp.PropertyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -27,6 +27,8 @@ namespace HomeEstate.Data.Configurations
                 .WithMany(u => u.FavoriteProperties)
                 .HasForeignKey(fp => fp.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+          
         }
     }
 }
