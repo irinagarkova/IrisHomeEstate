@@ -19,7 +19,6 @@ namespace HomeEstate.Services.Core.Dtos
         public int? MaxArea { get; set; }
         public PropertyListingType? ListingType { get; set; }
         public int? Bedrooms { get; set; }
-        public int? Bathrooms { get; set; }
         public bool? PetsAllowed { get; set; }
         public bool? IsFurnished { get; set; }
         public string? SortBy { get; set; }

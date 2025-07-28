@@ -30,14 +30,15 @@ namespace HomeEstate.Services.Core.Dtos
         public int CategoryId { get; set; }
         public CategoryDto Category { get; set; } = null!;
 
+        public int FavoriteCount { get; set; }
         public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale;
         public decimal? MonthlyRent { get; set; }
         public decimal? SecurityDeposit { get; set; }
         public int? MinimumLeasePeriod { get; set; }
-        public bool? PetsAllowed { get; set; }
-        public bool? IsFurnished { get; set; }
+        public bool PetsAllowed { get; set; }
+        public bool IsFurnished { get; set; }
         public DateTime? AvailableFrom { get; set; }
-		public bool? IsParking { get; set; }
+		public bool IsParking { get; set; }
 
 		public PropertyType PropertyType { get; set; }
 		public virtual ICollection<PropertyImageDto> Images { get; set; }

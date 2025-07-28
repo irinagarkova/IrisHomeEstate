@@ -19,9 +19,10 @@ namespace HomeEstate.Services.Core.Interfaces
         Task<ICollection<PropertyDto>> GetPropertiesForRentAsync();
         Task<ICollection<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria);
         Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId);
-
 		IEnumerable<LocationDto> GetAllLocations();
-	}
+
+        Task<RentalStatisticsDto> GetRentalStatisticsAsync(string userId);
+    }
 
 }
 

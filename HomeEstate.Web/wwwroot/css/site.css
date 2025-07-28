@@ -1,6 +1,5 @@
 ﻿:root {
     --primary: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
-    --primary-dark: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
     --secondary: #10b981;
     --dark: black;
     --gray: #6b7280; /*цвета на буквите*/
@@ -15,6 +14,15 @@
     padding: 0;
     box-sizing: border-box;
 }
+.main-content {
+    margin-top: 80px; /* Регулирайте според височината на header-а */
+    padding-top: 20px;
+}
+
+.property-card {
+    transition: transform 0.2s ease-in-out;
+}
+
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -31,6 +39,7 @@ header {
     width: 100%;
     top: 0;
     z-index: 1000;
+    height: 6rem;
 }
 
 nav {
@@ -46,7 +55,11 @@ nav {
     font-size: 1.5rem;
     font-weight: bold;
     color: white;
+    text-decoration: none;
 }
+    .logo a:hover {
+        color: white;
+    }
 
 .nav-links {
     display: flex;
@@ -54,6 +67,7 @@ nav {
     gap: 2rem;
     align-items: center;
     color: white;
+    text-decoration: none;
 }
 
     .nav-links a {
@@ -66,6 +80,17 @@ nav {
         .nav-links a:hover {
             color: white;
         }
+
+.nav-link {
+    display: inline-block;
+    padding: 0.5rem 0; /* consistent vertical padding */
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: color 0.3s;
+}
 
 .btn {
     background: var(--primary);
@@ -362,7 +387,11 @@ nav {
 }
 
 .property-location {
-    color: var(--gray);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
+    font-size: 14px;
     margin-bottom: 1rem;
 }
 
@@ -464,21 +493,59 @@ nav {
 .footer {
     background-color: #57C785;
     color: white;
-    padding: 3rem 5%;
+    padding: 1rem 8rem;
+    font-size: 0.9rem;
+}
+.footer-bottom {
+    border-top: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.9rem;
 }
 
 .footer-section ul {
     list-style: none;
-    text-decoration: none;
-    color: white;
+    padding: 0;
+    margin: 0;
 }
+    .footer-section ul li {
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+        .footer-section ul li a {
+            color: #ffffff; /* White color as requested */
+            text-decoration: none; /* No decorations as requested */
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+            padding: 5px 0;
+        }
+            .footer-section ul li a:hover {
+                color: #667eea;
+                transform: translateX(8px);
+                text-decoration: none; /* Ensure no underline on hover */
+            }
+
+            .footer-section ul li a::before {
+                content: '→';
+                position: absolute;
+                left: -20px;
+                opacity: 0;
+                transition: all 0.3s ease;
+                color: #667eea;
+            }
+            .footer-section ul li a:hover::before {
+                opacity: 1;
+                left: -15px;
+            }
 
 .footer-content {
     max-width: 1400px;
-    margin: 0 auto 2rem auto;
+    margin: 0 auto 0.1rem auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .footer-bottom p {
@@ -491,132 +558,136 @@ nav {
 }
 
 
+/* Social Media Icons Styling - TRANSPARENT WITH WHITE HOVER */
 .social-icons {
     display: flex;
-    justify-content: normal;
     gap: 15px;
+    margin-top: 20px;
 }
 
 .social-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: #333;
-    color: white;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s, background-color 0.3s;
-    font-size: 20px;
-    text-decoration: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: transparent; /* Transparent background */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* Almost transparent border */
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
+    .social-icon i {
+        color: rgba(255, 255, 255, 0.3); /* Almost transparent icons as requested */
+        font-size: 18px;
+        transition: all 0.4s ease;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Hover Effects - WHITE ON HOVER AS REQUESTED */
     .social-icon:hover {
-        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.8);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
 
-    .social-icon.facebook {
-        background-color: #3b5998;
+        .social-icon:hover i {
+            color: #ffffff; /* White on hover as requested */
+            transform: scale(1.1);
+        }
+
+    .social-icon::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(0);
+        transition: transform 0.4s ease;
+        z-index: 1;
     }
 
-    .social-icon.google {
-        background-color: #db4437;
+    .social-icon:hover::before {
+        transform: scale(1);
     }
 
-    .social-icon.linkedin {
-        background-color: #0077b5;
+    /* Specific hover animations for each social platform */
+    .social-icon.facebook:hover {
+        box-shadow: 0 10px 25px rgba(59, 89, 152, 0.3);
     }
 
-    .social-icon.reddit {
-        background-color: #ff4500;
+    .social-icon.google:hover {
+        box-shadow: 0 10px 25px rgba(221, 75, 57, 0.3);
     }
 
-/* Back to Top Button Styles */
+    .social-icon.linkedin:hover {
+        box-shadow: 0 10px 25px rgba(0, 119, 181, 0.3);
+    }
+
+    .social-icon.reddit:hover {
+        box-shadow: 0 10px 25px rgba(255, 69, 0, 0.3);
+    }
+
+/* Back to Top Button CSS - добавете към site.css */
+
 .back-to-top {
     position: fixed;
     bottom: 30px;
     right: 30px;
     width: 50px;
     height: 50px;
-    background-color: #2563eb;
-    color: #ffffff;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    z-index: 9999;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-    /* Показваме бутона когато е активен */
+    /* Show button when it has the 'show' class */
+
     .back-to-top.show {
-        opacity: 1;
-        visibility: visible;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
-    /* Hover ефект */
     .back-to-top:hover {
-        background-color: #1d4ed8;
         transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5a6fd8, #6b42a1);
     }
 
-/* Pulse анимация при първо показване */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    .back-to-top:active {
+        transform: translateY(-1px);
     }
 
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5);
-    }
-
-    100% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-}
-
-.back-to-top.pulse {
-    animation: pulse 1s ease-in-out;
-}
-
-/* За тъмна тема (ако имате) */
-@media (prefers-color-scheme: dark) {
-    .back-to-top {
-        background-color: #3b82f6;
-    }
-
-        .back-to-top:hover {
-            background-color: #2563eb;
-        }
-}
-
-/* Мобилна версия */
+/* Mobile version */
 @media (max-width: 768px) {
     .back-to-top {
         bottom: 20px;
         right: 20px;
         width: 45px;
         height: 45px;
-        font-size: 18px;
+        font-size: 16px;
     }
 }
-
-/* Ефект при натискане */
-.back-to-top:active {
-    transform: scale(0.95);
-}
 /* Responsive */
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     .nav-links {
         display: none;
     }
@@ -713,12 +784,6 @@ nav {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
     }
 
     .details-container {
@@ -830,13 +895,7 @@ nav {
             margin-bottom: 10px;
         }
 
-    .property-location {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        color: #666;
-        font-size: 14px;
-    }
+  
 
     .property-stats {
         display: flex;

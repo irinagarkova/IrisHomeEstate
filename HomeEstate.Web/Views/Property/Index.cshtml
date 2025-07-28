@@ -1,7 +1,33 @@
-﻿@model ICollection<PropertyViewModel>
+﻿@using HomeEstate.Services.Core.Dtos
+@model ICollection<PropertyViewModel>
 
 @{
     ViewData["Title"] = "Properties";
+}
+@if ((bool)ViewData["SearchApplied"])
+{
+    <div class="alert alert-info">
+        <i class="fas fa-search"></i>
+        Search Results: Found @ViewData["ResultsCount"] properties
+        @{
+            var criteria = ViewData["SearchCriteria"] as PropertySearchDto;
+        }
+        @if (criteria != null)
+        {
+            @if (!string.IsNullOrEmpty(criteria.Location))
+            {
+                <span class="badge bg-secondary">Location: @criteria.Location</span>
+            }
+            @if (criteria.CategoryId.HasValue)
+            {
+                <span class="badge bg-secondary">Category: @criteria.CategoryId</span>
+            }
+            @if (criteria.ListingType.HasValue)
+            {
+                <span class="badge bg-secondary">Type: @criteria.ListingType</span>
+            }
+        }
+    </div>
 }
 <div class="container-fluid mt-4">
     <!-- Search and Filter Section -->
@@ -54,14 +80,6 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h5 id="resultCount" class="mb-0">Showing @Model.Count() properties</h5>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary active" id="gridView">
-                    <i class="fas fa-th"></i>
-                </button>
-                <button type="button" class="btn btn-outline-secondary" id="listView">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
         </div>
     </div>
 
@@ -107,6 +125,7 @@
                             <!-- Property Badge -->
                             <div class="position-absolute top-0 start-0 m-2">
                                 <span class="badge bg-primary">For Sale</span>
+                                <span class="badge bg-primary">For Rent</span>
                             </div>
 
                             <!-- Favorite Button -->
@@ -125,8 +144,7 @@
                             <p class="card-text text-primary fs-4 fw-bold mb-2">@property.Price.ToString("C")</p>
 
                             <div class="d-flex justify-content-between text-muted small mb-2">
-                                <span><i class="fas fa-bed"></i> 3 Beds</span>
-                                <span><i class="fas fa-bath"></i> 2 Baths</span>
+                                <span><i class="fas fa-bed"></i> @property.PropertyType</span>
                                 <span><i class="fas fa-expand"></i> @property.Area m²</span>
                             </div>
 
@@ -344,7 +362,6 @@
 
                                     <div class="d-flex justify-content-between text-muted small mb-2">
                                         <span><i class="fas fa-bed"></i> ${property.bedrooms || 3} Beds</span>
-                                        <span><i class="fas fa-bath"></i> ${property.bathrooms || 2} Baths</span>
                                         <span><i class="fas fa-expand"></i> ${property.area} m²</span>
                                     </div>
 

@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@model ICollection<PropertyViewModel>
+@using System.Linq﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +12,6 @@
 </head>
 <body>
     <!-- Header -->
-
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
@@ -18,34 +19,45 @@
                 <h1>Find Your Dream Property</h1>
                 <p>Discover the perfect home from our extensive collection of properties for sale</p>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="#listings" class="btn">Browse Properties</a>
-                    <a href="#contact" class="btn">Get Started</a>
+                    <a href="/Property" class="btn">Browse Properties</a>
                 </div>
             </div>
             <div class="search-form">
                 <div class="search-tabs">
-                    <button class="tab active">Buy</button>
-                    <button class="tab active">Rent</button>
+                    <button type="button" class="tab active" data-listing-type="1">Buy</button>
+                    <button type="button" class="tab" data-listing-type="2">Rent</button>
                 </div>
-                <form>
+                <form id="propertySearchForm" action="/Property/Search" method="GET">
+                    <input type="hidden" id="listingTypeInput" name="ListingType" value="1">
+
                     <div class="search-grid">
                         <div class="form-group">
                             <label>Location</label>
-                            <input type="text" placeholder="City">
+                            <input type="text" name="Location" placeholder="София, Пловдив...">
                         </div>
                         <div class="form-group">
                             <label>Property Type</label>
-                            <select>
-                                <option>All Types</option>
-                                <option>House</option>
-                                <option>Apartment</option>
-                                <option>Condo</option>
-                                <option>Commercial</option>
+                            <select name="CategoryId">
+                                <option value="">All Types</option>
+                                <option value="1">Apartment</option>
+                                <option value="2">House</option>
+                                <option value="3">Office</option>
+                                <option value="4">Villa</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Max Price</label>
-                            <input type="text" placeholder="$0">
+                            <input type="number" name="MaxPrice" placeholder="500000" min="0" step="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Property Size</label>
+                            <select name="Bedrooms">
+                                <option value="">Any Size</option>
+                                <option value="1">1 Bedroom</option>
+                                <option value="2">2 Bedrooms</option>
+                                <option value="3">3 Bedrooms</option>
+                                <option value="4">4+ Bedrooms</option>
+                            </select>
                         </div>
                     </div>
                     <button type="submit" class="search-btn">Search Properties</button>
@@ -83,54 +95,39 @@
             <p>Hand-picked properties that offer exceptional value</p>
         </div>
         <div class="property-grid">
-            <div class="property-card">
-                <div class="property-image">
-                    <span class="property-badge">For Sale</span>
-                </div>
-                <div class="property-details">
-                    <div class="property-price">$450,000</div>
-                    <h3 class="property-title">Modern Family Home</h3>
-                    <p class="property-location">📍 Downtown District</p>
-                    <div class="property-features">
-                        <span class="feature">🛏️ 4 Beds</span>
-                        <span class="feature">🚿 3 Baths</span>
-                        <span class="feature">📐 2,500 sqft</span>
+            @foreach (var property in Model)
+            {
+                <div class="property-card">
+                       <div class="property-image">
+                        @if (property.Images != null && property.Images.Any())
+                        {
+                            var firstImage = property.Images.FirstOrDefault();
+                            if (firstImage != null)
+                            {
+                                <img src="@firstImage.ImageUrl" alt="@property.Title" class="img-fluid" />
+                            }
+                            else
+                            {
+                                <img src="/images/default-property.jpg" alt="No image available" class="img-fluid" />
+                            }
+                        }
+
+                        <span class="property-badge">@property.ListingType</span>
+                    </div>
+                    <div class="property-details">
+                        <div class="property-price">$@property.Price</div>
+                        <h3 class="property-title">@property.Title</h3>
+                        <p class="property-location">📍 @property.Location.City</p>
+                        <div class="property-features">
+                            <span class="feature">Rooms: @property.PropertyType</span>
+                            <span class="feature">Area 📐: @property.Area m²</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="property-card">
-                <div class="property-image">
-                    <span class="property-badge">For Lease</span>
-                </div>
-                <div class="property-details">
-                    <div class="property-price">$2,500/mo</div>
-                    <h3 class="property-title">Luxury Apartment</h3>
-                    <p class="property-location">📍 City Center</p>
-                    <div class="property-features">
-                        <span class="feature">🛏️ 2 Beds</span>
-                        <span class="feature">🚿 2 Baths</span>
-                        <span class="feature">📐 1,200 sqft</span>
-                    </div>
-                </div>
-            </div>
-            <div class="property-card">
-                <div class="property-image">
-                    <span class="property-badge">For Sale</span>
-                </div>
-                <div class="property-details">
-                    <div class="property-price">$650,000</div>
-                    <h3 class="property-title">Suburban Villa</h3>
-                    <p class="property-location">📍 Green Hills</p>
-                    <div class="property-features">
-                        <span class="feature">🛏️ 5 Beds</span>
-                        <span class="feature">🚿 4 Baths</span>
-                        <span class="feature">📐 3,800 sqft</span>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
         <div style="text-align: center;">
-            <a href="#" class="btn">View All Properties</a>
+            <a href="/Property" class="btn">View All Properties</a>
         </div>
     </section>
 
@@ -165,46 +162,68 @@
             <h2>Ready to Make Your Move?</h2>
             <p>Whether you're buying or selling, we're here to help you every step of the way</p>
             <div class="cta-buttons">
-                <a href="#" class="btn-white">Start Searching</a>
-              
+                <a href="/Property" class="btn-white">Start Searching</a>
+
             </div>
         </div>
     </section>
-
-    <!-- Footer -->
-    
-    <script>
-        // Tab switching functionality
-        const tabs = document.querySelectorAll('.tab');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-            });
-        });
-
-        // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Simple form validation
-        document.querySelector('.search-form form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Search functionality would be implemented in the MVC version');
-        });
-
-
-
-    </script>
 </body>
 </html>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.search-form .tab');
+            const listingTypeInput = document.getElementById('listingTypeInput');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const listingType = this.getAttribute('data-listing-type');
+                    listingTypeInput.value = listingType;
+                    updateLabelsForListingType(listingType);
+                });
+            });
+
+            function updateLabelsForListingType(listingType) {
+                const maxPriceLabel = document.querySelector('.search-form .form-group:nth-child(3) label');
+                const maxPriceInput = document.querySelector('.search-form input[type="number"]');
+
+                if (listingType === '2') { // Rent
+                    if (maxPriceLabel) maxPriceLabel.textContent = 'Max Rent';
+                    if (maxPriceInput) {
+                        maxPriceInput.placeholder = '2000';
+                        maxPriceInput.name = 'MaxRent';
+                    }
+                } else { // Sale
+                    if (maxPriceLabel) maxPriceLabel.textContent = 'Max Price';
+                    if (maxPriceInput) {
+                        maxPriceInput.placeholder = '500000';
+                        maxPriceInput.name = 'MaxPrice';
+                    }
+                }
+            }
+
+            // Form submission - ПОПРАВЕНО: Пренасочва към Property/Index
+            document.getElementById('propertySearchForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const searchParams = new URLSearchParams();
+
+                // Премахнете празните стойности
+                for (let [key, value] of formData.entries()) {
+                    if (value && value.trim() !== '') {
+                        searchParams.append(key, value);
+                    }
+                }
+
+                // ПОПРАВЕНО: Пренасочва към /Property/Index вместо /Property/Search
+                const searchUrl = '/Property?' + searchParams.toString();
+                window.location.href = searchUrl;
+            });
+        });
+    </script>
+}

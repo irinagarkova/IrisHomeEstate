@@ -12,5 +12,5 @@ namespace HomeEstate.Data.Models.Enum
 		TwoBedrooms = 2,
 		ThreeBedrooms = 3,
 		MultipleBedrooms = 4,
-	}
+    }
 }

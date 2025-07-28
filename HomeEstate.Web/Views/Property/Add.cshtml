@@ -1,77 +1,268 @@
-﻿@model AddAndUpdatePropertyViewModel
-<h1>Add Property Form</h1>
-<form asp-action="Add" enctype="multipart/form-data">
-    <div asp-validation-summary="All" class="text-danger mb-3"></div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="Title" class="form-label">Title</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Title" class="form-control" placeholder="Title" />
-                </div>
+﻿@using HomeEstate.Data.Models.Enum
+@model AddAndUpdatePropertyViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/addPage.css" asp-append-version="true" />
+    <title>Управление на имоти</title>
+</head>
+<body>
+    <div class="form-container">
+        
+        <div class="form-header">
+            <h1 class="form-title" id="formTitle">Добави имот</h1>
+            <p class="form-subtitle">Попълнете всички задължителни полета</p>
+        </div>
+        <form id="propertyForm" asp-controller="Property" asp-action="Add" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="propertyId" asp-for="Id" />
+
+            <div class="form-group">
+                <label class="form-label" for="title">
+                    Заглавие <span class="required">*</span>
+                </label>
+                <input type="text" id="title" name="title" asp-for="Title" class="form-input" required
+                       placeholder="Например: Луксозен апартамент в центъра">
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label">Description</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Description" class="form-control" placeholder="Description" />
-                </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">
+                    Описание <span class="required">*</span>
+                </label>
+                <textarea id="description" name="description" asp-for="Description" class="form-textarea" required
+                          placeholder="Опишете подробно вашия имот..."></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="Price" class="form-label">Price</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Price" class="form-control" placeholder="Price" />
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="price">
+                        Цена (лв.) <span class="required">*</span>
+                    </label>
+                    <input type="number" id="price" name="price" asp-for="Price" class="form-input" required
+                           placeholder="150000" min="0" step="1000">
+                    <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="Area" class="form-label">Area</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="Area" class="form-control" placeholder="Area" />
+                <div class="form-group">
+                    <label class="form-label" for="area">
+                        Площ (кв.м.) <span class="required">*</span>
+                    </label>
+                    <input type="number" id="area" name="area" asp-for="Area" class="form-input" required
+                           placeholder="85" min="1" step="0.1">
+                    <span asp-validation-for="Area" class="text-danger"></span>
                 </div>
-                <span asp-validation-for="Area" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="LocationId" class="form-label">City</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-city"></i></span>
-                    <select asp-for="LocationId" asp-items="Model.Locations" class="form-control"></select>
-                </div>
-                <span asp-validation-for="LocationId" class="text-danger"></span>
             </div>
 
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="CategoryId" class="form-label">Category</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input asp-for="CategoryId" class="form-control" placeholder="CategoryId" />
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="locationId">
+                        Локация <span class="required">*</span>
+                    </label>
+                    <select id="locationId" name="locationId" asp-for="LocationId" asp-items="Model.Locations" class="form-select" required>
+                        <option value="">Изберете локация</option>
+                    </select>
+                    <span asp-validation-for="LocationId" class="text-danger"></span>
                 </div>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                <div class="form-group">
+                    <label class="form-label" for="categoryId">
+                        Категория <span class="required">*</span>
+                    </label>
+                    <select id="categoryId" name="categoryId" asp-for="CategoryId" class="form-select" required>
+                        <option value="">Изберете категория</option>
+                        <option value="1">Апартамент</option>
+                        <option value="2">Къща</option>
+                        <option value="3">Офис</option>
+                        <option value="4">Вила</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-12 mb-3">
-                <label asp-for="Images" class="form-label">Upload Images</label>
-                <input asp-for="Images" class="form-control" type="file" multiple />
+            <div class="form-group">
+                <label class="form-label">
+                    Вид обява <span class="required">*</span>
+                </label>
+                <div class="type-selection">
+                    <div class="type-option">
+                        <input type="radio" id="sale" name="listingType" asp-for="ListingType" value="1" required>
+                        <label for="sale" class="type-label">Продажба</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="rent" name="listingType" asp-for="ListingType" value="2">
+                        <label for="rent" class="type-label">Наем</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="both" name="listingType" asp-for="ListingType" value="3">
+                        <label for="both" class="type-label">И двете</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Полета за наем (показват се само при избор на наем) -->
+            <div id="rentalFields" style="display: none;">
+                <div class="form-row-three">
+                    <div class="form-group">
+                        <label class="form-label" for="monthlyRent">
+                            Месечен наем (лв.)
+                        </label>
+                        <input type="number" id="monthlyRent" asp-for="MonthlyRent" class="form-input"
+                               placeholder="1200" min="0" step="50">
+                        <span asp-validation-for="MonthlyRent" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="securityDeposit">
+                            Депозит (лв.)
+                        </label>
+                        <input type="number" id="securityDeposit" asp-for="SecurityDeposit" class="form-input"
+                               placeholder="2400" min="0" step="100">
+                        <span asp-validation-for="SecurityDeposit" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="minimumLeasePeriod">
+                            Минимален срок (месеци)
+                        </label>
+                        <input type="number" id="minimumLeasePeriod" asp-for="MinimumLeasePeriod" class="form-input"
+                               placeholder="12" min="1" max="60">
+                        <span asp-validation-for="MinimumLeasePeriod" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="availableFrom">
+                        Свободен от дата
+                    </label>
+                    <input type="date" id="availableFrom" asp-for="AvailableFrom" class="form-input">
+                    <span asp-validation-for="AvailableFrom" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Допълнителни опции за наем</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="petsAllowed" asp-for="PetsAllowed" value="true">
+                            <label for="petsAllowed">Домашни любимци разрешени</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="isFurnished" asp-for="IsFurnished" value="true">
+                            <label for="isFurnished">Обзаведен</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="isParking" asp-for="IsParking" value="true">
+                            <label for="isParking">Паркомясто</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    Тип имот <span class="required">*</span>
+                </label>
+                <div class="type-selection">
+                    <div class="type-option">
+                        <input type="radio" id="oneBedroom" asp-for="PropertyType" value="1" required>
+                        <label for="oneBedroom" class="type-label">Едностаен</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="twoBedrooms" asp-for="PropertyType" value="2">
+                        <label for="twoBedrooms" class="type-label">Двустаен</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="threeBedrooms" asp-for="PropertyType" value="3">
+                        <label for="threeBedrooms" class="type-label">Тристаен</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="multipleBedrooms" asp-for="PropertyType" value="4">
+                        <label for="multipleBedrooms" class="type-label">Многостаен</label>
+                    </div>
+                </div>
+                <span asp-validation-for="PropertyType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="images">
+                    Качи снимки
+                </label>
+                <div class="file-upload">
+                    <input type="file" id="images" name="images" asp-for="Images" multiple accept="image/*">
+                    <label for="images" class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Изберете снимки или ги плъзнете тук
+                    </label>
+                </div>
                 <span asp-validation-for="Images" class="text-danger"></span>
             </div>
 
-        </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Създай имот
+                </button>
+            </div>
+        </form>
     </div>
-    <input type="submit" value="Submit" />
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    </body>
 
-</form>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Show/hide rental fields based on current selection
+            function toggleRentalFields() {
+                const rentalFields = document.getElementById('rentalFields');
+                const rentRadio = document.getElementById('rent');
+                const bothRadio = document.getElementById('both');
+
+                if (rentalFields && rentRadio && bothRadio) {
+                    if (rentRadio.checked || bothRadio.checked) {
+                        rentalFields.style.display = 'block';
+                    } else {
+                        rentalFields.style.display = 'none';
+                    }
+                }
+            }
+
+            // Event listeners for listing type
+            document.querySelectorAll('input[name="listingType"]').forEach(radio => {
+                radio.addEventListener('change', toggleRentalFields);
+            });
+
+            // File upload feedback
+            const fileInput = document.querySelector('input[type="file"]');
+            const fileLabel = document.querySelector('.file-upload-label');
+
+            if (fileInput && fileLabel) {
+                fileInput.addEventListener('change', function (e) {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        fileLabel.innerHTML = `<i class="fas fa-check"></i> Избрани ${files.length} файла`;
+                        fileLabel.style.color = '#28a745';
+                    } else {
+                        fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
+                        fileLabel.style.color = '';
+                    }
+                });
+            }
+
+            // Initialize rental fields display
+            toggleRentalFields();
+        });
+
+        // Reset form function
+        function resetForm() {
+            document.getElementById('propertyForm').reset();
+            document.getElementById('rentalFields').style.display = 'none';
+
+            const fileLabel = document.querySelector('.file-upload-label');
+            if (fileLabel) {
+                fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
+                fileLabel.style.color = '';
+            }
+        }
+    </script>
+}

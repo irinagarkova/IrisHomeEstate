@@ -25,12 +25,30 @@ namespace HomeEstate.Services.Core.Services
             this.mapper = mapper;
         }
 
-        // Existing methods remain the same
         public async Task CreatePropertyAsync(PropertyDto property)
         {
+            // Валидация за rental свойства
+            ValidateRentalProperties(property);
+
             var newProperty = mapper.Map<Property>(property);
+            newProperty.CreatedOn = DateTime.UtcNow;
+
             await dbContext.AddAsync(newProperty);
             await dbContext.SaveChangesAsync();
+
+            // Запазване на снимките ако има такива
+            if (property.Images != null && property.Images.Any())
+            {
+                var propertyImages = property.Images.Select(img => new PropertyImage
+                {
+                    PropertyId = newProperty.Id,
+                    ImageUrl = img.ImageUrl,
+                    IsDeleted = false
+                }).ToList();
+
+                await dbContext.PropertyImages.AddRangeAsync(propertyImages);
+                await dbContext.SaveChangesAsync();
+            }
         }
 
         public async Task DeletePropertyAsync(int id)
@@ -91,7 +109,7 @@ namespace HomeEstate.Services.Core.Services
         {
             var errors = new Dictionary<string, string>();
 
-            // Validation
+            // Съществуваща валидация
             if (property.Area <= 0)
             {
                 errors.Add("Area", "Area must be at least 1");
@@ -102,14 +120,8 @@ namespace HomeEstate.Services.Core.Services
                 errors.Add("Title", "Title must be between 5 and 100 characters");
             }
 
-            // Rent-specific validation
-            if (property.ListingType == PropertyListingType.Rent || property.ListingType == PropertyListingType.Both)
-            {
-                if (!property.MonthlyRent.HasValue || property.MonthlyRent <= 0)
-                {
-                    errors.Add("MonthlyRent", "Monthly rent is required for rental properties");
-                }
-            }
+            // Нова валидация за rental свойства
+            ValidateRentalProperties(property, errors);
 
             if (errors.Any())
             {
@@ -117,6 +129,7 @@ namespace HomeEstate.Services.Core.Services
             }
 
             var propertyToUpdate = await dbContext.Properties
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == property.Id);
 
             if (propertyToUpdate == null)
@@ -125,6 +138,28 @@ namespace HomeEstate.Services.Core.Services
             }
 
             mapper.Map(property, propertyToUpdate);
+
+            // Обновяване на снимки ако има нови
+            if (property.Images != null && property.Images.Any())
+            {
+                // Премахване на стари снимки
+                var oldImages = await dbContext.PropertyImages
+                    .Where(pi => pi.PropertyId == property.Id)
+                    .ToListAsync();
+
+                dbContext.PropertyImages.RemoveRange(oldImages);
+
+                // Добавяне на нови снимки
+                var newImages = property.Images.Select(img => new PropertyImage
+                {
+                    PropertyId = property.Id,
+                    ImageUrl = img.ImageUrl,
+                    IsDeleted = false
+                }).ToList();
+
+                await dbContext.PropertyImages.AddRangeAsync(newImages);
+            }
+
             await dbContext.SaveChangesAsync();
         }
 
@@ -135,10 +170,17 @@ namespace HomeEstate.Services.Core.Services
                 .Include(p => p.Images)
                 .Include(p => p.Location)
                 .Include(p => p.Category)
+                .Include(p => p.FavoriteProperties)
                 .ToListAsync();
 
-            var property = properties.Select(p => mapper.Map<PropertyDto>(p)).ToList();
-            return property;
+            var propertyDtos = properties.Select(p =>
+            {
+                var dto = mapper.Map<PropertyDto>(p);
+                dto.FavoriteCount = p.FavoriteProperties.Count; 
+                return dto;
+            }).ToList();
+
+            return propertyDtos;
         }
 
         // New methods for rent/sale functionality
@@ -163,35 +205,47 @@ namespace HomeEstate.Services.Core.Services
         {
             return await GetPropertiesByTypeAsync(PropertyListingType.Rent);
         }
-
         public async Task<ICollection<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria)
         {
+            Console.WriteLine($"SearchPropertiesAsync called with ListingType: {searchCriteria.ListingType}");
+
             var query = dbContext.Properties
                 .Include(p => p.Location)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
+                .Include(p => p.FavoriteProperties)
                 .Where(p => !p.IsDeleted);
+
+            // DEBUG: Логирайте колко properties има общо
+            var totalCount = await query.CountAsync();
+            Console.WriteLine($"Total properties in DB: {totalCount}");
 
             // Apply filters
             if (!string.IsNullOrEmpty(searchCriteria.Location))
             {
                 query = query.Where(p => p.Location.City.Contains(searchCriteria.Location) ||
                                         p.Location.Address.Contains(searchCriteria.Location));
+                Console.WriteLine($"After location filter: {await query.CountAsync()} properties");
             }
 
             if (searchCriteria.CategoryId.HasValue)
             {
                 query = query.Where(p => p.CategoryId == searchCriteria.CategoryId.Value);
+                Console.WriteLine($"After category filter: {await query.CountAsync()} properties");
             }
 
+            // ПОПРАВЕНА ЛОГИКА ЗА LISTING TYPE
             if (searchCriteria.ListingType.HasValue)
             {
                 query = query.Where(p => p.ListingType == searchCriteria.ListingType.Value ||
                                         p.ListingType == PropertyListingType.Both);
+                Console.WriteLine($"After listing type filter: {await query.CountAsync()} properties");
             }
 
-            // Price filters for sale properties
-            if (searchCriteria.ListingType == PropertyListingType.Sale || !searchCriteria.ListingType.HasValue)
+            // ПОПРАВЕНА ЛОГИКА ЗА PRICE/RENT FILTERS
+            // Ако търсим за Sale properties или не е указан тип
+            if (searchCriteria.ListingType == PropertyListingType.Sale ||
+                (!searchCriteria.ListingType.HasValue && searchCriteria.MaxPrice.HasValue))
             {
                 if (searchCriteria.MinPrice.HasValue)
                 {
@@ -202,19 +256,22 @@ namespace HomeEstate.Services.Core.Services
                 {
                     query = query.Where(p => p.Price <= searchCriteria.MaxPrice.Value);
                 }
+                Console.WriteLine($"After sale price filter: {await query.CountAsync()} properties");
             }
 
-            // Rent filters for rental properties
-            if (searchCriteria.ListingType == PropertyListingType.Rent)
+            // Ако търсим за Rent properties
+            if (searchCriteria.ListingType == PropertyListingType.Rent ||
+                searchCriteria.ListingType == PropertyListingType.Both ||
+                (!searchCriteria.ListingType.HasValue && searchCriteria.MaxRent.HasValue))
             {
                 if (searchCriteria.MinRent.HasValue)
                 {
-                    query = query.Where(p => p.MonthlyRent >= searchCriteria.MinRent.Value);
+                    query = query.Where(p => p.MonthlyRent.HasValue && p.MonthlyRent >= searchCriteria.MinRent.Value);
                 }
 
                 if (searchCriteria.MaxRent.HasValue)
                 {
-                    query = query.Where(p => p.MonthlyRent <= searchCriteria.MaxRent.Value);
+                    query = query.Where(p => p.MonthlyRent.HasValue && p.MonthlyRent <= searchCriteria.MaxRent.Value);
                 }
 
                 if (searchCriteria.PetsAllowed.HasValue)
@@ -226,6 +283,7 @@ namespace HomeEstate.Services.Core.Services
                 {
                     query = query.Where(p => p.IsFurnished == searchCriteria.IsFurnished.Value);
                 }
+                Console.WriteLine($"After rent filters: {await query.CountAsync()} properties");
             }
 
             // Common filters
@@ -248,18 +306,28 @@ namespace HomeEstate.Services.Core.Services
                 "date-desc" => query.OrderByDescending(p => p.CreatedOn),
                 "area-asc" => query.OrderBy(p => p.Area),
                 "area-desc" => query.OrderByDescending(p => p.Area),
-                _ => query.OrderByDescending(p => p.CreatedOn) // Default: newest first
+                _ => query.OrderByDescending(p => p.CreatedOn)
             };
 
             var properties = await query.ToListAsync();
-            return mapper.Map<ICollection<PropertyDto>>(properties);
+            Console.WriteLine($"Final result: {properties.Count} properties");
+
+            var result = properties.Select(p =>
+            {
+                var dto = mapper.Map<PropertyDto>(p);
+                dto.FavoriteCount = p.FavoriteProperties.Count;
+                return dto;
+            }).ToList();
+
+            return result;
         }
 
         public async Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId)
         {
             var userProperties = await dbContext.Properties
-                .Where(p => p.OwnerId == userId && !p.IsDeleted)
-                .ToListAsync();
+         .Where(p => p.OwnerId == userId && !p.IsDeleted)
+         .Include(p => p.FavoriteProperties) // Включете favorites
+         .ToListAsync();
 
             var statistics = new PropertyStatisticsDto
             {
@@ -273,12 +341,10 @@ namespace HomeEstate.Services.Core.Services
                     : 0,
                 AverageRent = userProperties.Where(p => p.MonthlyRent.HasValue).Any()
                     ? userProperties.Where(p => p.MonthlyRent.HasValue).Average(p => p.MonthlyRent.Value)
-                    : 0
+                    : 0,
+                TotalViews = 0, 
+                TotalFavorites = userProperties.Sum(p => p.FavoriteProperties.Count)
             };
-
-            // Note: TotalViews and TotalFavorites would need to be implemented with a proper tracking system
-            statistics.TotalViews = 0; // Placeholder
-            statistics.TotalFavorites = userProperties.Count * 5; // Placeholder
 
             return statistics;
         }
@@ -311,5 +377,62 @@ namespace HomeEstate.Services.Core.Services
 					.OrderBy(l => l.City)
 					.ToList();
 		}
-	}
+        private void ValidateRentalProperties(PropertyDto property, Dictionary<string, string> errors = null)
+        {
+            if (errors == null)
+                errors = new Dictionary<string, string>();
+
+            if (property.ListingType == PropertyListingType.Rent || property.ListingType == PropertyListingType.Both)
+            {
+                if (!property.MonthlyRent.HasValue || property.MonthlyRent <= 0)
+                {
+                    errors.Add("MonthlyRent", "Monthly rent is required for rental properties");
+                }
+
+                if (property.MinimumLeasePeriod.HasValue && (property.MinimumLeasePeriod < 1 || property.MinimumLeasePeriod > 60))
+                {
+                    errors.Add("MinimumLeasePeriod", "Minimum lease period must be between 1 and 60 months");
+                }
+
+                if (property.SecurityDeposit.HasValue && property.SecurityDeposit < 0)
+                {
+                    errors.Add("SecurityDeposit", "Security deposit cannot be negative");
+                }
+
+                if (property.AvailableFrom.HasValue && property.AvailableFrom < DateTime.Today)
+                {
+                    errors.Add("AvailableFrom", "Available from date cannot be in the past");
+                }
+            }
+
+            if (errors.Any())
+            {
+                throw new CustomValidationException("Rental validation failed", errors);
+            }
+        }
+
+        // Нов метод за получаване на rental статистики
+        public async Task<RentalStatisticsDto> GetRentalStatisticsAsync(string userId)
+        {
+            var userProperties = await dbContext.Properties
+                .Where(p => p.OwnerId == userId && !p.IsDeleted)
+                .ToListAsync();
+
+            var rentalProperties = userProperties.Where(p =>
+                p.ListingType == PropertyListingType.Rent ||
+                p.ListingType == PropertyListingType.Both).ToList();
+
+            return new RentalStatisticsDto
+            {
+                TotalRentalProperties = rentalProperties.Count,
+                AverageMonthlyRent = rentalProperties.Where(p => p.MonthlyRent.HasValue).Any()
+                    ? rentalProperties.Where(p => p.MonthlyRent.HasValue).Average(p => p.MonthlyRent.Value)
+                    : 0,
+                TotalMonthlyIncome = rentalProperties.Where(p => p.MonthlyRent.HasValue).Sum(p => p.MonthlyRent.Value),
+                FurnishedProperties = rentalProperties.Count(p => p.IsFurnished == true),
+                PetFriendlyProperties = rentalProperties.Count(p => p.PetsAllowed == true),
+                PropertiesWithParking = rentalProperties.Count(p => p.IsParking == true)
+            };
+        }
+    }
 }
