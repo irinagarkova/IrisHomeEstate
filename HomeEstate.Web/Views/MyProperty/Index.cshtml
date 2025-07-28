@@ -1,0 +1,209 @@
+﻿@model ICollection<PropertyViewModel>
+@{
+    ViewData["Title"] = "Моите имоти";
+}
+
+<div class="container-fluid main-content">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2">Моите имоти</h1>
+                    <p class="text-muted">Управление на вашите обяви</p>
+                </div>
+                <div>
+                    <a asp-controller="Property" asp-action="Add" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Добави нов имот
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    @if (ViewData["Statistics"] != null)
+    {
+        var stats = ViewData["Statistics"] as HomeEstate.Services.Core.Dtos.PropertyStatisticsDto;
+        if (stats != null)
+        {
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-primary">@stats.TotalProperties</h3>
+                            <p class="card-text">Общо имоти</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-success">@stats.PropertiesForSale</h3>
+                            <p class="card-text">За продажба</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-info">@stats.PropertiesForRent</h3>
+                            <p class="card-text">За наем</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-warning">@stats.TotalFavorites</h3>
+                            <p class="card-text">Общо харесвания</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Properties List -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-home fa-4x text-muted mb-3"></i>
+            <h3>Все още нямате създадени имоти</h3>
+            <p class="text-muted">Започнете като добавите вашия първи имот</p>
+            <a asp-controller="Property" asp-action="Add" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Създай първия си имот
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var property in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 property-card">
+                        <div class="position-relative">
+                            @if (property.Images != null && property.Images.Any())
+                            {
+                                <img src="@property.Images.First().ImageUrl" class="card-img-top" alt="@property.Title"
+                                     style="height: 200px; object-fit: cover;" onerror="this.src='/images/no-image.png'">
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                                     style="height: 200px;">
+                                    <i class="fas fa-home fa-3x text-muted"></i>
+                                </div>
+                            }
+
+                            <!-- Status Badge -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                @switch ((int)property.ListingType)
+                                {
+                                    case 1:
+                                        <span class="badge bg-success">Продажба</span>
+                                        break;
+                                    case 2:
+                                        <span class="badge bg-info">Наем</span>
+                                        break;
+                                    case 3:
+                                        <span class="badge bg-primary">Продажба/Наем</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">Активен</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@property.Title</h5>
+                            <p class="card-text text-primary fs-5 fw-bold">@property.Price.ToString("C")</p>
+
+                            <div class="row text-muted small mb-2">
+                                <div class="col-6">
+                                    <i class="fas fa-expand-arrows-alt"></i> @property.Area m²
+                                </div>
+                                <div class="col-6">
+                                    <i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "N/A")
+                                </div>
+                            </div>
+
+                            <div class="row text-muted small mb-3">
+                                <div class="col-6">
+                                    <i class="fas fa-calendar"></i> @property.CreatedOn.ToString("dd.MM.yyyy")
+                                </div>
+                                <div class="col-6">
+                                    <i class="fas fa-heart"></i> @property.FavoriteCount харесвания
+                                </div>
+                            </div>
+
+                            <div class="mt-auto">
+                                <div class="btn-group w-100" role="group">
+                                    <a asp-action="Details" asp-route-id="@property.Id"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Преглед
+                                    </a>
+                                    <a asp-controller="Property" asp-action="Update" asp-route-id="@property.Id"
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Редактирай
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick="deleteProperty(@property.Id, '@property.Title')">
+                                        <i class="fas fa-trash"></i> Изтрий
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Потвърждение за изтриване</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Сигурни ли сте, че искате да изтриете имота <strong id="propertyTitle"></strong>?</p>
+                <p class="text-danger">Това действие не може да бъде отменено.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отказ</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Изтрий</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            PropertyDeletion.initialize('@Url.Action("Delete", "MyProperty")');
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}

@@ -15,27 +15,25 @@
     <header>
             <nav>
             <div class="logo">
-                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Iris Home Estate</a>
+                <a class="logo" asp-area="" asp-controller="Home" asp-action="Index">Iris Home Estate</a>
             </div>
-                <ul class="nav-links">          
-                    <li>
-                        <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Index">Properties</a>
-                    </li>
+            <ul class="nav-links">
+                <li>
+                    <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Index">Properties</a>
+                </li>
 
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <li>
-                            <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Add">Add Prop</a>
-                        </li>
-                    }
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li>
-                        <a class="nav-link " asp-area= "" asp-controller="Property" asp-action="MyProperty">My Property</a>
-                        </li>
-                    }
-                 <partial name="_LoginPartial" />
-                </ul>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li>
+                        <a class="nav-link" asp-area="" asp-controller="Property" asp-action="Add">Add Property</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-area="" asp-controller="MyProperty" asp-action="Index">My Properties</a>
+                    </li>
+                }
+
+                <partial name="_LoginPartial" />
+            </ul>
             </nav>
        
     </header>
@@ -54,7 +52,7 @@
             <div class="footer-section">
                 <h4>Quick Links</h4>
                 <ul>
-                    <li><a href="#">Properties for Sale</a></li>
+                    <li><a href="/Property">Properties for Sale</a></li>
                     <li><a href="#">List Your Property</a></li>
                     <li><a href="#">Privacy policy</a></li>
                     <li><a href="#">Terms of service</a></li>
@@ -65,17 +63,25 @@
             <div class="footer-section">
                 <h4>Find us</h4>
                 <div class="social-icons">
-                    <span class="social-icon facebook"><i class="fab fa-facebook-f"></i></span>
-                    <span class="social-icon google"><i class="fab fa-google"></i></span>
-                    <span class="social-icon linkedin"><i class="fab fa-linkedin-in"></i></span>
-                    <span class="social-icon reddit"><i class="fab fa-reddit-alien"></i></span>
+                    <span class="social-icon facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </span>
+                    <span class="social-icon google">
+                        <i class="fab fa-google"></i>
+                    </span>
+                    <span class="social-icon linkedin">
+                        <i class="fab fa-linkedin-in"></i>
+                    </span>
+                    <span class="social-icon reddit">
+                        <i class="fab fa-reddit-alien"></i>
+                    </span>
                 </div>
             </div>
 
             <div class="footer-section">
                 <h4>Contact Us</h4>
                 <p>📞 (+359) 881234567</p>
-                <p>✉️ info@irishomeproperties.com</p>
+                <p>✉️ info@irishomeestate.com</p>
                 <p>📍 Sofia, Bulgaria</p>
             </div>
         </div>

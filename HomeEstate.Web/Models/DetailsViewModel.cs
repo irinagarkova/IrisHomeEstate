@@ -24,8 +24,16 @@ namespace HomeEstate.Web.Models
         public List<string> Images { get; set; } = new();
 
 		public PropertyListingType ListingType { get; internal set; }
-		//public virtual ICollection<PropertyImage> Images { get; set; }
-		//     = new List<PropertyImage>();
-	}
+        public decimal? MonthlyRent { get; set; }
+        public decimal? SecurityDeposit { get; set; }
+        public int? MinimumLeasePeriod { get; set; }
+        public DateTime? AvailableFrom { get; set; }
+        public bool PetsAllowed { get; set; }
+        public bool IsFurnished { get; set; }
+        public bool IsParking { get; set; }
+        public bool IsActive { get; set; }
+        //public virtual ICollection<PropertyImage> Images { get; set; }
+        //     = new List<PropertyImage>();
+    }
 }
  

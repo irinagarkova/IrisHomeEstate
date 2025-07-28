@@ -1,4 +1,5 @@
-﻿using HomeEstate.Models;
+﻿using HomeEstate.Data.Models.Enum;
+using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
 using System.ComponentModel.DataAnnotations;
 
@@ -27,5 +28,8 @@ namespace HomeEstate.Web.Models
         public CategoryDto Category { get; set; }
 
         public ICollection<PropertyImageDto> Images { get; set; }
+
+        public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale;
+        public PropertyType PropertyType { get; set; } = PropertyType.OneBedroom;
     }
 }

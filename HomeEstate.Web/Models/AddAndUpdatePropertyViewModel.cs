@@ -22,9 +22,19 @@ namespace HomeEstate.Web.Models
         public int LocationId { get; set; }
         [Required]
         public int CategoryId { get; set; }
-
 		public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
+
 		public List<IFormFile> Images { get; set; } = new();
-        public PropertyListingType ListingType { get; internal set; }
+        public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale; 
+        public decimal? MonthlyRent { get; set; }
+        public decimal? SecurityDeposit { get; set; }
+        public int? MinimumLeasePeriod { get; set; }
+        public DateTime? AvailableFrom { get; set; }
+        public bool PetsAllowed { get; set; }
+        public bool IsFurnished { get; set; }
+        public bool IsParking { get; set; }
+        public bool IsActive { get; set; } 
+      
+        public PropertyType PropertyType { get; set; }
     }
 }

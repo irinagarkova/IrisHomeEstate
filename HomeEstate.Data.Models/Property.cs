@@ -38,6 +38,10 @@ namespace HomeEstate.Models
 
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
+        public int FavoriteCount { get; set; } = 0;
+
+        // Navigation properties - добавете това ако го няма
+        public virtual ICollection<FavoriteProperty> FavoriteProperties { get; set; } = new HashSet<FavoriteProperty>();
 
         [Comment("Property Listing Type - Sale, Rent or Both")]
         public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale;

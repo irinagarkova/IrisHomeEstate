@@ -1,0 +1,296 @@
+﻿@using HomeEstate.Data.Models.Enum
+@model HomeEstate.Web.Models.DetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/detailsPage.css" asp-append-version="true" />
+</head>
+<div class="property-details">
+    <!-- Hero Section with Images -->
+    <div class="hero-section">
+        <div class="container-fluid px-0">
+            <div class="row g-0">
+                <div class="col-lg-8">
+                    <div class="main-image-container">
+                        @if (Model.Images.Any())
+                        {
+                            <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < Model.Images.Count; i++)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <img src="@Model.Images[i]" class="d-block w-100 property-main-image" alt="Property Image @(i + 1)">
+                                        </div>
+                                    }
+                                </div>
+                                @if (Model.Images.Count > 1)
+                                {
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-home fa-4x text-muted"></i>
+                                <p class="text-muted mt-3">Няма налични снимки</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="property-summary-card">
+                        <div class="price-section">
+                            @if (Model.ListingType == PropertyListingType.Sale)
+                            {
+                                <div class="price">@Model.Price.ToString("C0")</div>
+                                <div class="listing-type">За продажба</div>
+                            }
+                            else
+                            {
+                                <div class="price">@Model.MonthlyRent?.ToString("C0")/месец</div>
+                                <div class="listing-type">За наем</div>
+                            }
+                        </div>
+                        
+                        <div class="property-quick-info">
+                            <div class="info-item">
+                                <i class="fas fa-ruler-combined"></i>
+                                <span>@Model.Area м²</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@Model.LocationName</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-tag"></i>
+                                <span>@Model.CategoryName</span>
+                            </div>
+                        </div>
+
+                        @if (Model.ListingType == PropertyListingType.Rent)
+                        {
+                            <div class="rental-details">
+                                @if (Model.SecurityDeposit.HasValue)
+                                {
+                                    <div class="rental-item">
+                                        <span class="label">Депозит:</span>
+                                        <span class="value">@Model.SecurityDeposit.Value.ToString("C0")</span>
+                                    </div>
+                                }
+                                @if (Model.MinimumLeasePeriod.HasValue)
+                                {
+                                    <div class="rental-item">
+                                        <span class="label">Мин. период:</span>
+                                        <span class="value">@Model.MinimumLeasePeriod месеца</span>
+                                    </div>
+                                }
+                                @if (Model.AvailableFrom.HasValue)
+                                {
+                                    <div class="rental-item">
+                                        <span class="label">Свободен от:</span>
+                                        <span class="value">@Model.AvailableFrom.Value.ToString("dd.MM.yyyy")</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div class="property-features">
+                            @if (Model.IsFurnished)
+                            {
+                                <span class="feature-badge"><i class="fas fa-couch"></i> Обзаведен</span>
+                            }
+                            @if (Model.IsParking)
+                            {
+                                <span class="feature-badge"><i class="fas fa-car"></i> Паркинг</span>
+                            }
+                            @if (Model.PetsAllowed && Model.ListingType == PropertyListingType.Rent)
+                            {
+                                <span class="feature-badge"><i class="fas fa-paw"></i> Домашни любимци</span>
+                            }
+                        </div>
+
+                        <div class="contact-section">
+                            <button class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-phone me-2"></i>Свържи се
+                            </button>
+                            <button class="btn btn-outline-primary w-100">
+                                <i class="fas fa-heart me-2"></i>Запази в любими
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Details Section -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="property-content">
+                    <div class="property-header mb-4">
+                        <h1>@Model.Title</h1>
+                        <div class="property-meta">
+                            <span class="owner">
+                                <i class="fas fa-user"></i>
+                                Собственик: @Model.OwnerFullName
+                            </span>
+                            <span class="date">
+                                <i class="fas fa-calendar"></i>
+                                Публикувано: @Model.CreatedOn.ToString("dd.MM.yyyy")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="description-section">
+                        <h3>Описание</h3>
+                        <div class="description-content">
+                            @Html.Raw(Model.Description.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Thumbnail gallery for mobile/tablet -->
+                @if (Model.Images.Count > 1)
+                {
+                    <div class="thumbnail-gallery d-lg-block d-none">
+                        <h5>Всички снимки (@Model.Images.Count)</h5>
+                        <div class="thumbnails-grid">
+                            @for (int i = 0; i < Math.Min(Model.Images.Count, 8); i++)
+                            {
+                                <div class="thumbnail-item" data-bs-target="#propertyCarousel" data-bs-slide-to="@i">
+                                    <img src="@Model.Images[i]" alt="Thumbnail @(i + 1)">
+                                    @if (i == 7 && Model.Images.Count > 8)
+                                    {
+                                        <div class="thumbnail-overlay">
+                                            <span>+@(Model.Images.Count - 8)</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Properties Section -->
+    <div class="similar-properties-section bg-light py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2>Подобни имоти</h2>
+                <p class="text-muted">Други имоти, които може да ви интересуват</p>
+            </div>
+            
+            <div class="row" id="similarProperties">
+                <!-- Similar properties will be loaded here via AJAX -->
+                <!-- Placeholder cards for demo -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Property">
+                            <div class="price-overlay">450,000 лв</div>
+                        </div>
+                        <div class="property-info">
+                            <h5>Тристаен апартамент в центъра</h5>
+                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Център</p>
+                            <p class="area"><i class="fas fa-ruler-combined"></i> 85 м²</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Property">
+                            <div class="price-overlay">380,000 лв</div>
+                        </div>
+                        <div class="property-info">
+                            <h5>Двустаен апартамент</h5>
+                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Лозенец</p>
+                            <p class="area"><i class="fas fa-ruler-combined"></i> 65 м²</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Property">
+                            <div class="price-overlay">520,000 лв</div>
+                        </div>
+                        <div class="property-info">
+                            <h5>Четиристаен апартамент</h5>
+                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Младост</p>
+                            <p class="area"><i class="fas fa-ruler-combined"></i> 95 м²</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="https://via.placeholder.com/300x200" alt="Property">
+                            <div class="price-overlay">420,000 лв</div>
+                        </div>
+                        <div class="property-info">
+                            <h5>Тристаен с тераса</h5>
+                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Витоша</p>
+                            <p class="area"><i class="fas fa-ruler-combined"></i> 78 м²</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="#" class="btn btn-outline-primary">Виж още подобни имоти</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize carousel
+    var carousel = new bootstrap.Carousel(document.getElementById('propertyCarousel'), {
+        interval: false
+    });
+    
+    // Thumbnail click handling
+    document.querySelectorAll('.thumbnail-item').forEach(function(thumbnail) {
+        thumbnail.addEventListener('click', function() {
+            var slideIndex = this.getAttribute('data-bs-slide-to');
+            carousel.to(parseInt(slideIndex));
+        });
+    });
+    
+    // Load similar properties (replace with actual AJAX call)
+    // loadSimilarProperties();
+});
+
+// function loadSimilarProperties() {
+//     // This would be an AJAX call to your controller
+//     // Example:
+//     // fetch('/Property/GetSimilarProperties?id=' + propertyId)
+//     //     .then(response => response.json())
+//     //     .then(data => {
+//     //         // Populate similar properties
+//     //     });
+// }
+</script>

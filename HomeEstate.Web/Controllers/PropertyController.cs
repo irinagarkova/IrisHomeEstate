@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HomeEstate.Data;
+using HomeEstate.Data.Models;
 using HomeEstate.Data.Models.Enum;
 using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
@@ -37,19 +38,33 @@ namespace HomeEstate.Web.Controllers
 
         // Updated Index action to support both sale and rent
         [AllowAnonymous]
-        public async Task<IActionResult> Index(PropertyListingType? type = null)
+        public async Task<IActionResult> Index(PropertySearchDto? searchCriteria = null)
         {
+
+            // Ако searchCriteria е null, създайте празен
+            searchCriteria ??= new PropertySearchDto();
             ICollection<PropertyDto> propertyDtos;
 
-            if (type.HasValue)
+            // Ако има search критерии, използвайте ги
+            bool hasSearchCriteria = !string.IsNullOrEmpty(searchCriteria.Location) ||
+                          searchCriteria.CategoryId.HasValue ||
+                          searchCriteria.MaxPrice.HasValue ||
+                          searchCriteria.MaxRent.HasValue ||
+                          searchCriteria.ListingType.HasValue ||
+                          searchCriteria.Bedrooms.HasValue;
+
+            if (hasSearchCriteria)
             {
-                propertyDtos = await propertyService.GetPropertiesByTypeAsync(type.Value);
-                ViewData["ListingType"] = type.Value;
+                propertyDtos = await propertyService.SearchPropertiesAsync(searchCriteria);
+                ViewData["SearchApplied"] = true;
+                ViewData["SearchCriteria"] = searchCriteria;
+                ViewData["ResultsCount"] = propertyDtos.Count;
             }
             else
             {
                 propertyDtos = await propertyService.GetAllPropertiesAsync();
-                ViewData["ListingType"] = "All";
+                ViewData["SearchApplied"] = false;
+                ViewData["ResultsCount"] = propertyDtos.Count;
             }
 
             var userName = User.Identity?.Name;
@@ -78,95 +93,67 @@ namespace HomeEstate.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForSale()
         {
-            return await Index(PropertyListingType.Sale);
+            var searchCriteria = new PropertySearchDto
+            {
+                ListingType = PropertyListingType.Sale
+            };
+            return await Index(searchCriteria);
         }
 
         // New action for properties for rent
         [AllowAnonymous]
         public async Task<IActionResult> ForRent()
         {
-            return await Index(PropertyListingType.Rent);
+            var searchCriteria = new PropertySearchDto
+            {
+                ListingType = PropertyListingType.Rent
+            };
+            return await Index(searchCriteria);
         }
 
-        // Updated AJAX Search Action
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> Search([FromQuery] PropertySearchDto searchCriteria)
-        {
-            try
-            {
-                var properties = await propertyService.SearchPropertiesAsync(searchCriteria);
-
-                // Get favorite status if user is authenticated
-                var favoriteIds = new HashSet<int>();
-                if (User.Identity?.IsAuthenticated == true)
-                {
-                    var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
-                    favoriteIds = favorites.Select(f => f.PropertyId).ToHashSet();
-                }
-
-                var propertyResults = properties.Select(p => new
-                {
-                    id = p.Id,
-                    title = p.Title,
-                    description = p.Description,
-                    price = p.Price,
-                    monthlyRent = p.MonthlyRent,
-                    listingType = p.ListingType.ToString(),
-                    area = p.Area,
-                    location = p.Location?.City ?? "Unknown",
-                    category = p.Category?.Name ?? "Unknown",
-                    images = p.Images.Select(i => i.ImageUrl).ToList(),
-                    createdOn = p.CreatedOn,
-                    isFavorite = favoriteIds.Contains(p.Id),
-                    favoriteCount = favoritePropertyService.GetFavoriteCountForPropertyAsync(p.Id).Result,
-                    petsAllowed = p.PetsAllowed,
-                    isFurnished = p.IsFurnished,
-                    availableFrom = p.AvailableFrom,
-                    securityDeposit = p.SecurityDeposit,
-                    minimumLeasePeriod = p.MinimumLeasePeriod
-                }).ToList();
-
-                return Json(new { success = true, properties = propertyResults });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
+       
         // Updated Add action
         public IActionResult Add()
         {
             var model = new AddAndUpdatePropertyViewModel
             {
                 ListingType = PropertyListingType.Sale,
-				Locations = GetLocations() // Default
-			};
+                Locations = GetLocations() // Default
+            };
             return View(model);
         }
-		private IEnumerable<SelectListItem> GetLocations()
-		{
-			var locations = propertyService.GetAllLocations();
+        private IEnumerable<SelectListItem> GetLocations()
+        {
+            var locations = propertyService.GetAllLocations();
 
             return locations
                        .OrderBy(l => l.Id)
                        .Select(l => new SelectListItem
-		               {
-		               	Value = l.Id.ToString(),
-		               	Text = l.City
-		               })
-		               .ToList();
-		
-		}
-	
-		[HttpPost]
+                       {
+                           Value = l.Id.ToString(),
+                           Text = l.City
+                       })
+                       .ToList();
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(AddAndUpdatePropertyViewModel model)
         {
             if (!ModelState.IsValid)
             {
-				model.Locations = GetLocations();
-				return View(model); 
+                model.Locations = GetLocations();
+                return View(model);
+            }
+            if (model.ListingType == PropertyListingType.Rent || model.ListingType == PropertyListingType.Both)
+            {
+                if (!model.MonthlyRent.HasValue || model.MonthlyRent <= 0)
+                {
+                    ModelState.AddModelError("MonthlyRent", "Месечният наем е задължителен за имоти под наем");
+                    model.Locations = GetLocations();
+                    return View(model);
+                }
             }
 
             try
@@ -201,22 +188,25 @@ namespace HomeEstate.Web.Controllers
                 var userId = userManager.GetUserId(User);
                 var propertyDto = mapper.Map<PropertyDto>(model);
                 propertyDto.OwnerId = userId;
+                propertyDto.CreatedOn = DateTime.UtcNow;
                 propertyDto.Images = imagePaths.Select(path => new PropertyImageDto
                 {
                     ImageUrl = path
                 }).ToList();
 
                 await propertyService.CreatePropertyAsync(propertyDto);
-                return RedirectToAction("MyProperty");
+
+                TempData["SuccessMessage"] = "Имотът е създаден успешно!";
+                return RedirectToAction("Index", "MyProperty");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "An error occurred while creating the property.");
+                model.Locations = GetLocations();
                 return View(model);
             }
         }
 
-        // Updated Update action
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
@@ -244,9 +234,18 @@ namespace HomeEstate.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
+                model.Locations = GetLocations();
                 return View(model);
             }
-
+            if (model.ListingType == PropertyListingType.Rent || model.ListingType == PropertyListingType.Both)
+            {
+                if (!model.MonthlyRent.HasValue || model.MonthlyRent <= 0)
+                {
+                    ModelState.AddModelError("MonthlyRent", "Месечният наем е задължителен за имоти под наем");
+                    model.Locations = GetLocations();
+                    return View(model);
+                }
+            }
             try
             {
                 var property = await propertyService.GetPropertyAsync(model.Id);
@@ -260,7 +259,47 @@ namespace HomeEstate.Web.Controllers
                 var propertyDto = mapper.Map<PropertyDto>(model);
                 propertyDto.OwnerId = userId;
 
+                // Запазване на съществуващите снимки ако няма нови
+                if (model.Images == null || !model.Images.Any())
+                {
+                    propertyDto.Images = property.Images;
+                }
+                else
+                {
+                    // Качване на нови снимки
+                    var imagePaths = new List<string>();
+                    var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+                    if (!Directory.Exists(uploadFolder))
+                    {
+                        Directory.CreateDirectory(uploadFolder);
+                    }
+
+                    foreach (var image in model.Images)
+                    {
+                        if (image != null && image.Length > 0)
+                        {
+                            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            var filePath = Path.Combine(uploadFolder, fileName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+
+                            imagePaths.Add("/uploads/" + fileName);
+                        }
+                    }
+
+                    propertyDto.Images = imagePaths.Select(path => new PropertyImageDto
+                    {
+                        ImageUrl = path
+                    }).ToList();
+                }
+
                 await propertyService.UpdatePropertyAsync(propertyDto);
+
+                TempData["SuccessMessage"] = "Имотът е обновен успешно!";
                 return RedirectToAction("MyProperty");
             }
             catch (CustomValidationException ex)
@@ -269,6 +308,7 @@ namespace HomeEstate.Web.Controllers
                 {
                     ModelState.AddModelError(error.Key, error.Value);
                 }
+                model.Locations = GetLocations();
                 return View(model);
             }
             catch (NotFoundException)
@@ -277,47 +317,10 @@ namespace HomeEstate.Web.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError("", "An error occurred while updating.");
+                ModelState.AddModelError("", "Възникна грешка при обновяването.");
+                model.Locations = GetLocations();
                 return View(model);
             }
-        }
-
-        // New AJAX action to get property statistics
-        [HttpGet]
-        public async Task<IActionResult> GetStatistics()
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var statistics = await propertyService.GetUserPropertyStatisticsAsync(userId);
-
-                return Json(new { success = true, statistics });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        // Updated MyProperty to show statistics
-        [HttpGet]
-        public async Task<IActionResult> MyProperty()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
-
-            var myProps = await propertyService.GetPropertiesByUserIdAsync(userId);
-            var viewModel = myProps.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
-
-            // Get statistics
-            var statistics = await propertyService.GetUserPropertyStatisticsAsync(userId);
-            ViewData["Statistics"] = statistics;
-
-            return View(viewModel);
         }
 
         // Existing actions remain the same...
@@ -389,7 +392,41 @@ namespace HomeEstate.Web.Controllers
             return Json(new { Success = true, Properties = allprop });
         }
 
+        private IEnumerable<SelectListItem> GetCategories()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Апартамент" },
+                new SelectListItem { Value = "2", Text = "Къща" },
+                new SelectListItem { Value = "3", Text = "Офис" },
+                new SelectListItem { Value = "4", Text = "Вила" }
+            };
+        }
+        [HttpPost]
+        public IActionResult ValidateRentalFields([FromBody] RentalValidationRequest request)
+        {
+            var errors = new List<string>();
 
+            if (request.ListingType == PropertyListingType.Rent || request.ListingType == PropertyListingType.Both)
+            {
+                if (!request.MonthlyRent.HasValue || request.MonthlyRent <= 0)
+                {
+                    errors.Add("Месечният наем е задължителен");
+                }
+
+                if (request.MinimumLeasePeriod.HasValue && (request.MinimumLeasePeriod < 1 || request.MinimumLeasePeriod > 60))
+                {
+                    errors.Add("Минималният срок трябва да бъде между 1 и 60 месеца");
+                }
+
+                if (request.SecurityDeposit.HasValue && request.SecurityDeposit < 0)
+                {
+                    errors.Add("Депозитът не може да бъде отрицателен");
+                }
+            }
+
+            return Json(new { isValid = !errors.Any(), errors = errors });
+        }
     }
 
 }

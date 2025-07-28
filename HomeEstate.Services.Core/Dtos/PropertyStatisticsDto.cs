@@ -17,6 +17,8 @@ namespace HomeEstate.Services.Core.Dtos
         public decimal TotalValue { get; set; }
         public decimal AveragePrice { get; set; }
         public decimal AverageRent { get; set; }
+
+
     }
 }
 
