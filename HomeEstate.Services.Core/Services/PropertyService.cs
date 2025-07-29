@@ -5,6 +5,7 @@ using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
 using HomeEstate.Services.Core.Exceptions;
 using HomeEstate.Services.Core.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,6 @@ namespace HomeEstate.Services.Core.Services
             await dbContext.AddAsync(newProperty);
             await dbContext.SaveChangesAsync();
 
-            // Запазване на снимките ако има такива
             if (property.Images != null && property.Images.Any())
             {
                 var propertyImages = property.Images.Select(img => new PropertyImage
@@ -61,8 +61,18 @@ namespace HomeEstate.Services.Core.Services
             }
         }
 
-        public async Task<ICollection<PropertyDto>> GetAllPropertiesAsync()
+        public async Task<PaginatedDto<PropertyDto>> GetAllPropertiesAsync(int page, int pageSize)
         {
+            // Validate pagination parameters
+            page = Math.Max(1, page); // Ensure page is at least 1
+            pageSize = Math.Min(Math.Max(1, pageSize), 100); // Ensure pageSize is between 1 and 100
+
+            // Get total count for pagination info
+            var totalProperties = await GetTotalPropertiesCount();
+
+            // Calculate total pages
+            var totalPages = (int)Math.Ceiling((double)totalProperties / pageSize);
+
             var properties = await dbContext.Properties
                 .Include(p => p.Location)
                 .Include(p => p.Category)
@@ -70,8 +80,16 @@ namespace HomeEstate.Services.Core.Services
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
 
-            var mappedProperties = properties.Select(p => mapper.Map<PropertyDto>(p)).ToList();
-            return mappedProperties;
+            var mappedProps = mapper.Map<List<PropertyDto>>(properties);
+            return new PaginatedDto<PropertyDto>
+            {
+                Items = mappedProps,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalItems = totalProperties,
+                TotalPages = totalPages
+            };
+
         }
 
         public async Task<PropertyDto> GetPropertyAsync(int id)
@@ -139,7 +157,7 @@ namespace HomeEstate.Services.Core.Services
 
             mapper.Map(property, propertyToUpdate);
 
-            // Обновяване на снимки ако има нови
+            // Обновяване на снимки
             if (property.Images != null && property.Images.Any())
             {
                 // Премахване на стари снимки
@@ -149,7 +167,7 @@ namespace HomeEstate.Services.Core.Services
 
                 dbContext.PropertyImages.RemoveRange(oldImages);
 
-                // Добавяне на нови снимки
+         
                 var newImages = property.Images.Select(img => new PropertyImage
                 {
                     PropertyId = property.Id,
@@ -205,9 +223,8 @@ namespace HomeEstate.Services.Core.Services
         {
             return await GetPropertiesByTypeAsync(PropertyListingType.Rent);
         }
-        public async Task<ICollection<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria)
+        public async Task<PaginatedDto<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria)
         {
-            Console.WriteLine($"SearchPropertiesAsync called with ListingType: {searchCriteria.ListingType}");
 
             var query = dbContext.Properties
                 .Include(p => p.Location)
@@ -215,10 +232,6 @@ namespace HomeEstate.Services.Core.Services
                 .Include(p => p.Images)
                 .Include(p => p.FavoriteProperties)
                 .Where(p => !p.IsDeleted);
-
-            // DEBUG: Логирайте колко properties има общо
-            var totalCount = await query.CountAsync();
-            Console.WriteLine($"Total properties in DB: {totalCount}");
 
             // Apply filters
             if (!string.IsNullOrEmpty(searchCriteria.Location))
@@ -234,7 +247,6 @@ namespace HomeEstate.Services.Core.Services
                 Console.WriteLine($"After category filter: {await query.CountAsync()} properties");
             }
 
-            // ПОПРАВЕНА ЛОГИКА ЗА LISTING TYPE
             if (searchCriteria.ListingType.HasValue)
             {
                 query = query.Where(p => p.ListingType == searchCriteria.ListingType.Value ||
@@ -242,8 +254,7 @@ namespace HomeEstate.Services.Core.Services
                 Console.WriteLine($"After listing type filter: {await query.CountAsync()} properties");
             }
 
-            // ПОПРАВЕНА ЛОГИКА ЗА PRICE/RENT FILTERS
-            // Ако търсим за Sale properties или не е указан тип
+            // Ако търсим за Sale properties 
             if (searchCriteria.ListingType == PropertyListingType.Sale ||
                 (!searchCriteria.ListingType.HasValue && searchCriteria.MaxPrice.HasValue))
             {
@@ -286,7 +297,6 @@ namespace HomeEstate.Services.Core.Services
                 Console.WriteLine($"After rent filters: {await query.CountAsync()} properties");
             }
 
-            // Common filters
             if (searchCriteria.MinArea.HasValue)
             {
                 query = query.Where(p => p.Area >= searchCriteria.MinArea.Value);
@@ -297,7 +307,7 @@ namespace HomeEstate.Services.Core.Services
                 query = query.Where(p => p.Area <= searchCriteria.MaxArea.Value);
             }
 
-            // Apply sorting
+            // Сортиране / rent
             query = searchCriteria.SortBy?.ToLower() switch
             {
                 "price-asc" => query.OrderBy(p => p.ListingType == PropertyListingType.Rent ? p.MonthlyRent : p.Price),
@@ -319,14 +329,26 @@ namespace HomeEstate.Services.Core.Services
                 return dto;
             }).ToList();
 
-            return result;
+            int totalProperties = result.Count;
+
+            // Calculate total pages
+            var totalPages = (int)Math.Ceiling((double)totalProperties / 10);
+
+            return new PaginatedDto<PropertyDto>
+            {
+                Items = result,
+                CurrentPage = 1,
+                TotalPages = totalPages,
+                PageSize = 10,
+                TotalItems = totalProperties
+            };
         }
 
         public async Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId)
         {
             var userProperties = await dbContext.Properties
          .Where(p => p.OwnerId == userId && !p.IsDeleted)
-         .Include(p => p.FavoriteProperties) // Включете favorites
+         .Include(p => p.FavoriteProperties)
          .ToListAsync();
 
             var statistics = new PropertyStatisticsDto
@@ -411,7 +433,7 @@ namespace HomeEstate.Services.Core.Services
             }
         }
 
-        // Нов метод за получаване на rental статистики
+        // rental статистики
         public async Task<RentalStatisticsDto> GetRentalStatisticsAsync(string userId)
         {
             var userProperties = await dbContext.Properties
@@ -433,6 +455,19 @@ namespace HomeEstate.Services.Core.Services
                 PetFriendlyProperties = rentalProperties.Count(p => p.PetsAllowed == true),
                 PropertiesWithParking = rentalProperties.Count(p => p.IsParking == true)
             };
+        }
+
+        public async Task<int> GetTotalPropertiesCount()
+        {
+            var count = await dbContext.Properties.CountAsync();
+            return count;
+        }
+
+        public async Task<List<PropertyDto>> GetRecentProperties(int count)
+        {
+            var properties = await dbContext.Properties.TakeLast(count).ToListAsync();
+            var mapped = mapper.Map<List<PropertyDto>>(properties);
+            return mapped;
         }
     }
 }

@@ -49,6 +49,7 @@ namespace HomeEstate.Web.Mappings
              .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
 
             CreateMap<SearchViewModel, SearchPropertyDto>().ReverseMap();
+            CreateMap<ApplicationUserViewModel, ApplicationUserDto>().ReverseMap();
         }
     }
 }

@@ -9,15 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{96692E63-3
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Data", "HomeEstate.Data\HomeEstate.Data.csproj", "{81C18241-C648-40C0-B6CF-16BC96F1622A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Data.Common", "HomeEstate.Data.Common\HomeEstate.Data.Common.csproj", "{A252201C-542E-4DE0-9E85-4C210806829F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Data.Common", "HomeEstate.Data.Common\HomeEstate.Data.Common.csproj", "{A252201C-542E-4DE0-9E85-4C210806829F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Data.Models", "HomeEstate.Data.Models\HomeEstate.Data.Models.csproj", "{57AA5A2D-25F4-465D-809D-6FC868AD7164}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Data.Models", "HomeEstate.Data.Models\HomeEstate.Data.Models.csproj", "{57AA5A2D-25F4-465D-809D-6FC868AD7164}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{7D2C2B30-A751-44F6-982A-99EBEC1B4218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Services.Core", "HomeEstate.Services.Core\HomeEstate.Services.Core.csproj", "{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Services.Core", "HomeEstate.Services.Core\HomeEstate.Services.Core.csproj", "{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Services.Common", "HomeEstate.Services.Common\HomeEstate.Services.Common.csproj", "{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Services.Common", "HomeEstate.Services.Common\HomeEstate.Services.Common.csproj", "{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{D48848E2-50DC-4A1E-B427-004D6CE343E1}"
 EndProject
