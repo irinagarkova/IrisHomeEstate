@@ -1,0 +1,71 @@
+﻿@model ApplicationUserViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </h3>
+                    <a asp-action="Edit" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-muted">User Name</label>
+                            <p class="form-control-plaintext border-bottom pb-2">@Model.UserName</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-muted">Email</label>
+                            <p class="form-control-plaintext border-bottom pb-2">@Model.Email</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        @* <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-muted">First Name</label>
+                            <p class="form-control-plaintext border-bottom pb-2">
+                                @(string.IsNullOrEmpty(Model.FirstName) ? "Not provided" : Model.FirstName)
+                            </p>
+                        </div> *@
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-muted">Phone Number</label>
+                            <p class="form-control-plaintext border-bottom pb-2">
+                                @(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Keep your profile information up to date for better service.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

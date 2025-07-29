@@ -9,78 +9,90 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomeEstate
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
-			builder.Services.AddDbContext<HomeEstateDbContext>(options =>
-				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // Add services to the container.
+            builder.Services.AddDbContext<HomeEstateDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-			builder.Services.AddAutoMapper(cfg =>
-			{
-				cfg.AddProfile<PropertyMappingProfile>();
-				cfg.AddProfile<PropertyWebMappingProfile>();
-			});
+            builder.Services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<PropertyMappingProfile>();
+                cfg.AddProfile<PropertyWebMappingProfile>();
+            });
 
-			builder.Services.AddScoped<IPropertyService, PropertyService>();
-			builder.Services.AddScoped<IFavoritePropertyService, FavoritePropertyService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
-			builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>(); 
-			builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IFavoritePropertyService, FavoritePropertyService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             builder.Services
-			  .AddIdentity<ApplicationUser, IdentityRole>(options =>
-			  {
-				  options.SignIn.RequireConfirmedEmail = false;
-				  options.SignIn.RequireConfirmedAccount = false;
-				  options.SignIn.RequireConfirmedPhoneNumber = false;
+              .AddIdentity<ApplicationUser, IdentityRole>(options =>
+              {
+                  options.SignIn.RequireConfirmedEmail = false;
+                  options.SignIn.RequireConfirmedAccount = false;
+                  options.SignIn.RequireConfirmedPhoneNumber = false;
 
-				  options.Password.RequiredLength = 3;
-				  options.Password.RequireDigit = false;
-				  options.Password.RequireNonAlphanumeric = false;
-				  options.Password.RequireLowercase = false;
-				  options.Password.RequireUppercase = false;
-				  options.Password.RequiredUniqueChars = 0;
-			  })
-			  .AddEntityFrameworkStores<HomeEstateDbContext>()
-			  .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
-			builder.Services.AddControllersWithViews();
-			
-			builder.Services.AddRazorPages();
-			WebApplication app = builder.Build();
+                  options.Password.RequiredLength = 3;
+                  options.Password.RequireDigit = false;
+                  options.Password.RequireNonAlphanumeric = false;
+                  options.Password.RequireLowercase = false;
+                  options.Password.RequireUppercase = false;
+                  options.Password.RequiredUniqueChars = 0;
+              })
+              .AddEntityFrameworkStores<HomeEstateDbContext>()
+              .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
+            builder.Services.AddControllersWithViews();
 
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
+            builder.Services.AddRazorPages();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "Admin"));
+            });
+            WebApplication app = builder.Build();
 
-			}
-			else
-			{
-				app.UseExceptionHandler("/Home/Error");
-				app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-				app.UseHsts();
-			}
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
 
-			app.UseHttpsRedirection();
-			app.UseStaticFiles();
-			app.MapRazorPages();
-			app.UseRouting();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.MapRazorPages();
+            app.UseRouting();
 
-			app.UseAuthentication();
-			app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-			app.MapControllerRoute(
-				name: "default",
-				pattern: "{controller=Home}/{action=Index}/{id?}");
-			app.MapRazorPages();
+            app.MapControllerRoute(
+                name: "admin",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
-			app.Run();
-		}
-	}
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            //app.MapControllerRoute(
+            //    name: "default",
+            //    pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
+
+            app.Run();
+        }
+    }
 }

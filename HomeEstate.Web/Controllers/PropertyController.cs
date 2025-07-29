@@ -36,16 +36,15 @@ namespace HomeEstate.Web.Controllers
             this.favoritePropertyService = favoritePropertyService;
         }
 
-        // Updated Index action to support both sale and rent
         [AllowAnonymous]
         public async Task<IActionResult> Index(PropertySearchDto? searchCriteria = null)
         {
 
             // Ако searchCriteria е null, създайте празен
             searchCriteria ??= new PropertySearchDto();
-            ICollection<PropertyDto> propertyDtos;
+            PaginatedDto<PropertyDto> propertyDtos;
 
-            // Ако има search критерии, използвайте ги
+            // Ако има search критерии
             bool hasSearchCriteria = !string.IsNullOrEmpty(searchCriteria.Location) ||
                           searchCriteria.CategoryId.HasValue ||
                           searchCriteria.MaxPrice.HasValue ||
@@ -58,13 +57,13 @@ namespace HomeEstate.Web.Controllers
                 propertyDtos = await propertyService.SearchPropertiesAsync(searchCriteria);
                 ViewData["SearchApplied"] = true;
                 ViewData["SearchCriteria"] = searchCriteria;
-                ViewData["ResultsCount"] = propertyDtos.Count;
+                ViewData["ResultsCount"] = propertyDtos.TotalItems;
             }
             else
             {
-                propertyDtos = await propertyService.GetAllPropertiesAsync();
+                propertyDtos = await propertyService.GetAllPropertiesAsync(1,10);
                 ViewData["SearchApplied"] = false;
-                ViewData["ResultsCount"] = propertyDtos.Count;
+                ViewData["ResultsCount"] = propertyDtos.TotalItems;
             }
 
             var userName = User.Identity?.Name;
@@ -78,7 +77,7 @@ namespace HomeEstate.Web.Controllers
 
             var mappedProperties = new List<PropertyViewModel>();
 
-            foreach (var p in propertyDtos)
+            foreach (var p in propertyDtos.Items)
             {
                 var vm = mapper.Map<PropertyViewModel>(p);
                 vm.IsFavorite = favoriteIds.Contains(p.Id);
@@ -89,7 +88,6 @@ namespace HomeEstate.Web.Controllers
             return View(mappedProperties);
         }
 
-        // New action for properties for sale
         [AllowAnonymous]
         public async Task<IActionResult> ForSale()
         {
@@ -100,7 +98,6 @@ namespace HomeEstate.Web.Controllers
             return await Index(searchCriteria);
         }
 
-        // New action for properties for rent
         [AllowAnonymous]
         public async Task<IActionResult> ForRent()
         {
@@ -112,7 +109,6 @@ namespace HomeEstate.Web.Controllers
         }
 
        
-        // Updated Add action
         public IActionResult Add()
         {
             var model = new AddAndUpdatePropertyViewModel
@@ -323,7 +319,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        // Existing actions remain the same...
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
@@ -392,16 +387,6 @@ namespace HomeEstate.Web.Controllers
             return Json(new { Success = true, Properties = allprop });
         }
 
-        private IEnumerable<SelectListItem> GetCategories()
-        {
-            return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Апартамент" },
-                new SelectListItem { Value = "2", Text = "Къща" },
-                new SelectListItem { Value = "3", Text = "Офис" },
-                new SelectListItem { Value = "4", Text = "Вила" }
-            };
-        }
         [HttpPost]
         public IActionResult ValidateRentalFields([FromBody] RentalValidationRequest request)
         {

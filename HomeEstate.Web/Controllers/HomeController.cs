@@ -29,8 +29,8 @@ namespace HomeEstate.Web.Controllers
             try
             {
                 // Вземане на всички имоти и взимане на първите 3
-                var allProperties = await propertyService.GetAllPropertiesAsync();
-                var featuredProperties = allProperties.Take(3).ToList();
+                var allProperties = await propertyService.GetAllPropertiesAsync(1,10);
+                var featuredProperties = allProperties.Items.Take(3).ToList();
 
                 // Мапване към ViewModel
                 var featuredViewModels = featuredProperties.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
