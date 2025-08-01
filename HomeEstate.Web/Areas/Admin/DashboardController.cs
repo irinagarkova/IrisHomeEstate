@@ -11,14 +11,20 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
     public class DashboardController : Controller
     {
         private readonly IApplicationUserService applicationUserService;
-        private readonly IPropertyService propertyService; // Assuming you have this
+        private readonly IPropertyService propertyService;
         private readonly IMapper mapper;
+        private readonly ILogger<DashboardController> logger;
 
-        public DashboardController(IApplicationUserService accountService, IPropertyService propertyService, IMapper mapper)
+        public DashboardController(
+            IApplicationUserService applicationUserService,
+            IPropertyService propertyService,
+            IMapper mapper,
+            ILogger<DashboardController> logger)
         {
-            this.applicationUserService = accountService;
+            this.applicationUserService = applicationUserService;
             this.propertyService = propertyService;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -29,15 +35,42 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                 {
                     TotalUsers = await applicationUserService.GetTotalUsersCount(),
                     TotalProperties = await propertyService.GetTotalPropertiesCount(),
+                    RecentUsers = mapper.Map<List<ApplicationUserViewModel>>(await applicationUserService.GetRecentUsers(5)),
                     RecentProperties = mapper.Map<List<PropertyViewModel>>(await propertyService.GetRecentProperties(5))
                 };
+
+                // Calculate monthly stats (you might want to add these methods to your services)
+                dashboardData.NewUsersThisMonth = 0; // Implement this in ApplicationUserService
+                dashboardData.NewPropertiesThisMonth = 0; // Implement this in PropertyService
 
                 return View(dashboardData);
             }
             catch (Exception ex)
             {
+                logger.LogError(ex, "Error loading admin dashboard");
                 TempData["Error"] = "Unable to load dashboard data.";
                 return View(new AdminDashboardViewModel());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardStats()
+        {
+            try
+            {
+                var stats = new
+                {
+                    totalUsers = await applicationUserService.GetTotalUsersCount(),
+                    totalProperties = await propertyService.GetTotalPropertiesCount(),
+                    // Add more stats as needed
+                };
+
+                return Json(new { success = true, data = stats });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting dashboard stats");
+                return Json(new { success = false, message = "Error loading stats" });
             }
         }
     }

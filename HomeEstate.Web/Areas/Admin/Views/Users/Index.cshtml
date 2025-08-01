@@ -1,0 +1,642 @@
+﻿@model AdminUsersViewModel
+
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="users-management">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Manage Users</h2>
+            <p class="text-muted">View and manage user accounts and roles</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" onclick="refreshUsers()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Users</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput"
+                               placeholder="Search by name, email..."
+                               value="@Model.SearchTerm">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Role</label>
+                    <select class="form-select" id="roleFilter" onchange="loadUsers(1)">
+                        <option value="">All Roles</option>
+                        @foreach (var role in Model.AvailableRoles)
+                        {
+                            <option value="@role" @(Model.RoleFilter == role ? "selected" : "")>@role</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Items per page</label>
+                    <select class="form-select" id="pageSizeSelect" onchange="loadUsers(1)">
+                        @foreach (var size in Model.PageSizes)
+                        {
+                            <option value="@size" @(Model.Users.PageSize == size ? "selected" : "")>@size</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Bulk Actions</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                            <i class="fas fa-trash"></i> Delete Selected
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearSelection()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Users List</h5>
+                <small class="text-muted" id="resultsInfo">
+                    Showing @Model.Users.Items.Count of @Model.Users.TotalItems users
+                </small>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                <label class="form-check-label" for="selectAll">
+                    Select All
+                </label>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading users...</p>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-responsive" id="usersTableContainer">
+                <table class="table table-hover mb-0" id="usersTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" class="form-check-input" id="headerCheckbox" onchange="toggleSelectAll()">
+                            </th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Roles</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        @foreach (var user in Model.Users.Items)
+                        {
+                            <tr data-user-id="@user.Id">
+                                <td>
+                                    <input type="checkbox" class="form-check-input user-checkbox"
+                                           value="@user.Id" onchange="toggleUserSelection('@user.Id')">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            <div class="avatar-circle bg-primary text-white">
+                                                @(user.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">@user.UserName</h6>
+                                            <small class="text-muted">ID: @user.Id.Substring(0, 8)...</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>@user.Email</span>
+                                </td>
+                                <td>
+                                    <span>@(user.PhoneNumber ?? "N/A")</span>
+                                </td>
+                                <td>
+                                    <div class="roles-container">
+                                        @if (user.Roles.Any())
+                                        {
+                                            @foreach (var role in user.Roles)
+                                            {
+                                                <span class="badge bg-@(role == "Admin" ? "danger" : "primary") me-1">@role</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No roles</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.Now)
+                                    {
+                                        <span class="badge bg-warning">Locked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@user.Id"
+                                           class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id"
+                                           class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit User">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="showDeleteModal('@user.Id', '@user.UserName')"
+                                                data-bs-toggle="tooltip" title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-5 d-none">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5>No Users Found</h5>
+                <p class="text-muted">No users match your current search criteria.</p>
+                <button class="btn btn-outline-primary" onclick="clearSearch()">
+                    Clear Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer" id="paginationContainer">
+            @if (Model.Users.TotalPages > 1)
+            {
+                <nav aria-label="Users pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        @if (Model.Users.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage - 1)); return false;">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @{
+                            var startPage = Math.Max(1, Model.Users.CurrentPage - 2);
+                            var endPage = Math.Min(Model.Users.TotalPages, Model.Users.CurrentPage + 2);
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.Users.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="#" onclick="loadUsers(@i); return false;">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.Users.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage + 1)); return false;">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user?</p>
+                <div id="deleteUserInfo"></div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone and will permanently delete the user account.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Bulk Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="bulkDeleteCount">0</span> selected users?</p>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone and will permanently delete all selected user accounts.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDeleteBtn">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        let currentPage = @Model.Users.CurrentPage;
+        let currentPageSize = @Model.Users.PageSize;
+        let currentSearchTerm = '@Model.SearchTerm';
+        let currentRoleFilter = '@Model.RoleFilter';
+        let selectedUsers = new Set();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize tooltips
+            initializeTooltips();
+
+            // Enter key search
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    searchUsers();
+                }
+            });
+
+            // Auto-search with debounce
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchUsers();
+                }, 500);
+            });
+        });
+
+        function initializeTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function loadUsers(page = 1) {
+            currentPage = page;
+            currentPageSize = document.getElementById('pageSizeSelect').value;
+            currentRoleFilter = document.getElementById('roleFilter').value;
+
+            showLoading(true);
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                pageSize: currentPageSize,
+                searchTerm: currentSearchTerm,
+                roleFilter: currentRoleFilter
+            });
+
+            fetch(`@Url.Action("LoadUsers", "Users", new { area = "Admin" })?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateUsersTable(data.data);
+                        updatePagination(data.pagination);
+                        updateResultsInfo(data.pagination);
+                        clearSelection();
+                    } else {
+                        showError('Error loading users');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error loading users');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function searchUsers() {
+            currentSearchTerm = document.getElementById('searchInput').value;
+            loadUsers(1);
+        }
+
+        function refreshUsers() {
+            loadUsers(currentPage);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            currentSearchTerm = '';
+            currentRoleFilter = '';
+            loadUsers(1);
+        }
+
+        function updateUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (users.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+
+            tbody.innerHTML = users.map(user => {
+                const roles = user.roles || [];
+                const rolesHtml = roles.length > 0
+                    ? roles.map(role => `<span class="badge bg-${role === 'Admin' ? 'danger' : 'primary'} me-1">${role}</span>`).join('')
+                    : '<span class="text-muted">No roles</span>';
+
+                return `
+                            <tr data-user-id="${user.id}">
+                                <td>
+                                    <input type="checkbox" class="form-check-input user-checkbox"
+                                           value="${user.id}" onchange="toggleUserSelection('${user.id}')">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            <div class="avatar-circle bg-primary text-white">
+                                                ${(user.userName || 'U').substring(0, 1).toUpperCase()}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">${user.userName || 'N/A'}</h6>
+                                            <small class="text-muted">ID: ${user.id.substring(0, 8)}...</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${user.email || 'N/A'}</td>
+                                <td>${user.phoneNumber || 'N/A'}</td>
+                                <td><div class="roles-container">${rolesHtml}</div></td>
+                                <td>
+                                    ${user.lockoutEnd && new Date(user.lockoutEnd) > new Date()
+                        ? '<span class="badge bg-warning">Locked</span>'
+                        : '<span class="badge bg-success">Active</span>'}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", "Users", new { area = "Admin" })/${user.id}"
+                                           class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Users", new { area = "Admin" })/${user.id}"
+                                           class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit User">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="showDeleteModal('${user.id}', '${user.userName}')"
+                                                data-bs-toggle="tooltip" title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+            }).join('');
+
+            // Reinitialize tooltips
+            initializeTooltips();
+        }
+
+        function updatePagination(pagination) {
+            // Similar to properties pagination logic
+            const container = document.getElementById('paginationContainer');
+
+            if (pagination.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            // Implement pagination HTML generation similar to properties
+            // ... (pagination logic here)
+        }
+
+        function updateResultsInfo(pagination) {
+            const info = document.getElementById('resultsInfo');
+            const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
+            const end = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems);
+            info.textContent = `Showing ${start}-${end} of ${pagination.totalItems} users`;
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const userId = checkbox.value;
+                if (selectAll.checked) {
+                    selectedUsers.add(userId);
+                } else {
+                    selectedUsers.delete(userId);
+                }
+            });
+
+            updateBulkActions();
+        }
+
+        function toggleUserSelection(userId) {
+            const checkbox = document.querySelector(`input[value="${userId}"]`);
+            if (checkbox.checked) {
+                selectedUsers.add(userId);
+            } else {
+                selectedUsers.delete(userId);
+            }
+
+            // Update select all checkbox
+            const allCheckboxes = document.querySelectorAll('.user-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+            const selectAll = document.getElementById('selectAll');
+
+            selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
+            selectAll.checked = checkedCheckboxes.length === allCheckboxes.length;
+
+            updateBulkActions();
+        }
+
+        function clearSelection() {
+            selectedUsers.clear();
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            document.getElementById('selectAll').indeterminate = false;
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            bulkDeleteBtn.disabled = selectedUsers.size === 0;
+        }
+
+        function showDeleteModal(userId, userName) {
+            document.getElementById('deleteUserInfo').innerHTML = `
+                        <strong>User:</strong> ${userName}<br>
+                        <strong>ID:</strong> ${userId}
+                    `;
+
+            document.getElementById('confirmDeleteBtn').onclick = () => deleteUser(userId);
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function deleteUser(userId) {
+            showLoading(true);
+
+            fetch(`@Url.Action("DeleteAjax", "Users", new { area = "Admin" })`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(userId)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                        loadUsers(currentPage);
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error deleting user');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function bulkDelete() {
+            if (selectedUsers.size === 0) return;
+
+            document.getElementById('bulkDeleteCount').textContent = selectedUsers.size;
+            document.getElementById('confirmBulkDeleteBtn').onclick = performBulkDelete;
+            new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
+        }
+
+        function performBulkDelete() {
+            showLoading(true);
+
+            fetch(`@Url.Action("BulkDelete", "Users", new { area = "Admin" })`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(Array.from(selectedUsers))
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        if (data.errors && data.errors.length > 0) {
+                            data.errors.forEach(error => showError(error));
+                        }
+                        bootstrap.Modal.getInstance(document.getElementById('bulkDeleteModal')).hide();
+                        clearSelection();
+                        loadUsers(currentPage);
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error performing bulk delete');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            const table = document.getElementById('usersTableContainer');
+
+            if (show) {
+                spinner.classList.remove('d-none');
+                table.style.opacity = '0.5';
+            } else {
+                spinner.classList.add('d-none');
+                table.style.opacity = '1';
+            }
+        }
+
+        function showSuccess(message) {
+            showToast(message, 'success');
+        }
+
+        function showError(message) {
+            showToast(message, 'danger');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1060';
+            toast.style.minWidth = '300px';
+            toast.innerHTML = `
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    const bsAlert = new bootstrap.Alert(toast);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+    </script>
+    @Html.AntiForgeryToken()
+}

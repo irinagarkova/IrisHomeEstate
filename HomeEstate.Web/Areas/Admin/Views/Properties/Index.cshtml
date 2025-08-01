@@ -1,0 +1,586 @@
+﻿@model HomeEstate.Web.Areas.Models.AdminPropertiesViewModel
+
+@{
+    ViewData["Title"] = "Manage Properties";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="properties-management">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Manage Properties</h2>
+            <p class="text-muted">View and manage all property listings</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" onclick="refreshProperties()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Properties</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput"
+                               placeholder="Search by title, location..."
+                               value="@Model.SearchTerm">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchProperties()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" id="sortSelect" onchange="loadProperties(1)">
+                        <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Newest First</option>
+                        <option value="oldest" @(Model.SortBy == "oldest" ? "selected" : "")>Oldest First</option>
+                        <option value="price-asc" @(Model.SortBy == "price-asc" ? "selected" : "")>Price: Low to High</option>
+                        <option value="price-desc" @(Model.SortBy == "price-desc" ? "selected" : "")>Price: High to Low</option>
+                        <option value="area-asc" @(Model.SortBy == "area-asc" ? "selected" : "")>Area: Small to Large</option>
+                        <option value="area-desc" @(Model.SortBy == "area-desc" ? "selected" : "")>Area: Large to Small</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Items per page</label>
+                    <select class="form-select" id="pageSizeSelect" onchange="loadProperties(1)">
+                        @foreach (var size in Model.PageSizes)
+                        {
+                            <option value="@size" @(Model.Properties.PageSize == size ? "selected" : "")>@size</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Bulk Actions</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                            <i class="fas fa-trash"></i> Delete Selected
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearSelection()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Properties List</h5>
+                <small class="text-muted" id="resultsInfo">
+                    Showing @Model.Properties.Items.Count of @Model.Properties.TotalItems properties
+                </small>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                <label class="form-check-label" for="selectAll">
+                    Select All
+                </label>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading properties...</p>
+            </div>
+
+            <!-- Properties Table -->
+            <div class="table-responsive" id="propertiesTableContainer">
+                <table class="table table-hover mb-0" id="propertiesTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" class="form-check-input" id="headerCheckbox" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Property</th>
+                            <th>Location</th>
+                            <th>Price</th>
+                            <th>Area</th>
+                            <th>Owner</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propertiesTableBody">
+                        @await Html.PartialAsync("_PropertiesTableRows", Model.Properties.Items)
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-5 d-none">
+                <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                <h5>No Properties Found</h5>
+                <p class="text-muted">No properties match your current search criteria.</p>
+                <button class="btn btn-outline-primary" onclick="clearSearch()">
+                    Clear Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer" id="paginationContainer">
+            @await Html.PartialAsync("_Pagination", Model.Properties)
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this property?</p>
+                <div id="deletePropertyInfo"></div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Property</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Bulk Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="bulkDeleteCount">0</span> selected properties?</p>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone and will permanently delete all selected properties.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDeleteBtn">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = @Model.Properties.CurrentPage;
+        let currentPageSize = @Model.Properties.PageSize;
+        let currentSearchTerm = '@Model.SearchTerm';
+        let currentSortBy = '@Model.SortBy';
+        let selectedProperties = new Set();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Enter key search
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    searchProperties();
+                }
+            });
+
+            // Auto-search with debounce
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchProperties();
+                }, 500);
+            });
+        });
+
+        function loadProperties(page = 1) {
+            currentPage = page;
+            currentPageSize = document.getElementById('pageSizeSelect').value;
+            currentSortBy = document.getElementById('sortSelect').value;
+
+            showLoading(true);
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                pageSize: currentPageSize,
+                searchTerm: currentSearchTerm,
+                sortBy: currentSortBy
+            });
+
+            fetch(`@Url.Action("LoadProperties", "Properties", new { area = "Admin" })?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updatePropertiesTable(data.data);
+                        updatePagination(data.pagination);
+                        updateResultsInfo(data.pagination);
+                        clearSelection();
+                    } else {
+                        showError('Error loading properties');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error loading properties');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function searchProperties() {
+            currentSearchTerm = document.getElementById('searchInput').value;
+            loadProperties(1);
+        }
+
+        function refreshProperties() {
+            loadProperties(currentPage);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            currentSearchTerm = '';
+            loadProperties(1);
+        }
+
+        function updatePropertiesTable(properties) {
+            const tbody = document.getElementById('propertiesTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (properties.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+
+            tbody.innerHTML = properties.map(property => `
+                        <tr data-property-id="${property.id}">
+                            <td>
+                                <input type="checkbox" class="form-check-input property-checkbox"
+                                       value="${property.id}" onchange="togglePropertySelection(${property.id})">
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="property-image me-3">
+                                        ${property.images && property.images.length > 0
+                    ? `<img src="${property.images[0].imageUrl}" alt="Property" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">`
+                    : `<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-home text-muted"></i></div>`
+                }
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${property.title}</h6>
+                                        <small class="text-muted">${property.category?.name || 'N/A'}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div>${property.location?.city || 'N/A'}</div>
+                                    <small class="text-muted">${property.location?.address || ''}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success">${Number(property.price).toLocaleString()}</span>
+                            </td>
+                            <td>
+                                <span>${property.area} m²</span>
+                            </td>
+                            <td>
+                                <div>
+                                    <div>${property.owner?.userName || 'N/A'}</div>
+                                    <small class="text-muted">${property.owner?.email || ''}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span>${new Date(property.createdOn).toLocaleDateString()}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="@Url.Action("Details", "Properties", new { area = "Admin" })/${property.id}"
+                                       class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="showDeleteModal(${property.id}, '${property.title}')"
+                                            data-bs-toggle="tooltip" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+
+            // Reinitialize tooltips for new content
+            const tooltipTriggerList = [].slice.call(tbody.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function updatePagination(pagination) {
+            const container = document.getElementById('paginationContainer');
+
+            if (pagination.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = '<nav><ul class="pagination justify-content-center mb-0">';
+
+            // Previous button
+            if (pagination.hasPreviousPage) {
+                paginationHtml += `
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadProperties(${pagination.currentPage - 1}); return false;">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        `;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>';
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, pagination.currentPage - 2);
+            const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="loadProperties(1); return false;">1</a></li>';
+                if (startPage > 2) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                            <li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="loadProperties(${i}); return false;">${i}</a>
+                            </li>
+                        `;
+            }
+
+            if (endPage < pagination.totalPages) {
+                if (endPage < pagination.totalPages - 1) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadProperties(${pagination.totalPages}); return false;">${pagination.totalPages}</a></li>`;
+            }
+
+            // Next button
+            if (pagination.hasNextPage) {
+                paginationHtml += `
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadProperties(${pagination.currentPage + 1}); return false;">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        `;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>';
+            }
+
+            paginationHtml += '</ul></nav>';
+            container.innerHTML = paginationHtml;
+        }
+
+        function updateResultsInfo(pagination) {
+            const info = document.getElementById('resultsInfo');
+            const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
+            const end = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems);
+            info.textContent = `Showing ${start}-${end} of ${pagination.totalItems} properties`;
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.property-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const propertyId = parseInt(checkbox.value);
+                if (selectAll.checked) {
+                    selectedProperties.add(propertyId);
+                } else {
+                    selectedProperties.delete(propertyId);
+                }
+            });
+
+            updateBulkActions();
+        }
+
+        function togglePropertySelection(propertyId) {
+            const checkbox = document.querySelector(`input[value="${propertyId}"]`);
+            if (checkbox.checked) {
+                selectedProperties.add(propertyId);
+            } else {
+                selectedProperties.delete(propertyId);
+            }
+
+            // Update select all checkbox
+            const allCheckboxes = document.querySelectorAll('.property-checkbox');
+            const checkedCheckboxes = document.querySelectorAll('.property-checkbox:checked');
+            const selectAll = document.getElementById('selectAll');
+
+            selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
+            selectAll.checked = checkedCheckboxes.length === allCheckboxes.length;
+
+            updateBulkActions();
+        }
+
+        function clearSelection() {
+            selectedProperties.clear();
+            document.querySelectorAll('.property-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            document.getElementById('selectAll').indeterminate = false;
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            bulkDeleteBtn.disabled = selectedProperties.size === 0;
+        }
+
+        function showDeleteModal(propertyId, propertyTitle) {
+            document.getElementById('deletePropertyInfo').innerHTML = `
+                        <strong>Property:</strong> ${propertyTitle}<br>
+                        <strong>ID:</strong> ${propertyId}
+                    `;
+
+            document.getElementById('confirmDeleteBtn').onclick = () => deleteProperty(propertyId);
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function deleteProperty(propertyId) {
+            showLoading(true);
+            debugger
+            let id = propertyId
+            fetch(`@Url.Action("DeleteAjax", "Properties", new { area = "Admin" })?id=${propertyId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                        loadProperties(currentPage);
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error deleting property');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function bulkDelete() {
+            if (selectedProperties.size === 0) return;
+
+            document.getElementById('bulkDeleteCount').textContent = selectedProperties.size;
+            document.getElementById('confirmBulkDeleteBtn').onclick = performBulkDelete;
+            new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
+        }
+
+        function performBulkDelete() {
+            showLoading(true);
+
+            fetch(`@Url.Action("BulkDelete", "Properties", new { area = "Admin" })`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(Array.from(selectedProperties))
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        bootstrap.Modal.getInstance(document.getElementById('bulkDeleteModal')).hide();
+                        clearSelection();
+                        loadProperties(currentPage);
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error performing bulk delete');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            const table = document.getElementById('propertiesTableContainer');
+
+            if (show) {
+                spinner.classList.remove('d-none');
+                table.style.opacity = '0.5';
+            } else {
+                spinner.classList.add('d-none');
+                table.style.opacity = '1';
+            }
+        }
+
+        function showSuccess(message) {
+            showToast(message, 'success');
+        }
+
+        function showError(message) {
+            showToast(message, 'danger');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1060';
+            toast.innerHTML = `
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+    </script>
+    @Html.AntiForgeryToken()
+}

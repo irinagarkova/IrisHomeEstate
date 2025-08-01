@@ -19,7 +19,7 @@
                 <h1>Find Your Dream Property</h1>
                 <p>Discover the perfect home from our extensive collection of properties for sale</p>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="/Property" class="btn">Browse Properties</a>
+                    <a href="/Property" class="browseProp">Browse Properties</a>
                 </div>
             </div>
             <div class="search-form">
@@ -47,7 +47,7 @@
                         </div>
                         <div class="form-group">
                             <label>Max Price</label>
-                            <input type="number" name="MaxPrice" placeholder="500000" min="0" step="1000">
+                            <input type="number" name="MaxPrice" placeholder="500000" min="0">
                         </div>
                         <div class="form-group">
                             <label>Property Size</label>
@@ -192,7 +192,7 @@
                 const maxPriceInput = document.querySelector('.search-form input[type="number"]');
 
                 if (listingType === '2') { // Rent
-                    if (maxPriceLabel) maxPriceLabel.textContent = 'Max Rent';
+                    if (maxPriceLabel) maxPriceLabel.textContent = 'Max Rent Price';
                     if (maxPriceInput) {
                         maxPriceInput.placeholder = '2000';
                         maxPriceInput.name = 'MaxRent';

@@ -19,7 +19,6 @@ namespace HomeEstate.Web.Mappings
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(l => l.Location))
                 .ForMember(dest => dest.Owner, opt => opt.Ignore());
 
-            //class 1 prop int Id  prop Address Address class2  2 prop int Id prop Address
             CreateMap<AddAndUpdatePropertyViewModel, PropertyDto>()
                  .ForMember(dest => dest.Images, opt => opt.Ignore()).ReverseMap();
 

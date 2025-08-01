@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="form-container">
-        
+
         <div class="form-header">
             <h1 class="form-title" id="formTitle">Добави имот</h1>
             <p class="form-subtitle">Попълнете всички задължителни полета</p>
@@ -39,14 +39,33 @@
                           placeholder="Опишете подробно вашия имот..."></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-
+            <div class="form-group">
+                <label class="form-label">
+                    Вид обява <span class="required">*</span>
+                </label>
+                <div class="type-selection">
+                    <div class="type-option">
+                        <input type="radio" id="sale" name="listingType" asp-for="ListingType" value="1" required>
+                        <label for="sale" class="type-label">Продажба</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="rent" name="listingType" asp-for="ListingType" value="2">
+                        <label for="rent" class="type-label">Наем</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="both" name="listingType" asp-for="ListingType" value="3">
+                        <label for="both" class="type-label">И двете</label>
+                    </div>
+                </div>
+            </div>
             <div class="form-row">
-                <div class="form-group">
+                <!-- Поле за цена - ще се скрива при наем -->
+                <div class="form-group" id="priceField">
                     <label class="form-label" for="price">
                         Цена (лв.) <span class="required">*</span>
                     </label>
                     <input type="number" id="price" name="price" asp-for="Price" class="form-input" required
-                           placeholder="150000" min="0" step="1000">
+                           placeholder="150000" min="0">
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -54,7 +73,7 @@
                         Площ (кв.м.) <span class="required">*</span>
                     </label>
                     <input type="number" id="area" name="area" asp-for="Area" class="form-input" required
-                           placeholder="85" min="1" step="0.1">
+                           placeholder="85" min="1">
                     <span asp-validation-for="Area" class="text-danger"></span>
                 </div>
             </div>
@@ -84,35 +103,17 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">
-                    Вид обява <span class="required">*</span>
-                </label>
-                <div class="type-selection">
-                    <div class="type-option">
-                        <input type="radio" id="sale" name="listingType" asp-for="ListingType" value="1" required>
-                        <label for="sale" class="type-label">Продажба</label>
-                    </div>
-                    <div class="type-option">
-                        <input type="radio" id="rent" name="listingType" asp-for="ListingType" value="2">
-                        <label for="rent" class="type-label">Наем</label>
-                    </div>
-                    <div class="type-option">
-                        <input type="radio" id="both" name="listingType" asp-for="ListingType" value="3">
-                        <label for="both" class="type-label">И двете</label>
-                    </div>
-                </div>
-            </div>
+           
 
             <!-- Полета за наем (показват се само при избор на наем) -->
             <div id="rentalFields" style="display: none;">
                 <div class="form-row-three">
                     <div class="form-group">
                         <label class="form-label" for="monthlyRent">
-                            Месечен наем (лв.)
+                            Месечен наем (лв.) <span class="required rent-required" style="display: none;">*</span>
                         </label>
                         <input type="number" id="monthlyRent" asp-for="MonthlyRent" class="form-input"
-                               placeholder="1200" min="0" step="50">
+                               placeholder="1200" min="0">
                         <span asp-validation-for="MonthlyRent" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -120,7 +121,7 @@
                             Депозит (лв.)
                         </label>
                         <input type="number" id="securityDeposit" asp-for="SecurityDeposit" class="form-input"
-                               placeholder="2400" min="0" step="100">
+                               placeholder="2400" min="0">
                         <span asp-validation-for="SecurityDeposit" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -206,30 +207,57 @@
             </div>
         </form>
     </div>
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
-    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+</body>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Show/hide rental fields based on current selection
-            function toggleRentalFields() {
-                const rentalFields = document.getElementById('rentalFields');
-                const rentRadio = document.getElementById('rent');
-                const bothRadio = document.getElementById('both');
+            const priceField = document.getElementById('priceField');
+            const rentalFields = document.getElementById('rentalFields');
+            const priceInput = document.getElementById('price');
+            const monthlyRentInput = document.getElementById('monthlyRent');
+            const saleRadio = document.getElementById('sale');
+            const rentRadio = document.getElementById('rent');
+            const bothRadio = document.getElementById('both');
 
-                if (rentalFields && rentRadio && bothRadio) {
-                    if (rentRadio.checked || bothRadio.checked) {
-                        rentalFields.style.display = 'block';
-                    } else {
-                        rentalFields.style.display = 'none';
-                    }
+            // Function to toggle fields based on listing type
+            function toggleFields() {
+                if (saleRadio.checked) {
+                    // Продажба - показва цена, скрива наем
+                    priceField.style.display = 'block';
+                    rentalFields.style.display = 'none';
+                    priceInput.required = true;
+                    monthlyRentInput.required = false;
+
+                    // Show price required asterisk, hide rent required
+                    document.querySelector('.rent-required').style.display = 'none';
+
+                } else if (rentRadio.checked) {
+                    // Наем - скрива цена, показва наем
+                    priceField.style.display = 'none';
+                    rentalFields.style.display = 'block';
+                    priceInput.required = false;
+                    monthlyRentInput.required = true;
+
+                    // Show rent required asterisk
+                    document.querySelector('.rent-required').style.display = 'inline';
+
+                } else if (bothRadio.checked) {
+                    // И двете - показва всичко
+                    priceField.style.display = 'block';
+                    rentalFields.style.display = 'block';
+                    priceInput.required = true;
+                    monthlyRentInput.required = true;
+
+                    // Show rent required asterisk
+                    document.querySelector('.rent-required').style.display = 'inline';
                 }
             }
 
-            // Event listeners for listing type
+            // Event listeners for listing type changes
             document.querySelectorAll('input[name="listingType"]').forEach(radio => {
-                radio.addEventListener('change', toggleRentalFields);
+                radio.addEventListener('change', toggleFields);
             });
 
             // File upload feedback
@@ -249,13 +277,55 @@
                 });
             }
 
-            // Initialize rental fields display
-            toggleRentalFields();
+            // Form validation before submit
+            document.getElementById('propertyForm').addEventListener('submit', function (e) {
+                const listingType = document.querySelector('input[name="listingType"]:checked');
+
+                if (!listingType) {
+                    e.preventDefault();
+                    alert('Моля изберете вид обява!');
+                    return false;
+                }
+
+                // Validate based on listing type
+                if (listingType.value === '1') { // Sale
+                    if (!priceInput.value || priceInput.value <= 0) {
+                        e.preventDefault();
+                        alert('Моля въведете валидна цена за продажба!');
+                        priceInput.focus();
+                        return false;
+                    }
+                } else if (listingType.value === '2') { // Rent
+                    if (!monthlyRentInput.value || monthlyRentInput.value <= 0) {
+                        e.preventDefault();
+                        alert('Моля въведете валиден месечен наем!');
+                        monthlyRentInput.focus();
+                        return false;
+                    }
+                } else if (listingType.value === '3') { // Both
+                    if (!priceInput.value || priceInput.value <= 0) {
+                        e.preventDefault();
+                        alert('Моля въведете валидна цена за продажба!');
+                        priceInput.focus();
+                        return false;
+                    }
+                    if (!monthlyRentInput.value || monthlyRentInput.value <= 0) {
+                        e.preventDefault();
+                        alert('Моля въведете валиден месечен наем!');
+                        monthlyRentInput.focus();
+                        return false;
+                    }
+                }
+            });
+
+            // Initialize fields display on page load
+            toggleFields();
         });
 
         // Reset form function
         function resetForm() {
             document.getElementById('propertyForm').reset();
+            document.getElementById('priceField').style.display = 'block';
             document.getElementById('rentalFields').style.display = 'none';
 
             const fileLabel = document.querySelector('.file-upload-label');

@@ -211,10 +211,16 @@ namespace HomeEstate.Services.Core.Services
             return total;
         }
 
-        public async Task<List<ApplicationUser>> GetRecentUsers(int count)
+        public async Task<List<ApplicationUserDto>> GetRecentUsers(int count)
         {
-            var recentUsers = await dbContext.Users.TakeLast(count).ToListAsync();
-            return recentUsers;
+            var recentUsers = await dbContext.Users.ToListAsync();
+            var users = new List<ApplicationUser>();
+            for (int i = recentUsers.Count - 1; i > recentUsers.Count - count; i--)
+            {
+                users.Add(recentUsers[i]);
+            }
+            var mapped = mapper.Map<List<ApplicationUserDto>>(users);
+            return mapped;
         }
         public async Task<PaginatedDto<ApplicationUserWithRoleDto>> GetAllUsersWithRolesAsync(int page, int pageSize)
         {
