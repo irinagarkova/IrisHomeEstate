@@ -1,4 +1,5 @@
-﻿@using HomeEstate.Services.Core.Dtos
+﻿@using HomeEstate.Data.Models.Enum
+@using HomeEstate.Services.Core.Dtos
 @model ICollection<PropertyViewModel>
 
 @{
@@ -36,6 +37,10 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h4 class="mb-3">Search Properties</h4>
+                    <div class="search-tabs">
+                        <button type="button" class="tab active" data-listing-type="1">Buy</button>
+                        <button type="button" class="tab" data-listing-type="2">Rent</button>
+                    </div>
                     <form id="searchForm" class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Location</label>
@@ -51,6 +56,16 @@
                                 <option value="3" >Office</option>
                                 <option value="4" >Villa</option>
                             </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Property Size</label>
+                            <select class="form-select">
+                            <option value="">Any Size</option>
+                            <option value="1">1 Bedroom</option>
+                            <option value="2">2 Bedrooms</option>
+                            <option value="3">3 Bedrooms</option>
+                            <option value="4">4+ Bedrooms</option>
+                        </select>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Max Price</label>
@@ -122,11 +137,23 @@
                                 <img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">
                             }
 
-                            <!-- Property Badge -->
+                            <!-- Property Badge - Fixed Logic -->
                             <div class="position-absolute top-0 start-0 m-2">
-                                <span class="badge bg-primary">For Sale</span>
-                                <span class="badge bg-primary">For Rent</span>
+                                @if (property.ListingType == PropertyListingType.Sale)
+                                {
+                                    <span class="badge bg-success">For Sale</span>
+                                }
+                                else if (property.ListingType == PropertyListingType.Rent)
+                                {
+                                    <span class="badge bg-info">For Rent</span>
+                                }
+                                else if (property.ListingType == PropertyListingType.Both)
+                                {
+                                    <span class="badge bg-success me-1">For Sale</span>
+                                    <span class="badge bg-info">For Rent</span>
+                                }
                             </div>
+
 
                             <!-- Favorite Button -->
                             @if (User.Identity.IsAuthenticated)

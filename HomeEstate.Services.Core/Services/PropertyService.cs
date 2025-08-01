@@ -320,7 +320,6 @@ namespace HomeEstate.Services.Core.Services
             };
 
             var properties = await query.ToListAsync();
-            Console.WriteLine($"Final result: {properties.Count} properties");
 
             var result = properties.Select(p =>
             {
@@ -465,8 +464,13 @@ namespace HomeEstate.Services.Core.Services
 
         public async Task<List<PropertyDto>> GetRecentProperties(int count)
         {
-            var properties = await dbContext.Properties.TakeLast(count).ToListAsync();
-            var mapped = mapper.Map<List<PropertyDto>>(properties);
+
+            var properties = await dbContext.Properties.ToListAsync();
+            var mapped = new List<PropertyDto>();
+            for (int i = properties.Count - 1; i > properties.Count - count; i--)
+            {
+                mapped.Add(mapper.Map<PropertyDto>(properties[i]));
+            }
             return mapped;
         }
     }

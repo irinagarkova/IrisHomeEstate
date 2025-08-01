@@ -4,188 +4,271 @@
 @{
     ViewData["Title"] = Model.Title;
 }
+
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/css/detailsPage.css" asp-append-version="true" />
+    <title>@ViewData["Title"] - HomeEstate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/detailsPage.css">
+
 </head>
-<div class="property-details">
-    <!-- Hero Section with Images -->
+<body>
+    <!-- Breadcrumb -->
+    <div class="container">
+        <nav aria-label="breadcrumb" class="breadcrumb-custom">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Property">Properties</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
     <div class="hero-section">
-        <div class="container-fluid px-0">
-            <div class="row g-0">
+        <div class="container">
+            <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <div class="main-image-container">
-                        @if (Model.Images.Any())
-                        {
-                            <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    @for (int i = 0; i < Model.Images.Count; i++)
-                                    {
-                                        <div class="carousel-item @(i == 0 ? "active" : "")">
-                                            <img src="@Model.Images[i]" class="d-block w-100 property-main-image" alt="Property Image @(i + 1)">
-                                        </div>
-                                    }
-                                </div>
-                                @if (Model.Images.Count > 1)
-                                {
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon"></span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon"></span>
-                                    </button>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="no-image-placeholder">
-                                <i class="fas fa-home fa-4x text-muted"></i>
-                                <p class="text-muted mt-3">Няма налични снимки</p>
-                            </div>
-                        }
+                    <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-light text-primary fs-6">@Model.CategoryName</span>
+                        <span><i class="fas fa-map-marker-alt"></i> @Model.LocationName</span>
+                        <span><i class="fas fa-calendar"></i> Listed @Model.CreatedOn.ToString("MMM dd, yyyy")</span>
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="property-summary-card">
-                        <div class="price-section">
-                            @if (Model.ListingType == PropertyListingType.Sale)
-                            {
-                                <div class="price">@Model.Price.ToString("C0")</div>
-                                <div class="listing-type">За продажба</div>
-                            }
-                            else
-                            {
-                                <div class="price">@Model.MonthlyRent?.ToString("C0")/месец</div>
-                                <div class="listing-type">За наем</div>
-                            }
-                        </div>
-                        
-                        <div class="property-quick-info">
-                            <div class="info-item">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>@Model.Area м²</span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>@Model.LocationName</span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fas fa-tag"></i>
-                                <span>@Model.CategoryName</span>
-                            </div>
-                        </div>
-
-                        @if (Model.ListingType == PropertyListingType.Rent)
-                        {
-                            <div class="rental-details">
-                                @if (Model.SecurityDeposit.HasValue)
-                                {
-                                    <div class="rental-item">
-                                        <span class="label">Депозит:</span>
-                                        <span class="value">@Model.SecurityDeposit.Value.ToString("C0")</span>
-                                    </div>
-                                }
-                                @if (Model.MinimumLeasePeriod.HasValue)
-                                {
-                                    <div class="rental-item">
-                                        <span class="label">Мин. период:</span>
-                                        <span class="value">@Model.MinimumLeasePeriod месеца</span>
-                                    </div>
-                                }
-                                @if (Model.AvailableFrom.HasValue)
-                                {
-                                    <div class="rental-item">
-                                        <span class="label">Свободен от:</span>
-                                        <span class="value">@Model.AvailableFrom.Value.ToString("dd.MM.yyyy")</span>
-                                    </div>
-                                }
-                            </div>
-                        }
-
-                        <div class="property-features">
-                            @if (Model.IsFurnished)
-                            {
-                                <span class="feature-badge"><i class="fas fa-couch"></i> Обзаведен</span>
-                            }
-                            @if (Model.IsParking)
-                            {
-                                <span class="feature-badge"><i class="fas fa-car"></i> Паркинг</span>
-                            }
-                            @if (Model.PetsAllowed && Model.ListingType == PropertyListingType.Rent)
-                            {
-                                <span class="feature-badge"><i class="fas fa-paw"></i> Домашни любимци</span>
-                            }
-                        </div>
-
-                        <div class="contact-section">
-                            <button class="btn btn-primary btn-lg w-100 mb-3">
-                                <i class="fas fa-phone me-2"></i>Свържи се
-                            </button>
-                            <button class="btn btn-outline-primary w-100">
-                                <i class="fas fa-heart me-2"></i>Запази в любими
-                            </button>
-                        </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="d-flex gap-2 justify-content-lg-end">
+                        <button class="btn btn-outline-light" onclick="shareProperty()">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                        <button class="btn btn-outline-light">
+                            <i class="fas fa-heart"></i> Save
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Property Details Section -->
-    <div class="container my-5">
+    <div class="container">
         <div class="row">
+            <!-- Main Content -->
             <div class="col-lg-8">
-                <div class="property-content">
-                    <div class="property-header mb-4">
-                        <h1>@Model.Title</h1>
-                        <div class="property-meta">
-                            <span class="owner">
-                                <i class="fas fa-user"></i>
-                                Собственик: @Model.OwnerFullName
-                            </span>
-                            <span class="date">
-                                <i class="fas fa-calendar"></i>
-                                Публикувано: @Model.CreatedOn.ToString("dd.MM.yyyy")
-                            </span>
+                <!-- Image Gallery -->
+                <div class="property-gallery">
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < Model.Images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@Model.Images[i].ImageUrl" class="d-block w-100 main-image" alt="Property Image @(i + 1)">
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.Images.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            }
                         </div>
-                    </div>
 
-                    <div class="description-section">
-                        <h3>Описание</h3>
-                        <div class="description-content">
-                            @Html.Raw(Model.Description.Replace("\n", "<br>"))
+                        <!-- Thumbnail Gallery -->
+                        @if (Model.Images.Count > 1)
+                        {
+                            <div class="thumbnail-gallery">
+                                @for (int i = 0; i < Math.Min(Model.Images.Count, 6); i++)
+                                {
+                                    <img src="@Model.Images[i].ImageUrl" 
+                                         class="thumbnail @(i == 0 ? "active" : "")" 
+                                         alt="Thumbnail @(i + 1)"
+                                         onclick="changeMainImage(@i)">
+                                }
+                                @if (Model.Images.Count > 6)
+                                {
+                                    <div class="thumbnail d-flex align-items-center justify-content-center bg-secondary text-white">
+                                        +@(Model.Images.Count - 6)
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-home fa-4x mb-3"></i>
+                            <h5>No images available</h5>
                         </div>
+                    }
+                </div>
+
+                <!-- Property Description -->
+                <div class="description-card">
+                    <h3 class="mb-4"><i class="fas fa-file-alt me-2"></i>Description</h3>
+                    <div class="fs-6 lh-lg">
+                        @Html.Raw(Model.Description.Replace("\n", "<br>"))
                     </div>
                 </div>
+
+                <!-- Property Features -->
+                <div class="property-card">
+                    <div class="property-info">
+                        <h3 class="mb-4"><i class="fas fa-star me-2"></i>Property Features</h3>
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Area</div>
+                                    <div class="text-muted">@Model.Area m²</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Property Type</div>
+                                    <div class="text-muted">@Model.CategoryName</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Location</div>
+                                    <div class="text-muted">@Model.LocationName</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Owner</div>
+                                    <div class="text-muted">@Model.OwnerFullName</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feature Badges -->
+                        <div class="feature-badges">
+                            @if (Model.IsFurnished)
+                            {
+                                <span class="feature-badge success">
+                                    <i class="fas fa-couch"></i> Furnished
+                                </span>
+                            }
+                            @if (Model.IsParking)
+                            {
+                                <span class="feature-badge">
+                                    <i class="fas fa-car"></i> Parking Available
+                                </span>
+                            }
+                            @if (Model.PetsAllowed && Model.ListingType == PropertyListingType.Rent)
+                            {
+                                <span class="feature-badge warning">
+                                    <i class="fas fa-paw"></i> Pet Friendly
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div> 
             </div>
 
+            <!-- Sidebar -->
             <div class="col-lg-4">
-                <!-- Thumbnail gallery for mobile/tablet -->
-                @if (Model.Images.Count > 1)
-                {
-                    <div class="thumbnail-gallery d-lg-block d-none">
-                        <h5>Всички снимки (@Model.Images.Count)</h5>
-                        <div class="thumbnails-grid">
-                            @for (int i = 0; i < Math.Min(Model.Images.Count, 8); i++)
+                <!-- Price Section -->
+                <div class="property-card">
+                    <div class="price-section">
+                        @if (Model.ListingType == PropertyListingType.Sale)
+                        {
+                            <div class="price-main">@Model.Price.ToString("C0")</div>
+                            <div class="price-subtitle">For Sale</div>
+                        }
+                        else if (Model.ListingType == PropertyListingType.Rent)
+                        {
+                            <div class="price-main">@Model.MonthlyRent?.ToString("C0")</div>
+                            <div class="price-subtitle">Per Month</div>
+                        }
+                        else
+                        {
+                            <div class="price-main">@Model.Price.ToString("C0")</div>
+                            <div class="price-subtitle">Sale Price</div>
+                            @if (Model.MonthlyRent.HasValue)
                             {
-                                <div class="thumbnail-item" data-bs-target="#propertyCarousel" data-bs-slide-to="@i">
-                                    <img src="@Model.Images[i]" alt="Thumbnail @(i + 1)">
-                                    @if (i == 7 && Model.Images.Count > 8)
-                                    {
-                                        <div class="thumbnail-overlay">
-                                            <span>+@(Model.Images.Count - 8)</span>
-                                        </div>
-                                    }
+                                <div class="mt-2">
+                                    <div class="fs-5">@Model.MonthlyRent.Value.ToString("C0")/month</div>
+                                    <div class="small">Also available for rent</div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Rental Details (if applicable) -->
+                @if (Model.ListingType == PropertyListingType.Rent || Model.ListingType == PropertyListingType.Both)
+                {
+                    <div class="rental-details">
+                        <h4 class="mb-3"><i class="fas fa-key me-2"></i>Rental Information</h4>
+                        <div class="rental-grid">
+                            @if (Model.SecurityDeposit.HasValue)
+                            {
+                                <div class="rental-item">
+                                    <div class="fw-bold">Security Deposit</div>
+                                    <div>@Model.SecurityDeposit.Value.ToString("C0")</div>
+                                </div>
+                            }
+                            @if (Model.MinimumLeasePeriod.HasValue)
+                            {
+                                <div class="rental-item">
+                                    <div class="fw-bold">Min. Lease Period</div>
+                                    <div>@Model.MinimumLeasePeriod months</div>
+                                </div>
+                            }
+                            @if (Model.AvailableFrom.HasValue)
+                            {
+                                <div class="rental-item">
+                                    <div class="fw-bold">Available From</div>
+                                    <div>@Model.AvailableFrom.Value.ToString("MMM dd, yyyy")</div>
                                 </div>
                             }
                         </div>
                     </div>
                 }
-            </div>
+
+                <!-- Contact Section -->
+                <div class="contact-section">
+                    <h4 class="mb-3"><i class="fas fa-phone me-2"></i>Contact Owner</h4>
+                    <p class="mb-4">Interested in this property? Get in touch with the owner.</p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="tel:+359881234567" class="btn-custom btn-success">
+                            <i class="fas fa-phone"></i> Call Now
+                        </a>
+                        <a href="mailto:info@homeestate.com" class="btn-custom">
+                            <i class="fas fa-envelope"></i> Send Email
+                        </a>
+                        <button class="btn-custom" onclick="shareProperty()">
+                            <i class="fas fa-share-alt"></i> Share Property
+                        </button>
+                    </div>
+                </div>
         </div>
     </div>
 
@@ -193,10 +276,10 @@
     <div class="similar-properties-section bg-light py-5">
         <div class="container">
             <div class="section-header text-center mb-5">
-                <h2>Подобни имоти</h2>
+                <h2>Similar Properties</h2>
                 <p class="text-muted">Други имоти, които може да ви интересуват</p>
             </div>
-            
+
             <div class="row" id="similarProperties">
                 <!-- Similar properties will be loaded here via AJAX -->
                 <!-- Placeholder cards for demo -->
@@ -213,7 +296,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="property-card">
                         <div class="property-image">
@@ -227,7 +310,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="property-card">
                         <div class="property-image">
@@ -241,7 +324,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="property-card">
                         <div class="property-image">
@@ -256,41 +339,234 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="text-center mt-4">
                 <a href="#" class="btn btn-outline-primary">Виж още подобни имоти</a>
             </div>
         </div>
     </div>
-</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeMainImage(index) {
+            // Remove active class from all thumbnails
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            
+            // Add active class to clicked thumbnail
+            document.querySelectorAll('.thumbnail')[index].classList.add('active');
+            
+            // Change carousel to selected image
+            const carousel = new bootstrap.Carousel(document.getElementById('propertyCarousel'));
+            carousel.to(index);
+        }
+        function shareProperty() {
+            const propertyData = {
+                title: '@Model.Title',
+                text: `Check out this amazing property: @Model.Title in @Model.LocationName. Price: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))`,
+                url: window.location.href
+            };
+
+            // Check if Web Share API is supported
+            if (navigator.share) {
+                navigator.share(propertyData)
+                    .then(() => {
+                        showNotification('Property shared successfully!', 'success');
+                    })
+                    .catch((error) => {
+                        console.log('Error sharing:', error);
+                        fallbackShare();
+                    });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                fallbackShare();
+            }
+        }
+
+        function fallbackShare() {
+            // Create a modal with sharing options
+            const shareModal = document.getElementById('shareModal');
+            if (!shareModal) {
+                createShareModal();
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+            modal.show();
+        }
+
+        function createShareModal() {
+            const modalHTML = `
+                        <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+                                    <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                                        <h5 class="modal-title" id="shareModalLabel">
+                                            <i class="fas fa-share-alt me-2"></i>Share Property
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <h6 class="mb-3">Share via Social Media</h6>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <button onclick="shareToFacebook()" class="btn w-100 p-3" style="background: #1877F2; color: white; border-radius: 15px;">
+                                                    <i class="fab fa-facebook-f fa-lg mb-2 d-block"></i>
+                                                    <small>Facebook</small>
+                                                </button>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <button onclick="shareToTwitter()" class="btn w-100 p-3" style="background: #1DA1F2; color: white; border-radius: 15px;">
+                                                    <i class="fab fa-twitter fa-lg mb-2 d-block"></i>
+                                                    <small>Twitter</small>
+                                                </button>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <button onclick="shareToWhatsApp()" class="btn w-100 p-3" style="background: #25D366; color: white; border-radius: 15px;">
+                                                    <i class="fab fa-whatsapp fa-lg mb-2 d-block"></i>
+                                                    <small>WhatsApp</small>
+                                                </button>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <button onclick="shareViaEmail()" class="btn w-100 p-3" style="background: #EA4335; color: white; border-radius: 15px;">
+                                                    <i class="fas fa-envelope fa-lg mb-2 d-block"></i>
+                                                    <small>Email</small>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <div>
+                                            <h6 class="mb-3">Copy Link</h6>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="shareUrl" value="${window.location.href}" readonly style="border-radius: 15px 0 0 15px; border: 2px solid #e9ecef;">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()" style="border-radius: 0 15px 15px 0; border: 2px solid #e9ecef; border-left: none;">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                            <small class="text-muted">Click the copy button to copy the link to your clipboard</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function shareToFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent('@Model.Title - @Model.LocationName');
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
+        }
+
+        function shareToTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent(`Check out this amazing property: @Model.Title in @Model.LocationName! 🏠✨`);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
+        }
+
+        function shareToWhatsApp() {
+            const text = encodeURIComponent(`Check out this property: @Model.Title in @Model.LocationName\n${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareViaEmail() {
+            const subject = encodeURIComponent(`Property Recommendation: @Model.Title`);
+            const body = encodeURIComponent(`Hi,\n\nI found this amazing property that might interest you:\n\n@Model.Title\nLocation: @Model.LocationName\nPrice: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))\n\nCheck it out here: ${window.location.href}\n\nBest regards`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function copyToClipboard() {
+            const urlInput = document.getElementById('shareUrl');
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand('copy');
+                showNotification('Link copied to clipboard!', 'success');
+
+                // Change button text temporarily
+                const copyBtn = event.target.closest('button');
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                copyBtn.classList.add('btn-success');
+                copyBtn.classList.remove('btn-outline-secondary');
+
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalHTML;
+                    copyBtn.classList.remove('btn-success');
+                    copyBtn.classList.add('btn-outline-secondary');
+                }, 2000);
+
+            } catch (err) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showNotification('Link copied to clipboard!', 'success');
+                }).catch(() => {
+                    showNotification('Could not copy link. Please copy manually.', 'error');
+                });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+            notification.style.cssText = `
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        min-width: 300px;
+                        border-radius: 15px;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                        animation: slideInRight 0.5s ease-out;
+                    `;
+            notification.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                    `;
+
+            document.body.appendChild(notification);
+
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease-out';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
+        }
 
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize carousel
-    var carousel = new bootstrap.Carousel(document.getElementById('propertyCarousel'), {
-        interval: false
-    });
-    
-    // Thumbnail click handling
-    document.querySelectorAll('.thumbnail-item').forEach(function(thumbnail) {
-        thumbnail.addEventListener('click', function() {
-            var slideIndex = this.getAttribute('data-bs-slide-to');
-            carousel.to(parseInt(slideIndex));
+        function requestTour() {
+            alert('Tour request functionality would be implemented here');
+        }
+
+        function calculateMortgage() {
+            alert('Mortgage calculator would be implemented here');
+        }
+
+
+        function reportProperty() {
+            alert('Report listing functionality would be implemented here');
+        }
+
+        // Initialize carousel
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = new bootstrap.Carousel(document.getElementById('propertyCarousel'), {
+                interval: false // Disable auto-advance
+            });
         });
-    });
-    
-    // Load similar properties (replace with actual AJAX call)
-    // loadSimilarProperties();
-});
-
-// function loadSimilarProperties() {
-//     // This would be an AJAX call to your controller
-//     // Example:
-//     // fetch('/Property/GetSimilarProperties?id=' + propertyId)
-//     //     .then(response => response.json())
-//     //     .then(data => {
-//     //         // Populate similar properties
-//     //     });
-// }
-</script>
+    </script>
+</body>
+</html>

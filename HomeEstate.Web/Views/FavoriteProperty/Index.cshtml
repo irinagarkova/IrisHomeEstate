@@ -1,41 +1,269 @@
 ﻿@model ICollection<PropertyViewModel>
 
 @{
-    ViewData["Title"] = "Yours Favorite";
+    ViewData["Title"] = "My Favorite Properties";
 }
 
-<h1 class="text-center">@ViewData["Title"]</h1>
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/myFavorite.css">
+</head>
+<body>
+    <div class="favorites-container">
+        <!-- Header -->
+        <div class="favorites-header">
+            <h1 class="favorites-title"> My Favorite Properties</h1>
+            <p class="favorites-subtitle">Your curated collection of dream properties</p>
+        </div>
 
-@if (!Model.Any())
-{
-    <p class="text-center">Няма налични имоти.</p>
-}
-else
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var property in Model)
+        @if (Model.Any())
         {
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">@property.Title</h5>
-                        <p class="card-text">
-                            <strong>ID:</strong> @property.Id <br />
-                            <strong>Description:</strong> @property.Description <br />
-                            <strong>Price:</strong> @property.Price.ToString("C") <br />
-                            <strong>Area:</strong> @property.Area m²<br />
-                            <strong>Created On:</strong> @property.CreatedOn.ToShortDateString() <br />
-                        </p>
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stats-content">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.Count()</h3>
+                            <p>Favorite Properties</p>
+                        </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between">
-                        <a asp-controller="Property" asp-action="Details" asp-route-id="@property.Id" class="btn btn-primary">View Details</a>
-                        <form asp-controller="FavoriteProperty" asp-action="Remove" method="post">
-                            <input type="hidden" name="id" value="@property.Id" />
-                            <button type="submit" class="btn btn-danger">Remove from Favorite</button>
-                        </form>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.Sum(p => p.Price).ToString("C0")</h3>
+                            <p>Total Value</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@((Model.Sum(p => p.Price) / Model.Count()).ToString("C0"))</h3>
+                            <p>Average Price</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>@Model.Sum(p => p.Area) m²</h3>
+                            <p>Total Area</p>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-content">
+                    <div class="filter-item">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="search-box" placeholder="Search properties..." id="searchInput">
+                    </div>
+                    <div class="filter-item">
+                        <i class="fas fa-filter"></i>
+                        <select class="filter-select" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="House">House</option>
+                            <option value="Office">Office</option>
+                            <option value="Villa">Villa</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <i class="fas fa-sort"></i>
+                        <select class="filter-select" id="sortBy">
+                            <option value="newest">Newest First</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="area-large">Area: Largest First</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Properties Grid -->
+            <div class="properties-grid" id="propertiesContainer">
+                @foreach (var property in Model)
+                {
+                    <div class="property-card" data-category="@property.Category?.Name" data-price="@property.Price" data-area="@property.Area" data-title="@property.Title.ToLower()">
+                        <div class="property-image">
+                            @if (property.Images != null && property.Images.Any())
+                            {
+                                <img src="@property.Images.First().ImageUrl" alt="@property.Title" onerror="this.src='/images/no-image.png'">
+                            }
+                            else
+                            {
+                                <img src="/images/no-image.png" alt="No image available">
+                            }
+
+                            <div class="favorite-badge">
+                                <i class="fas fa-heart"></i>
+                            </div>
+
+                            @if (property.Category != null)
+                            {
+                                <div class="property-type-badge">
+                                    @property.Category.Name
+                                </div>
+                            }
+                        </div>
+
+                        <div class="property-content">
+                            <h3 class="property-title">@property.Title</h3>
+                            <div class="property-price">@property.Price.ToString("C0")</div>
+
+                            <div class="property-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-expand-arrows-alt"></i>
+                                    </div>
+                                    <span>@property.Area m²</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <span>@(property.Location?.City ?? "Unknown")</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-bed"></i>
+                                    </div>
+                                    <span>@property.PropertyType</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-calendar"></i>
+                                    </div>
+                                    <span>@property.CreatedOn.ToString("dd.MM.yyyy")</span>
+                                </div>
+                            </div>
+
+                            <div class="property-actions">
+                                <a href="/Property/Details/@property.Id" class="btn-view">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </a>
+                                <form asp-controller="FavoriteProperty" asp-action="Remove" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@property.Id" />
+                                    <button type="submit" class="btn-remove" onclick="return confirmRemove('@property.Title')">
+                                        <i class="fas fa-heart-broken"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-heart-broken"></i>
+                </div>
+                <h2 class="empty-title">No Favorite Properties Yet</h2>
+                <p class="empty-text">
+                    Start building your dream collection by exploring our amazing properties and clicking the heart icon on the ones you love!
+                </p>
+                <a href="/Property" class="cta-button">
+                    <i class="fas fa-search"></i>
+                    Explore Properties
+                </a>
+            </div>
         }
     </div>
-}
+
+    <script>
+        function switchView(viewType) {
+            const container = document.getElementById('propertiesContainer');
+            const buttons = document.querySelectorAll('.toggle-button');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (viewType === 'list') {
+                container.parentElement.classList.add('list-view');
+            } else {
+                container.parentElement.classList.remove('list-view');
+            }
+        }
+
+        function confirmRemove(propertyTitle) {
+            return confirm(`Are you sure you want to remove "${propertyTitle}" from your favorites?`);
+        }
+
+        // Search and Filter Functionality
+        document.getElementById('searchInput').addEventListener('input', filterProperties);
+        document.getElementById('categoryFilter').addEventListener('change', filterProperties);
+        document.getElementById('sortBy').addEventListener('change', sortProperties);
+
+        function filterProperties() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const cards = document.querySelectorAll('.property-card');
+
+            cards.forEach(card => {
+                const title = card.dataset.title;
+                const category = card.dataset.category;
+                
+                const matchesSearch = title.includes(searchTerm);
+                const matchesCategory = !categoryFilter || category === categoryFilter;
+                
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function sortProperties() {
+            const sortBy = document.getElementById('sortBy').value;
+            const container = document.getElementById('propertiesContainer');
+            const cards = Array.from(container.children);
+
+            cards.sort((a, b) => {
+                switch (sortBy) {
+                    case 'price-low':
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    case 'price-high':
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    case 'area-large':
+                        return parseFloat(b.dataset.area) - parseFloat(a.dataset.area);
+                    default: // newest
+                        return 0; // Keep original order
+                }
+            });
+
+            cards.forEach(card => container.appendChild(card));
+        }
+
+        // Add smooth animations on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.property-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

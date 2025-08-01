@@ -1,6 +1,287 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .hero-section {
+        background: var(--gradient);
+        color: white;
+        padding: 4rem 0;
+        margin: -20px -15px 0 -15px;
+    }
+
+    .privacy-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .privacy-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem;
+        text-align: center;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .privacy-content {
+        padding: 3rem;
+    }
+
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .section-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .highlight-box {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .btn-modern {
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .back-to-home {
+        text-align: center;
+        margin: 3rem 0;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 0;
+        }
+        .privacy-container {
+            margin: 1rem;
+            margin-top: -30px;
+        }
+        .privacy-header, .privacy-content {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-shield-alt me-3"></i>
+                Privacy Policy
+            </h1>
+            <p class="lead mb-0">
+                Your privacy is our priority. Learn how we protect your personal information.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="privacy-container">
+        <div class="privacy-header">
+            <h2 class="h3 mb-3">Политика за поверителност</h2>
+            <p class="text-muted mb-0">
+                Последно обновена: <strong>30 юли 2025</strong>
+            </p>
+        </div>
+
+        <div class="privacy-content">
+            <!-- Introduction -->
+            <div class="highlight-box">
+                <h3>
+                    <i class="fas fa-info-circle me-2"></i>
+                    Важно за нас
+                </h3>
+                <p class="mb-0">
+                    В Iris Home Estate, ние се ангажираме да защитаваме вашата лична информация и да поддържаме 
+                    прозрачност относно начина, по който събираме, използваме и защитаваме вашите данни.
+                </p>
+            </div>
+
+            <!-- Information Collection -->
+            <section class="section-card">
+                <div class="section-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3 class="section-title">1. Събиране на лична информация</h3>
+                <p>Ние събираме информация когато:</p>
+                <ul>
+                    <li>Създавате акаунт в нашата платформа</li>
+                    <li>Публикувате имот за продажба или наем</li>
+                    <li>Контактувате с нас за поддръжка</li>
+                    <li>Използвате нашия уебсайт (чрез бисквитки)</li>
+                </ul>
+            </section>
+
+            <!-- Data Usage -->
+            <section class="section-card">
+                <div class="section-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3 class="section-title">2. Как използваме вашите данни</h3>
+                <ul>
+                    <li><strong>Предоставяне на услуги:</strong> За управление на вашия акаунт и имоти</li>
+                    <li><strong>Комуникация:</strong> За изпращане на важни съобщения и уведомления</li>
+                    <li><strong>Подобряване:</strong> За анализ и подобряване на нашите услуги</li>
+                    <li><strong>Сигурност:</strong> За защита срещу измами и злоупотреби</li>
+                </ul>
+            </section>
+
+            <!-- Data Protection -->
+            <section class="section-card">
+                <div class="section-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="section-title">3. Защита на данните</h3>
+                <p>Ние прилагаме строги мерки за сигурност:</p>
+                <ul>
+                    <li><strong>SSL Криптиране:</strong> Всички данни се предават криптирано</li>
+                    <li><strong>Сигурни сървъри:</strong> Данните се съхраняват в защитени дата центрове</li>
+                    <li><strong>Ограничен достъп:</strong> Само оторизиран персонал има достъп</li>
+                    <li><strong>Редовни резервни копия:</strong> Автоматично архивиране на данните</li>
+                </ul>
+            </section>
+
+            <!-- Cookies -->
+            <section class="section-card">
+                <div class="section-icon">
+                    <i class="fas fa-cookie-bite"></i>
+                </div>
+                <h3 class="section-title">4. Бисквитки</h3>
+                <p>Използваме бисквитки за:</p>
+                <ul>
+                    <li><strong>Основни функции:</strong> Запомняне на логин статуса</li>
+                    <li><strong>Предпочитания:</strong> Съхраняване на вашите настройки</li>
+                    <li><strong>Анализи:</strong> Разбиране как използвате сайта</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Можете да управлявате бисквитките чрез настройките на вашия браузър.
+                </div>
+            </section>
+
+            <!-- User Rights -->
+            <section class="section-card">
+                <div class="section-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 class="section-title">5. Вашите права</h3>
+                <p>Съгласно GDPR, вие имате право на:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Достъп:</strong> Преглед на вашите данни</li>
+                            <li><strong>Корекция:</strong> Поправка на неточни данни</li>
+                            <li><strong>Изтриване:</strong> Премахване на данните</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Преносимост:</strong> Експорт на данните</li>
+                            <li><strong>Ограничение:</strong> Ограничаване на обработката</li>
+                            <li><strong>Възражение:</strong> Спиране на обработката</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact -->
+            <section class="section-card text-center">
+                <div class="section-icon mx-auto">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="section-title">6. Контакт</h3>
+                <p>За въпроси относно тази политика:</p>
+                <p>
+                    <i class="fas fa-envelope me-2"></i>
+                    <strong>privacy@irishomeestate.com</strong>
+                </p>
+                <p>
+                    <i class="fas fa-phone me-2"></i>
+                    <strong>+359 881 234 567</strong>
+                </p>
+                <a href="mailto:privacy@irishomeestate.com" class="btn-modern mt-3">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Изпратете запитване
+                </a>
+            </section>
+
+            <!-- Last Updated -->
+            <div class="text-center text-muted mt-4 pt-4" style="border-top: 2px solid #ecf0f1;">
+                <p>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Последно актуализирано: <strong>30 юли 2025</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Home Button -->
+<div class="back-to-home">
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn-modern">
+        <i class="fas fa-arrow-left me-2"></i>
+        Обратно към началото
+    </a>
+</div>

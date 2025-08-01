@@ -19,6 +19,8 @@ namespace HomeEstate.Data.Seeds
                     Id = "3da54138-8954-47bf-9d6f-e4d4643bd2da",
                     Email = "nqkuv@email.com"
                 });
+
+
         }
     }
 }

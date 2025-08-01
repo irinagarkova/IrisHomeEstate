@@ -82,7 +82,8 @@ namespace HomeEstate
 
             app.MapControllerRoute(
                 name: "admin",
-                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+                pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}",
+                defaults: new { area = "Admin" });
 
             app.MapControllerRoute(
                 name: "default",
@@ -91,8 +92,50 @@ namespace HomeEstate
             //    name: "default",
             //    pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
-
+            SeedData(app);
             app.Run();
+        }
+        private static void SeedData(WebApplication app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<HomeEstateDbContext>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+                    SeedAdminUser(userManager).Wait();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred seeding the DB.");
+                }
+            }
+        }
+        private static async Task SeedAdminUser(UserManager<ApplicationUser> userManager)
+        {
+            var adminEmail = "admin@homeestate.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                var newAdminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(newAdminUser, "admin");
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(newAdminUser, "Admin");
+                }
+            }
         }
     }
 }

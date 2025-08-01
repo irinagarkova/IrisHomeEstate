@@ -1,4 +1,5 @@
 ﻿using HomeEstate.Data.Models.Enum;
+using HomeEstate.Services.Core.Dtos;
 
 namespace HomeEstate.Web.Models
 { 
@@ -21,7 +22,7 @@ namespace HomeEstate.Web.Models
 
         public string CategoryName { get; set; } = null!;
 
-        public List<string> Images { get; set; } = new();
+        public List<PropertyImageDto> Images { get; set; } = new();
 
 		public PropertyListingType ListingType { get; internal set; }
         public decimal? MonthlyRent { get; set; }

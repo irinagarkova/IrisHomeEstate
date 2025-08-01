@@ -1,5 +1,6 @@
 ﻿:root {
-    --primary: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
+    --primary: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
+    --primary-hover: linear-gradient(90deg, rgba(87, 199, 133, 1) 0%, rgba(42, 123, 155, 1) 100%);
     --secondary: #10b981;
     --dark: black;
     --gray: #6b7280; /*цвета на буквите*/
@@ -93,22 +94,46 @@ nav {
 }
 
 .btn {
-    background: var(--primary);
+    background-image: var(--primary);
+    background-size: 200% 100%;
+    background-position: left center;
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 0.5rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
     text-decoration: none;
     display: inline-block;
+    transition: background-position 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
     .btn:hover {
-        background: var(--primary-dark);
+        background-position: right center;
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
+    }
+
+.browseProp {
+    background-image: var(--primary);
+    background-size: 200% 100%;
+    background-position: left center;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-position 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .browseProp:hover {
+        background-position: right center;
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+        color: #fff;
     }
 
 .btn-outline {
