@@ -1,6 +1,7 @@
 ﻿    using AutoMapper;
 using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
+using HomeEstate.Web.Areas.Admin.Models;
 using HomeEstate.Web.Models;
 
 namespace HomeEstate.Web.Mappings
@@ -18,7 +19,7 @@ namespace HomeEstate.Web.Mappings
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(s => s.Category))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(l => l.Location))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(opt => opt.Price))
-                .ForMember(dest => dest.Owner, opt => opt.Ignore());
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom(s => s.Owner));
 
             CreateMap<PropertyDto, DetailsViewModel>();
 
@@ -54,7 +55,11 @@ namespace HomeEstate.Web.Mappings
              .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
 
             CreateMap<SearchViewModel, SearchPropertyDto>().ReverseMap();
-            CreateMap<ApplicationUserDto, ApplicationUserViewModel>().ReverseMap();
+            CreateMap<ApplicationUserDto, ApplicationUserViewModel>()
+                .ForMember(dest => dest.PropertiesCount, opt => opt.MapFrom(x => x.Properties.Count))
+                .ForMember(dest => dest.FavoritePropertiesCount, opt => opt.MapFrom(x => x.FavoriteProperties.Count));
+            CreateMap<PropertyDto, AdminPropertyDetailsViewModel>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
         }
     }
 }

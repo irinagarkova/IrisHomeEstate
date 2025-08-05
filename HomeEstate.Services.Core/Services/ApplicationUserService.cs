@@ -33,9 +33,11 @@ namespace HomeEstate.Services.Core.Services
         public async Task<ApplicationUser> GetApplicationUser(string email)
         {
             var user = await dbContext.ApplicationUser
+                .Include(p=> p.Properties)
+                    .ThenInclude(x => x.Images)
                 .Include(p=>p.FavoriteProperties)
-                .ThenInclude(x=>x.Property)
-                .ThenInclude(x=>x.Images)
+                    .ThenInclude(x=>x.Property)
+                    .ThenInclude(x=>x.Images)
                 .FirstOrDefaultAsync(x=> x.Email == email);
             if(user != null)
             {

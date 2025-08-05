@@ -743,7 +743,6 @@
                         $('#currentImagesSection').show();
 
                     const existingImages = @Html.Raw(Json.Serialize(Model.ExistingImages));
-                    debugger
                     if (existingImages && existingImages.length > 0) {
                         let imagesHtml = '';
                         existingImages.forEach(function (img, index) {

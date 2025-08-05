@@ -12,5 +12,9 @@ namespace HomeEstate.Services.Core.Dtos
         public string UserName { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
+        public List<PropertyDto> Properties { get; set; }
+        public List<FavoritePropertyDto> FavoriteProperties { get; set; }
+
+
     }
 }

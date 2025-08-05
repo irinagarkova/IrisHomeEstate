@@ -23,7 +23,7 @@ namespace HomeEstate.Services.Core.Dtos
 
         public string OwnerId { get; set; } = null!;
         public ApplicationUserDto Owner { get; set; } = null!;
-
+            
         public int LocationId { get; set; }
         public LocationDto Location { get; set; } = null!;
 

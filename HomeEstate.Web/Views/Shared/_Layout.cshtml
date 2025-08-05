@@ -97,10 +97,10 @@
     <button id="backToTopBtn" class="back-to-top" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i>
     </button>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/property-search.js" asp-append-version="true"></script>
+    @* <script src="~/js/property-search.js" asp-append-version="true"></script> *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

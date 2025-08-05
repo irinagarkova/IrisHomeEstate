@@ -306,13 +306,14 @@
 </div>
 
 <!-- JavaScript код директно в view-то -->
+@section Scripts {
 <script>
     console.log('jQuery available?', typeof $ !== 'undefined');
     $(document).ready(function () {
         // Дефинираме променлива за authentication статуса в началото
         const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
 
-        let currentListingType = 1; // Default to Buy
+        var currentListingType = 1; // Default to Buy
         let hasActiveSearch = false;
 
         // Get DOM elements
@@ -723,3 +724,4 @@
         }, 3000);
     }
 </script>
+}

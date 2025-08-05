@@ -41,7 +41,7 @@
                         <option value="">All Roles</option>
                         @foreach (var role in Model.AvailableRoles)
                         {
-                            <option value="@role">@role</option>
+                            <option value="@role" >@role</option>
                         }
                     </select>
                 </div>
@@ -50,7 +50,7 @@
                     <select class="form-select" id="pageSizeSelect" onchange="loadUsers(1)">
                         @foreach (var size in Model.PageSizes)
                         {
-                            <option value="@size">@size</option>
+                            <option value="@size" >@size</option>
                         }
                     </select>
                 </div>
@@ -106,6 +106,7 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Roles</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -126,15 +127,27 @@
                                         </div>
                                         <div>
                                             <h6 class="mb-1">@user.UserName</h6>
-                                            <small class="text-muted">ID: @user.Id</small>
+                                            <small class="text-muted">ID: @user.Id.Substring(0, 8)...</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <span>@user.Email</span>
+                                    @if (user.EmailConfirmed)
+                                    {
+                                        <i class="fas fa-check-circle text-success ms-1" data-bs-toggle="tooltip" title="Email Verified"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-exclamation-circle text-warning ms-1" data-bs-toggle="tooltip" title="Email Not Verified"></i>
+                                    }
                                 </td>
                                 <td>
                                     <span>@(user.PhoneNumber ?? "N/A")</span>
+                                    @if (!string.IsNullOrEmpty(user.PhoneNumber) && user.PhoneNumberConfirmed)
+                                    {
+                                        <i class="fas fa-check-circle text-success ms-1" data-bs-toggle="tooltip" title="Phone Verified"></i>
+                                    }
                                 </td>
                                 <td>
                                     <div class="roles-container">
@@ -150,6 +163,16 @@
                                             <span class="text-muted">No roles</span>
                                         }
                                     </div>
+                                </td>
+                                <td>
+                                    @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
+                                    {
+                                        <span class="badge bg-warning">Locked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
@@ -187,11 +210,107 @@
 
         <!-- Pagination -->
         <div class="card-footer" id="paginationContainer">
-            @await Html.PartialAsync("_Pagination", Model.Users, new ViewDataDictionary(ViewData)
+            @if (Model.Users.TotalPages > 1)
             {
-                ["LoadFunction"] = "loadProperties",
-                ["ShowTooltips"] = "true"
-            })
+                <nav aria-label="Users pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <!-- Previous Page -->
+                        @if (Model.Users.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage - 1)); return false;"
+                                   data-bs-toggle="tooltip" title="Previous Page">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-left"></i>
+                                </span>
+                            </li>
+                        }
+
+                        <!-- Page Numbers -->
+                        @{
+                            var startPage = Math.Max(1, Model.Users.CurrentPage - 2);
+                            var endPage = Math.Min(Model.Users.TotalPages, Model.Users.CurrentPage + 2);
+                        }
+
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(1); return false;">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.Users.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="#" onclick="loadUsers(@i); return false;">@i</a>
+                            </li>
+                        }
+
+                        @if (endPage < Model.Users.TotalPages)
+                        {
+                            @if (endPage < Model.Users.TotalPages - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(@Model.Users.TotalPages); return false;">@Model.Users.TotalPages</a>
+                            </li>
+                        }
+
+                        <!-- Next Page -->
+                        @if (Model.Users.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage + 1)); return false;"
+                                   data-bs-toggle="tooltip" title="Next Page">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+
+                <!-- Pagination Info -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        Showing @((Model.Users.CurrentPage - 1) * Model.Users.PageSize + 1) to
+                        @(Math.Min(Model.Users.CurrentPage * Model.Users.PageSize, Model.Users.TotalItems)) of
+                        @Model.Users.TotalItems.ToString("N0") users
+                    </small>
+                    <small class="text-muted">
+                        Page @Model.Users.CurrentPage of @Model.Users.TotalPages
+                    </small>
+                </div>
+            }
+            else if (Model.Users.TotalItems > 0)
+            {
+                <div class="text-center">
+                    <small class="text-muted">Showing all @Model.Users.TotalItems users</small>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -242,7 +361,6 @@
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     <script>
@@ -350,52 +468,66 @@
                     ? roles.map(role => `<span class="badge bg-${role === 'Admin' ? 'danger' : 'primary'} me-1">${role}</span>`).join('')
                     : '<span class="text-muted">No roles</span>';
 
+                const statusBadge = user.lockoutEnd && new Date(user.lockoutEnd) > new Date()
+                    ? '<span class="badge bg-warning">Locked</span>'
+                    : '<span class="badge bg-success">Active</span>';
+
+                const emailVerifiedIcon = user.emailConfirmed
+                    ? '<i class="fas fa-check-circle text-success ms-1" data-bs-toggle="tooltip" title="Email Verified"></i>'
+                    : '<i class="fas fa-exclamation-circle text-warning ms-1" data-bs-toggle="tooltip" title="Email Not Verified"></i>';
+
+                const phoneVerifiedIcon = user.phoneNumber && user.phoneNumberConfirmed
+                    ? '<i class="fas fa-check-circle text-success ms-1" data-bs-toggle="tooltip" title="Phone Verified"></i>'
+                    : '';
+
                 return `
-                            <tr data-user-id="${user.id}">
-                                <td>
-                                    <input type="checkbox" class="form-check-input user-checkbox"
-                                           value="${user.id}" onchange="toggleUserSelection('${user.id}')">
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="user-avatar me-3">
-                                            <div class="avatar-circle bg-primary text-white">
-                                                ${(user.userName || 'U').substring(0, 1).toUpperCase()}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1">${user.userName || 'N/A'}</h6>
-                                            <small class="text-muted">ID: ${user.id.substring(0, 8)}...</small>
-                                        </div>
+                    <tr data-user-id="${user.id}">
+                        <td>
+                            <input type="checkbox" class="form-check-input user-checkbox"
+                                   value="${user.id}" onchange="toggleUserSelection('${user.id}')">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    <div class="avatar-circle bg-primary text-white">
+                                        ${(user.userName || 'U').substring(0, 1).toUpperCase()}
                                     </div>
-                                </td>
-                                <td>${user.email || 'N/A'}</td>
-                                <td>${user.phoneNumber || 'N/A'}</td>
-                                <td><div class="roles-container">${rolesHtml}</div></td>
-                                <td>
-                                    ${user.lockoutEnd && new Date(user.lockoutEnd) > new Date()
-                        ? '<span class="badge bg-warning">Locked</span>'
-                        : '<span class="badge bg-success">Active</span>'}
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="@Url.Action("Details", "Users", new { area = "Admin" })/${user.id}"
-                                           class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="@Url.Action("Edit", "Users", new { area = "Admin" })/${user.id}"
-                                           class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit User">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                onclick="showDeleteModal('${user.id}', '${user.userName}')"
-                                                data-bs-toggle="tooltip" title="Delete User">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">${user.userName || 'N/A'}</h6>
+                                    <small class="text-muted">ID: ${user.id.substring(0, 8)}...</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span>${user.email || 'N/A'}</span>
+                            ${emailVerifiedIcon}
+                        </td>
+                        <td>
+                            <span>${user.phoneNumber || 'N/A'}</span>
+                            ${phoneVerifiedIcon}
+                        </td>
+                        <td><div class="roles-container">${rolesHtml}</div></td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("Details", "Users", new { area = "Admin" })/${user.id}"
+                                   class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="@Url.Action("Edit", "Users", new { area = "Admin" })/${user.id}"
+                                   class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="showDeleteModal('${user.id}', '${user.userName}')"
+                                        data-bs-toggle="tooltip" title="Delete User">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }).join('');
 
             // Reinitialize tooltips
@@ -403,16 +535,84 @@
         }
 
         function updatePagination(pagination) {
-            // Similar to properties pagination logic
             const container = document.getElementById('paginationContainer');
 
             if (pagination.totalPages <= 1) {
-                container.innerHTML = '';
+                container.innerHTML = '<div class="text-center"><small class="text-muted">Showing all ' + pagination.totalItems + ' users</small></div>';
                 return;
             }
 
-            // Implement pagination HTML generation similar to properties
-            // ... (pagination logic here)
+            let paginationHtml = '<nav aria-label="Users pagination"><ul class="pagination justify-content-center mb-0">';
+
+            // Previous button
+            if (pagination.hasPreviousPage) {
+                paginationHtml += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadUsers(${pagination.currentPage - 1}); return false;">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                `;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>';
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, pagination.currentPage - 2);
+            const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="loadUsers(1); return false;">1</a></li>';
+                if (startPage > 2) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadUsers(${i}); return false;">${i}</a>
+                    </li>
+                `;
+            }
+
+            if (endPage < pagination.totalPages) {
+                if (endPage < pagination.totalPages - 1) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadUsers(${pagination.totalPages}); return false;">${pagination.totalPages}</a></li>`;
+            }
+
+            // Next button
+            if (pagination.hasNextPage) {
+                paginationHtml += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadUsers(${pagination.currentPage + 1}); return false;">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                `;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>';
+            }
+
+            paginationHtml += '</ul></nav>';
+
+            // Add pagination info
+            paginationHtml += `
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        Showing ${(pagination.currentPage - 1) * pagination.pageSize + 1} to
+                        ${Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of
+                        ${pagination.totalItems.toLocaleString()} users
+                    </small>
+                    <small class="text-muted">
+                        Page ${pagination.currentPage} of ${pagination.totalPages}
+                    </small>
+                </div>
+            `;
+
+            container.innerHTML = paginationHtml;
         }
 
         function updateResultsInfo(pagination) {
@@ -473,9 +673,11 @@
 
         function showDeleteModal(userId, userName) {
             document.getElementById('deleteUserInfo').innerHTML = `
-                        <strong>User:</strong> ${userName}<br>
-                        <strong>ID:</strong> ${userId}
-                    `;
+                <div class="p-3 bg-light rounded">
+                    <strong>User:</strong> ${userName}<br>
+                    <strong>ID:</strong> ${userId}
+                </div>
+            `;
 
             document.getElementById('confirmDeleteBtn').onclick = () => deleteUser(userId);
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
@@ -582,10 +784,10 @@
             toast.style.zIndex = '1060';
             toast.style.minWidth = '300px';
             toast.innerHTML = `
-                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
 
             document.body.appendChild(toast);
 
@@ -599,3 +801,54 @@
     </script>
     @Html.AntiForgeryToken()
 }
+
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .roles-container .badge {
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin-right: 0.25rem;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    #usersTableContainer {
+        min-height: 400px;
+    }
+
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .page-link {
+        color: #4e73df;
+    }
+
+    .page-item.active .page-link {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+</style>
