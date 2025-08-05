@@ -31,7 +31,8 @@ namespace HomeEstate
             builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            
             builder.Services
               .AddIdentity<ApplicationUser, IdentityRole>(options =>
               {

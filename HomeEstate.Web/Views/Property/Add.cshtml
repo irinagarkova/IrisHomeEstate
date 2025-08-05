@@ -16,53 +16,52 @@
     <div class="form-container">
 
         <div class="form-header">
-            <h1 class="form-title" id="formTitle">Добави имот</h1>
-            <p class="form-subtitle">Попълнете всички задължителни полета</p>
+            <h1 class="form-title" id="formTitle">Add Property</h1>
+            <p class="form-subtitle">Fill all the required fields</p>
         </div>
         <form id="propertyForm" asp-controller="Property" asp-action="Add" method="POST" enctype="multipart/form-data">
             <input type="hidden" id="propertyId" asp-for="Id" />
 
             <div class="form-group">
                 <label class="form-label" for="title">
-                    Заглавие <span class="required">*</span>
+                    Tittle <span class="required">*</span>
                 </label>
                 <input type="text" id="title" name="title" asp-for="Title" class="form-input" required
-                       placeholder="Например: Луксозен апартамент в центъра">
+                       placeholder="For example: Luxury apartment in the center">
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="description">
-                    Описание <span class="required">*</span>
+                    Description <span class="required">*</span>
                 </label>
                 <textarea id="description" name="description" asp-for="Description" class="form-textarea" required
-                          placeholder="Опишете подробно вашия имот..."></textarea>
+                          placeholder="Describe your property in detail.."></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label class="form-label">
-                    Вид обява <span class="required">*</span>
+                    Property type <span class="required">*</span>
                 </label>
                 <div class="type-selection">
                     <div class="type-option">
                         <input type="radio" id="sale" name="listingType" asp-for="ListingType" value="1" required>
-                        <label for="sale" class="type-label">Продажба</label>
+                        <label for="sale" class="type-label">Sale</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="rent" name="listingType" asp-for="ListingType" value="2">
-                        <label for="rent" class="type-label">Наем</label>
+                        <label for="rent" class="type-label">Rent</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="both" name="listingType" asp-for="ListingType" value="3">
-                        <label for="both" class="type-label">И двете</label>
+                        <label for="both" class="type-label">Both</label>
                     </div>
                 </div>
             </div>
             <div class="form-row">
-                <!-- Поле за цена - ще се скрива при наем -->
                 <div class="form-group" id="priceField">
                     <label class="form-label" for="price">
-                        Цена (лв.) <span class="required">*</span>
+                        Price (lv.) <span class="required">*</span>
                     </label>
                     <input type="number" id="price" name="price" asp-for="Price" class="form-input" required
                            placeholder="150000" min="0">
@@ -70,7 +69,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="area">
-                        Площ (кв.м.) <span class="required">*</span>
+                       Area (sq/m) <span class="required">*</span>
                     </label>
                     <input type="number" id="area" name="area" asp-for="Area" class="form-input" required
                            placeholder="85" min="1">
@@ -81,36 +80,34 @@
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label" for="locationId">
-                        Локация <span class="required">*</span>
+                        Location <span class="required">*</span>
                     </label>
                     <select id="locationId" name="locationId" asp-for="LocationId" asp-items="Model.Locations" class="form-select" required>
-                        <option value="">Изберете локация</option>
+                        <option value="">Choose location</option>
                     </select>
                     <span asp-validation-for="LocationId" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="categoryId">
-                        Категория <span class="required">*</span>
+                        Category <span class="required">*</span>
                     </label>
                     <select id="categoryId" name="categoryId" asp-for="CategoryId" class="form-select" required>
-                        <option value="">Изберете категория</option>
-                        <option value="1">Апартамент</option>
-                        <option value="2">Къща</option>
-                        <option value="3">Офис</option>
-                        <option value="4">Вила</option>
+                        <option value="">Choose category</option>
+                        <option value="1">Apartment</option>
+                        <option value="2">House</option>
+                        <option value="3">Office</option>
+                        <option value="4">Villa</option>
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
             </div>
 
-           
-
-            <!-- Полета за наем (показват се само при избор на наем) -->
+            <!-- Полета за наем  -->
             <div id="rentalFields" style="display: none;">
                 <div class="form-row-three">
                     <div class="form-group">
                         <label class="form-label" for="monthlyRent">
-                            Месечен наем (лв.) <span class="required rent-required" style="display: none;">*</span>
+                            Monthly rent (lv.) <span class="required rent-required" style="display: none;">*</span>
                         </label>
                         <input type="number" id="monthlyRent" asp-for="MonthlyRent" class="form-input"
                                placeholder="1200" min="0">
@@ -118,7 +115,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="securityDeposit">
-                            Депозит (лв.)
+                            Deposit (lv.)
                         </label>
                         <input type="number" id="securityDeposit" asp-for="SecurityDeposit" class="form-input"
                                placeholder="2400" min="0">
@@ -126,7 +123,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="minimumLeasePeriod">
-                            Минимален срок (месеци)
+                            Minimum Lease Period
                         </label>
                         <input type="number" id="minimumLeasePeriod" asp-for="MinimumLeasePeriod" class="form-input"
                                placeholder="12" min="1" max="60">
@@ -136,26 +133,26 @@
 
                 <div class="form-group">
                     <label class="form-label" for="availableFrom">
-                        Свободен от дата
+                        Available From:
                     </label>
                     <input type="date" id="availableFrom" asp-for="AvailableFrom" class="form-input">
                     <span asp-validation-for="AvailableFrom" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Допълнителни опции за наем</label>
+                    <label class="form-label">Additional rent features</label>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
                             <input type="checkbox" id="petsAllowed" asp-for="PetsAllowed" value="true">
-                            <label for="petsAllowed">Домашни любимци разрешени</label>
+                            <label for="petsAllowed">Pets allowed</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="isFurnished" asp-for="IsFurnished" value="true">
-                            <label for="isFurnished">Обзаведен</label>
+                            <label for="isFurnished">Furnished</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="isParking" asp-for="IsParking" value="true">
-                            <label for="isParking">Паркомясто</label>
+                            <label for="isParking">Parking space</label>
                         </div>
                     </div>
                 </div>
@@ -163,24 +160,24 @@
 
             <div class="form-group">
                 <label class="form-label">
-                    Тип имот <span class="required">*</span>
+                    Property type <span class="required">*</span>
                 </label>
                 <div class="type-selection">
                     <div class="type-option">
                         <input type="radio" id="oneBedroom" asp-for="PropertyType" value="1" required>
-                        <label for="oneBedroom" class="type-label">Едностаен</label>
+                        <label for="oneBedroom" class="type-label">One room</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="twoBedrooms" asp-for="PropertyType" value="2">
-                        <label for="twoBedrooms" class="type-label">Двустаен</label>
+                        <label for="twoBedrooms" class="type-label">Two rooms</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="threeBedrooms" asp-for="PropertyType" value="3">
-                        <label for="threeBedrooms" class="type-label">Тристаен</label>
+                        <label for="threeBedrooms" class="type-label">Three rooms</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="multipleBedrooms" asp-for="PropertyType" value="4">
-                        <label for="multipleBedrooms" class="type-label">Многостаен</label>
+                        <label for="multipleBedrooms" class="type-label">Multiple rooms</label>
                     </div>
                 </div>
                 <span asp-validation-for="PropertyType" class="text-danger"></span>
@@ -188,21 +185,25 @@
 
             <div class="form-group">
                 <label class="form-label" for="images">
-                    Качи снимки
+                    Upload photos
                 </label>
-                <div class="file-upload">
+                <div class="file-upload" id="fileUploadArea">
                     <input type="file" id="images" name="images" asp-for="Images" multiple accept="image/*">
-                    <label for="images" class="file-upload-label">
+                    <div class="file-upload-label">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        Изберете снимки или ги плъзнете тук
-                    </label>
+                        <span id="uploadText">Choose photos or drag them here</span>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            Maximum of 10 photos, up to 5MB each
+                        </small>
+                    </div>
                 </div>
+                <div id="imagePreview" class="image-preview"></div>
                 <span asp-validation-for="Images" class="text-danger"></span>
             </div>
 
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Създай имот
+                    <i class="fas fa-plus"></i> Create property
                 </button>
             </div>
         </form>
@@ -220,6 +221,84 @@
             const saleRadio = document.getElementById('sale');
             const rentRadio = document.getElementById('rent');
             const bothRadio = document.getElementById('both');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileInput = document.getElementById('images');
+            const uploadText = document.getElementById('uploadText');
+            fileInput.addEventListener('change', function (e) {
+                const files = Array.from(e.target.files);
+                if (validateFiles(files)) {
+                    selectedFiles = [...selectedFiles, ...files];
+                    updateFileList();
+                    updateFileDisplay();
+                }
+            });
+            let selectedFiles = [];
+
+            function validateFiles(files) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxFiles = 10;
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+                if (selectedFiles.length + files.length > maxFiles) {
+                    alert(`Можете да качите максимум ${maxFiles} снимки.`);
+                    return false;
+                }
+
+                for (let file of files) {
+                    if (file.size > maxSize) {
+                        alert(`Файлът "${file.name}" е твърде голям. Максимален размер: 5MB`);
+                        return false;
+                    }
+                    if (!allowedTypes.includes(file.type.toLowerCase())) {
+                        alert(`Файлът "${file.name}" не е поддържан. Разрешени формати: JPG, PNG, GIF, WebP`);
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function updateFileDisplay() {
+                if (selectedFiles.length > 0) {
+                    uploadText.innerHTML = `<i class="fas fa-check"></i> Избрани ${selectedFiles.length} файла`;
+                    uploadText.style.color = '#28a745';
+                    displayImagePreviews();
+                } else {
+                    uploadText.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
+                    uploadText.style.color = '';
+                    imagePreview.innerHTML = '';
+                }
+            }
+
+            function displayImagePreviews() {
+                imagePreview.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'image-preview-item';
+                        previewItem.innerHTML = `
+                                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                                    <button type="button" class="remove-image" onclick="removeImage(${index})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                `;
+                        imagePreview.appendChild(previewItem);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            window.removeImage = function (index) {
+                selectedFiles.splice(index, 1);
+                updateFileList();
+                updateFileDisplay();
+            };
+
+            function updateFileList() {
+                const dt = new DataTransfer();
+                selectedFiles.forEach(file => dt.items.add(file));
+                fileInput.files = dt.files;
+            }
 
             // Function to toggle fields based on listing type
             function toggleFields() {
@@ -261,7 +340,7 @@
             });
 
             // File upload feedback
-            const fileInput = document.querySelector('input[type="file"]');
+            // const fileInput = document.querySelector('input[type="file"]');
             const fileLabel = document.querySelector('.file-upload-label');
 
             if (fileInput && fileLabel) {

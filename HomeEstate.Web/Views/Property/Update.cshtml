@@ -14,8 +14,8 @@
 <body>
     <div class="form-container">
         <div class="form-header">
-            <h1 class="form-title">Редактирай имот</h1>
-            <p class="form-subtitle">Променете данните на вашия имот</p>
+            <h1 class="form-title">Edit property</h1>
+            <p class="form-subtitle">Change your property details</p>
         </div>
 
         <form asp-action="Update" method="POST" enctype="multipart/form-data">
@@ -24,31 +24,31 @@
 
             <div class="form-group">
                 <label class="form-label" asp-for="Title">
-                    Заглавие <span class="required">*</span>
+                    Tittle <span class="required">*</span>
                 </label>
-                <input asp-for="Title" class="form-input" placeholder="Например: Луксозен апартамент в центъра">
+                <input asp-for="Title" class="form-input" placeholder="For example: Luxury apartment in the center">
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label class="form-label" asp-for="Description">
-                    Описание <span class="required">*</span>
+                    Description <span class="required">*</span>
                 </label>
-                <textarea asp-for="Description" class="form-textarea" placeholder="Опишете подробно вашия имот..."></textarea>
+                <textarea asp-for="Description" class="form-textarea" placeholder="Describe your property in detail"...></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label" asp-for="Price">
-                        Цена (лв.) <span class="required">*</span>
+                        Price (lv.) <span class="required">*</span>
                     </label>
                     <input asp-for="Price" class="form-input" placeholder="150000" min="0">
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label" asp-for="Area">
-                        Площ (кв.м.) <span class="required">*</span>
+                        Area (sq/m) <span class="required">*</span>
                     </label>
                     <input asp-for="Area" class="form-input" placeholder="85" min="1">
                     <span asp-validation-for="Area" class="text-danger"></span>
@@ -61,7 +61,6 @@
                     <input type="hidden" asp-for="ExistingImages[i].Id" />
                     <input type="hidden" asp-for="ExistingImages[i].ImageUrl" />
                     <input type="hidden" asp-for="ExistingImages[i].PropertyId" />
-                    @* Добави всички properties на PropertyImageDto които искаш да запазиш *@
                 }
             }
             <div class="form-row">
@@ -70,20 +69,20 @@
                         Локация <span class="required">*</span>
                     </label>
                     <select id="locationId" name="locationId" asp-for="LocationId" asp-items="Model.Locations" class="form-select" required>
-                        <option value="">Изберете локация</option>
+                        <option value="">Choose location</option>
                     </select>
                     <span asp-validation-for="LocationId" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label" asp-for="CategoryId">
-                        Категория <span class="required">*</span>
+                        Category <span class="required">*</span>
                     </label>
                     <select asp-for="CategoryId" class="form-select">
-                        <option value="">Изберете категория</option>
-                        <option value="1">Апартамент</option>
-                        <option value="2">Къща</option>
-                        <option value="3">Офис</option>
-                        <option value="4">Вила</option>
+                        <option value="">Choose category</option>
+                        <option value="1">Apartment</option>
+                        <option value="2">House</option>
+                        <option value="3">Office</option>
+                        <option value="4">Villa</option>
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
@@ -91,20 +90,20 @@
 
             <div class="form-group">
                 <label class="form-label">
-                    Вид обява <span class="required">*</span>
+                    Property type <span class="required">*</span>
                 </label>
                 <div class="type-selection">
                     <div class="type-option">
                         <input type="radio" id="sale" asp-for="ListingType" value="1">
-                        <label for="sale" class="type-label">Продажба</label>
+                        <label for="sale" class="type-label">Sale</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="rent" asp-for="ListingType" value="2">
-                        <label for="rent" class="type-label">Наем</label>
+                        <label for="rent" class="type-label">Rent</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="both" asp-for="ListingType" value="3">
-                        <label for="both" class="type-label">И двете</label>
+                        <label for="both" class="type-label">Both</label>
                     </div>
                 </div>
             </div>
@@ -114,21 +113,21 @@
                 <div class="form-row-three">
                     <div class="form-group">
                         <label class="form-label" asp-for="MonthlyRent">
-                            Месечен наем (лв.)
+                            Monthly rent (lv.)
                         </label>
                         <input asp-for="MonthlyRent" class="form-input" placeholder="1200" min="0" step="50">
                         <span asp-validation-for="MonthlyRent" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label" asp-for="SecurityDeposit">
-                            Депозит (лв.)
+                            Deposit (lv.)
                         </label>
                         <input asp-for="SecurityDeposit" class="form-input" placeholder="2400" min="0" step="100">
                         <span asp-validation-for="SecurityDeposit" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label" asp-for="MinimumLeasePeriod">
-                            Минимален срок (месеци)
+                            Minimum Lease Period
                         </label>
                         <input asp-for="MinimumLeasePeriod" class="form-input" placeholder="12" min="1" max="60">
                         <span asp-validation-for="MinimumLeasePeriod" class="text-danger"></span>
@@ -137,26 +136,26 @@
 
                 <div class="form-group">
                     <label class="form-label" asp-for="AvailableFrom">
-                        Свободен от дата
+                        Available From:
                     </label>
                     <input asp-for="AvailableFrom" class="form-input" type="date">
                     <span asp-validation-for="AvailableFrom" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Допълнителни опции за наем</label>
+                    <label class="form-label">Additional rent features</label>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
                             <input type="checkbox" id="petsAllowed" asp-for="PetsAllowed" value="true">
-                            <label for="petsAllowed">Домашни любимци разрешени</label>
+                            <label for="petsAllowed">Pets allowed</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="isFurnished" asp-for="IsFurnished" value="true">
-                            <label for="isFurnished">Обзаведен</label>
+                            <label for="isFurnished">Furnished</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="isParking" asp-for="IsParking" value="true">
-                            <label for="isParking">Паркомясто</label>
+                            <label for="isParking">Parking space</label>
                         </div>
                     </div>
                 </div>
@@ -164,24 +163,24 @@
 
             <div class="form-group">
                 <label class="form-label">
-                    Тип имот <span class="required">*</span>
+                    Property type <span class="required">*</span>
                 </label>
                 <div class="type-selection">
                     <div class="type-option">
                         <input type="radio" id="oneBedroom" asp-for="PropertyType" value="1">
-                        <label for="oneBedroom" class="type-label">Едностаен</label>
+                        <label for="oneBedroom" class="type-label">One room</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="twoBedrooms" asp-for="PropertyType" value="2">
-                        <label for="twoBedrooms" class="type-label">Двустаен</label>
+                        <label for="twoBedrooms" class="type-label">Two rooms</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="threeBedrooms" asp-for="PropertyType" value="3">
-                        <label for="threeBedrooms" class="type-label">Тристаен</label>
+                        <label for="threeBedrooms" class="type-label">Three rooms</label>
                     </div>
                     <div class="type-option">
                         <input type="radio" id="multipleBedrooms" asp-for="PropertyType" value="4">
-                        <label for="multipleBedrooms" class="type-label">Многостаен</label>
+                        <label for="multipleBedrooms" class="type-label">Multiple rooms</label>
                     </div>
                 </div>
             </div>
@@ -191,36 +190,35 @@
                 <div class="current-images">
                     <h4>Текущи снимки</h4>
                     <div class="image-preview" id="currentImages">
-                        <!-- Снимките ще се заредят тук с JavaScript -->
                     </div>
                 </div>
             </div>
-
             <div class="form-group">
                 <label class="form-label" asp-for="Images">
-                    Качи нови снимки (ще заменят текущите)
+                    Upload new photos (will replace current photos)
                 </label>
                 <div class="file-upload">
                     <input asp-for="Images" multiple accept="image/*">
                     <label class="file-upload-label">
-                        <i class="fas fa-cloud-upload-alt"></i>Изберете нови снимки или ги плъзнете тук</label>
+                        <i class="fas fa-cloud-upload-alt"></i>Choose new photos or drag them here
+                    </label>
                 </div>
                 <span asp-validation-for="Images" class="text-danger"></span>
             </div>
 
             <div class="btn-group">
                 <a asp-action="MyProperty" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Назад
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
-                @* <a asp-action="Delete" asp-route-id="@Model.Title" class="btn btn-primary">Delete</a>*@
+           @*      <a asp-action="Delete" asp-route-id="@Model.Title" class="btn btn-primary">Delete</a>
                 <form asp-action="Delete" method="POST">
                     <input type="hidden" name="id" value="@Model.Id" />
                     <button type="submit"  class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Изтрий
+                        <i class="fas fa-trash"></i> Delete
                     </button>
-                </form>
+                </form> *@
                 <button type="submit"  class="btn btn-primary">
-                    <i class="fas fa-save"></i> Запази промените
+                    <i class="fas fa-save"></i> Save Changes
                 </button>
             </div>
         </form>

@@ -26,12 +26,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h2">Моите имоти</h1>
-                    <p class="text-muted">Управление на вашите обяви</p>
+                    <h1 class="h2">My Properties</h1>
+                    <p class="text-muted">Manage your listings</p>
                 </div>
                 <div>
                     <a asp-controller="Property" asp-action="Add" class="btn btn-success">
-                        <i class="fas fa-plus"></i> Добави нов имот
+                        <i class="fas fa-plus"></i> Add new property
                     </a>
                 </div>
             </div>
@@ -49,7 +49,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <h3 class="text-primary">@stats.TotalProperties</h3>
-                            <p class="card-text">Общо имоти</p>
+                            <p class="card-text">Total Properties</p>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <h3 class="text-success">@stats.PropertiesForSale</h3>
-                            <p class="card-text">За продажба</p>
+                            <p class="card-text">Properties for Sale</p>
                         </div>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <h3 class="text-info">@stats.PropertiesForRent</h3>
-                            <p class="card-text">За наем</p>
+                            <p class="card-text">Properties or Rent</p>
                         </div>
                     </div>
                 </div>
@@ -73,23 +73,22 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <h3 class="text-warning">@stats.TotalFavorites</h3>
-                            <p class="card-text">Общо харесвания</p>
+                            <p class="card-text">Total Favorites</p>
                         </div>
                     </div>
                 </div>
             </div>
         }
     }
-
     <!-- Properties List -->
     @if (!Model.Any())
     {
         <div class="text-center py-5">
             <i class="fas fa-home fa-4x text-muted mb-3"></i>
-            <h3>Все още нямате създадени имоти</h3>
-            <p class="text-muted">Започнете като добавите вашия първи имот</p>
+            <h3>You don't have properties created yet</h3>
+            <p class="text-muted">Start by adding your first property</p>
             <a asp-controller="Property" asp-action="Add" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Създай първия си имот
+                <i class="fas fa-plus"></i> Create your first property
             </a>
         </div>
     }
@@ -119,16 +118,16 @@
                                 @switch ((int)property.ListingType)
                                 {
                                     case 1:
-                                        <span class="badge bg-success">Продажба</span>
+                                        <span class="badge bg-success">Sale</span>
                                         break;
                                     case 2:
-                                        <span class="badge bg-info">Наем</span>
+                                        <span class="badge bg-info">Rent</span>
                                         break;
                                     case 3:
-                                        <span class="badge bg-primary">Продажба/Наем</span>
+                                        <span class="badge bg-primary">Sale/Rent</span>
                                         break;
                                     default:
-                                        <span class="badge bg-secondary">Активен</span>
+                                        <span class="badge bg-secondary">Active</span>
                                         break;
                                 }
                             </div>
@@ -160,15 +159,15 @@
                                 <div class="btn-group w-100" role="group">
                                     <a   asp-action="Details" asp-controller="Property" asp-route-id="@property.Id"
                                        class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> Преглед
+                                        <i class="fas fa-eye"></i> View
                                     </a>
                                     <a asp-controller="Property" asp-action="Update"   asp-route-id="@property.Id"
                                        class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Редактирай
+                                        <i class="fas fa-edit"></i> Edit
                                     </a>
                                     <button type="button" class="btn btn-outline-danger btn-sm"
                                             onclick="deleteProperty(@property.Id, '@property.Title')">
-                                        <i class="fas fa-trash"></i> Изтрий
+                                        <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </div>
                             </div>
@@ -189,12 +188,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Сигурни ли сте, че искате да изтриете имота <strong id="propertyTitle"></strong>?</p>
-                <p class="text-danger">Това действие не може да бъде отменено.</p>
+                <p>Are you sure you want to delete the property? <strong id="propertyTitle"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отказ</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Изтрий</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rejection</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
             </div>
         </div>
     </div>
