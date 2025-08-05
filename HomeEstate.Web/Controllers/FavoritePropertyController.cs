@@ -9,21 +9,21 @@ using System.Security.Claims;
 
 namespace HomeEstate.Web.Controllers
 {
-	[Authorize] 
-	public class FavoritePropertyController : Controller
-	{
-		private readonly IFavoritePropertyService favoritePropertyService;
-		private readonly IMapper mapper;
+    [Authorize]
+    public class FavoritePropertyController : Controller
+    {
+        private readonly IFavoritePropertyService favoritePropertyService;
+        private readonly IMapper mapper;
         private readonly IPropertyService propertyService;
 
         public FavoritePropertyController(IFavoritePropertyService favoritePropertyService, IMapper mapper, IPropertyService propertyService)
-		{
-			this.favoritePropertyService = favoritePropertyService;
-			this.mapper = mapper;
+        {
+            this.favoritePropertyService = favoritePropertyService;
+            this.mapper = mapper;
             this.propertyService = propertyService;
         }
-		public async Task<IActionResult> Index()
-		{
+        public async Task<IActionResult> Index()
+        {
 
             var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
             var propertyDtos = favorites.Select(fp => fp.Property).ToList();
@@ -32,32 +32,34 @@ namespace HomeEstate.Web.Controllers
             return View(mapped);
         }
 
-		[HttpPost]
-		public  async Task<IActionResult>Add(int id, string returnUrl)
-		{
-			await favoritePropertyService.AddPropertyToFavoriteAsync(id, User.Identity.Name);
-	
-            if (!string.IsNullOrEmpty(returnUrl))
+        [HttpPost]
+        public async Task<IActionResult> Add(int id)
+        {
+            try
             {
-                return Redirect(returnUrl);
+                await favoritePropertyService.AddPropertyToFavoriteAsync(id, User.Identity.Name);
+                return Json(new { success = true });
             }
-
-            return RedirectToAction("Index"); 
-
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error occured" });
+            }
+            
         }
 
         [HttpPost]
-        public async Task<IActionResult> Remove(int id, string returnUrl)
+        public async Task<IActionResult> Remove(int id)
         {
-            await favoritePropertyService.RemovePropertyFromFavoriteAsync(id, User.Identity.Name);
-
-            if (!string.IsNullOrEmpty(returnUrl))
+            try
             {
-                return Redirect(returnUrl);
+                await favoritePropertyService.RemovePropertyFromFavoriteAsync(id, User.Identity.Name);
+                return Json(new { success = true });
             }
-
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                return Json(new { success = false , message= "Error occured"});
+            }
+            
         }
-
     }
 }

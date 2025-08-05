@@ -222,7 +222,7 @@ namespace HomeEstate.Services.Core.Services
             var mapped = mapper.Map<List<ApplicationUserDto>>(users);
             return mapped;
         }
-        public async Task<PaginatedDto<ApplicationUserWithRoleDto>> GetAllUsersWithRolesAsync(int page, int pageSize)
+        public async Task<Pagination<ApplicationUserWithRoleDto>> GetAllUsersWithRolesAsync(int page, int pageSize)
         {
             // Validate pagination parameters
             page = Math.Max(1, page); // Ensure page is at least 1
@@ -258,7 +258,7 @@ namespace HomeEstate.Services.Core.Services
             }
 
             // Return paginated result
-            return new PaginatedDto<ApplicationUserWithRoleDto>
+            return new Pagination<ApplicationUserWithRoleDto>
             {
                 Items = userDtos,
                 CurrentPage = page,
@@ -268,7 +268,7 @@ namespace HomeEstate.Services.Core.Services
             };
         }
 
-        public async Task<PaginatedDto<ApplicationUserDto>> GetAllUsersAsync(int page, int pageSize)
+        public async Task<Pagination<ApplicationUserDto>> GetAllUsersAsync(int page, int pageSize)
         {
             page = Math.Max(1, page); // Ensure page is at least 1
             pageSize = Math.Min(Math.Max(1, pageSize), 100); // Ensure pageSize is between 1 and 100
@@ -285,7 +285,7 @@ namespace HomeEstate.Services.Core.Services
                .Take(pageSize)
                .ToListAsync();
 
-            return new PaginatedDto<ApplicationUserDto>
+            return new Pagination<ApplicationUserDto>
             {
                 Items = mapper.Map<List<ApplicationUserDto>>(users),
                 CurrentPage = page,

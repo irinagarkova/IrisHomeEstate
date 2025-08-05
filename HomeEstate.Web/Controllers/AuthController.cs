@@ -72,8 +72,8 @@ namespace HomeEstate.Web.Controllers
 			return View();
 		}
 		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Login (LoginViewModel model)
+		//[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Login(LoginViewModel model)
 		{
 
 			if (!ModelState.IsValid)
@@ -87,9 +87,9 @@ namespace HomeEstate.Web.Controllers
 																 false);
 			if (result.Succeeded)
 			{
-				return RedirectToAction("Index", "Home");
+				return Json(new {Success = true});
 			}
-
+				
 			ModelState.AddModelError(string.Empty, "Invalid credentials");
 			return View(model);
                                                      

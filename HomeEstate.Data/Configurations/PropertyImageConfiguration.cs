@@ -30,7 +30,7 @@ namespace HomeEstate.Data.Configurations
                 .HasOne(pi => pi.Property)
                 .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.PropertyId)
-                .OnDelete(DeleteBehavior.Restrict); // We'll handle soft delete manually
+                .OnDelete(DeleteBehavior.Cascade); // We'll handle soft delete manually
 
             builder
                 .HasQueryFilter(u => u.IsDeleted == false);

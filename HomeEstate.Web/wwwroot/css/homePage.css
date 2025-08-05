@@ -1,27 +1,11 @@
-﻿:root {
-    --primary: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
-    --primary-hover: linear-gradient(90deg, rgba(87, 199, 133, 1) 0%, rgba(42, 123, 155, 1) 100%);
-    --secondary: #10b981;
-    --dark: black;
-    --gray: #6b7280; /*цвета на буквите*/
-    --light: #f3f4f6; /*нещо светло*/
-    --white: #ffffff;
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-.main-content {
+﻿.main-content {
     margin-top: 80px; /* Регулирайте според височината на header-а */
     padding-top: 20px;
 }
 
 .property-card {
     transition: transform 0.2s ease-in-out;
+
 }
 
 
@@ -30,67 +14,6 @@ body {
     line-height: 1.6;
     color: var(--dark);
     background: var(--white);
-}
-
-/* Header */
-header {
-    background: #57C785;
-    box-shadow: var(--shadow);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    height: 6rem;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-}
-    .logo a:hover {
-        color: white;
-    }
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-    align-items: center;
-    color: white;
-    text-decoration: none;
-}
-
-    .nav-links a {
-        text-decoration: none;
-        color: white;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
-
-        .nav-links a:hover {
-            color: white;
-        }
-
-.nav-link {
-    display: inline-block;
-    padding: 0.5rem 0; /* consistent vertical padding */
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1rem;
-    line-height: 1.5;
-    transition: color 0.3s;
 }
 
 .btn {
@@ -359,6 +282,7 @@ nav {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
     margin-bottom: 3rem;
+    align-items: stretch; /* Осигурява еднаква височина на всички карти */
 }
 
 .property-card {
@@ -368,6 +292,9 @@ nav {
     box-shadow: var(--shadow);
     transition: all 0.3s;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%; 
 }
 
     .property-card:hover {
@@ -378,10 +305,24 @@ nav {
 .property-image {
     position: relative;
     height: 250px;
+    width: 100%;
+    overflow: hidden;
     background: linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0), linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0);
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
+    object-fit: fill;
 }
+
+    .property-image img {
+        position: relative;
+        height: 250px;
+        width: 100%;
+        overflow: hidden;
+        background: linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0), linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0);
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+        object-fit: fill;
+    }
 
 .property-badge {
     position: absolute;
@@ -393,10 +334,14 @@ nav {
     border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.875rem;
+    z-index: 2; 
 }
 
 .property-details {
     padding: 1.5rem;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .property-price {
@@ -409,6 +354,10 @@ nav {
 .property-title {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
 }
 
 .property-location {
@@ -425,6 +374,7 @@ nav {
     gap: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--light);
+    margin-top: auto; 
 }
 
 .feature {
@@ -513,152 +463,6 @@ nav {
     gap: 1rem;
     justify-content: center;
 }
-
-
-.footer {
-    background-color: #57C785;
-    color: white;
-    padding: 1rem 8rem;
-    font-size: 0.9rem;
-}
-.footer-bottom {
-    border-top: 1px solid #ccc;
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-.footer-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-    .footer-section ul li {
-        margin-bottom: 12px;
-        transition: all 0.3s ease;
-    }
-        .footer-section ul li a {
-            color: #ffffff; /* White color as requested */
-            text-decoration: none; /* No decorations as requested */
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-block;
-            position: relative;
-            padding: 5px 0;
-        }
-            .footer-section ul li a:hover {
-                color: #667eea;
-                transform: translateX(8px);
-                text-decoration: none; /* Ensure no underline on hover */
-            }
-
-            .footer-section ul li a::before {
-                content: '→';
-                position: absolute;
-                left: -20px;
-                opacity: 0;
-                transition: all 0.3s ease;
-                color: #667eea;
-            }
-            .footer-section ul li a:hover::before {
-                opacity: 1;
-                left: -15px;
-            }
-
-.footer-content {
-    max-width: 1400px;
-    margin: 0 auto 0.1rem auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.footer-bottom p {
-    text-align: center;
-}
-
-.social-wrapper h4 {
-    margin-bottom: 15px;
-    font-size: 24px;
-}
-
-
-/* Social Media Icons Styling - TRANSPARENT WITH WHITE HOVER */
-.social-icons {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.social-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: transparent; /* Transparent background */
-    border: 2px solid rgba(255, 255, 255, 0.2); /* Almost transparent border */
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-    .social-icon i {
-        color: rgba(255, 255, 255, 0.3); /* Almost transparent icons as requested */
-        font-size: 18px;
-        transition: all 0.4s ease;
-        z-index: 2;
-        position: relative;
-    }
-
-    /* Hover Effects - WHITE ON HOVER AS REQUESTED */
-    .social-icon:hover {
-        border-color: rgba(255, 255, 255, 0.8);
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-        .social-icon:hover i {
-            color: #ffffff; /* White on hover as requested */
-            transform: scale(1.1);
-        }
-
-    .social-icon::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        transform: scale(0);
-        transition: transform 0.4s ease;
-        z-index: 1;
-    }
-
-    .social-icon:hover::before {
-        transform: scale(1);
-    }
-
-    /* Specific hover animations for each social platform */
-    .social-icon.facebook:hover {
-        box-shadow: 0 10px 25px rgba(59, 89, 152, 0.3);
-    }
-
-    .social-icon.google:hover {
-        box-shadow: 0 10px 25px rgba(221, 75, 57, 0.3);
-    }
-
-    .social-icon.linkedin:hover {
-        box-shadow: 0 10px 25px rgba(0, 119, 181, 0.3);
-    }
-
-    .social-icon.reddit:hover {
-        box-shadow: 0 10px 25px rgba(255, 69, 0, 0.3);
-    }
 
 /* Back to Top Button CSS - добавете към site.css */
 
@@ -819,8 +623,8 @@ nav {
     /* Main Grid Layout */
     .content-grid {
         display: grid;
-        grid-template-columns: 1fr 400px;
-        gap: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
     }
     /* Gallery Section */
     .gallery-section {
@@ -920,7 +724,7 @@ nav {
             margin-bottom: 10px;
         }
 
-  
+
 
     .property-stats {
         display: flex;

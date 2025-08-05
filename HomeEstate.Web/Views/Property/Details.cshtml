@@ -36,7 +36,7 @@
                     <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <span class="badge bg-light text-primary fs-6">@Model.CategoryName</span>
-                        <span><i class="fas fa-map-marker-alt"></i> @Model.LocationName</span>
+                        <span><i class="fas fa-map-marker-alt"></i> @Model.Location.City</span>
                         <span><i class="fas fa-calendar"></i> Listed @Model.CreatedOn.ToString("MMM dd, yyyy")</span>
                     </div>
                 </div>
@@ -151,7 +151,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold">Location</div>
-                                    <div class="text-muted">@Model.LocationName</div>
+                                    <div class="text-muted">@Model.Location.City</div>
                                 </div>
                             </div>
                             
@@ -161,7 +161,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold">Owner</div>
-                                    <div class="text-muted">@Model.OwnerFullName</div>
+                                    <div class="text-muted">@Model.Owner</div>
                                 </div>
                             </div>
                         </div>
@@ -271,81 +271,96 @@
                 </div>
         </div>
     </div>
-
-    <!-- Similar Properties Section -->
-    <div class="similar-properties-section bg-light py-5">
-        <div class="container">
-            <div class="section-header text-center mb-5">
-                <h2>Similar Properties</h2>
-                <p class="text-muted">Други имоти, които може да ви интересуват</p>
-            </div>
-
-            <div class="row" id="similarProperties">
-                <!-- Similar properties will be loaded here via AJAX -->
-                <!-- Placeholder cards for demo -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="https://via.placeholder.com/300x200" alt="Property">
-                            <div class="price-overlay">450,000 лв</div>
-                        </div>
-                        <div class="property-info">
-                            <h5>Тристаен апартамент в центъра</h5>
-                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Център</p>
-                            <p class="area"><i class="fas fa-ruler-combined"></i> 85 м²</p>
-                        </div>
-                    </div>
+        <!-- Similar Properties Section -->
+        <div class="similar-properties-section bg-light py-5">
+            <div class="container">
+                <div class="section-header text-center mb-5">
+                    <h2>Similar Properties</h2>
+                    <p class="text-muted">Други имоти, които може да ви интересуват</p>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="https://via.placeholder.com/300x200" alt="Property">
-                            <div class="price-overlay">380,000 лв</div>
+                <div class="row" id="similarProperties">
+                    @if (ViewBag.SimilarProperties != null && ((List<PropertyViewModel>)ViewBag.SimilarProperties).Any())
+                    {
+                        @foreach (var similarProperty in (List<PropertyViewModel>)ViewBag.SimilarProperties)
+                        {
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="property-card">
+                                    <div class="property-image">
+                                        @if (similarProperty.Images != null && similarProperty.Images.Any())
+                                        {
+                                            <img src="@similarProperty.Images.First().ImageUrl" alt="@similarProperty.Title" class="img-fluid">
+                                        }
+                                        else
+                                        {
+                                            <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No Image" class="img-fluid">
+                                        }
+                                       
+                                    </div>
+                                    <div class="property-info">
+                                        <h5>
+                                            <a href="/Property/Details/@similarProperty.Id" class="text-decoration-none text-dark">
+                                                @similarProperty.Title
+                                            </a>
+                                        </h5>
+                                        <div class="price-overlay">
+                                            @if (similarProperty.ListingType == HomeEstate.Data.Models.Enum.PropertyListingType.Rent)
+                                            {
+                                                <span>@similarProperty.Price.ToString("C0")/месец</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@similarProperty.Price.ToString("C0")</span>
+                                            }
+                                        </div>
+                                        <p class="location">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            @(similarProperty.Location?.City ?? "Unknown Location")
+                                        </p>
+                                        <p class="area">
+                                            <i class="fas fa-ruler-combined"></i>
+                                            @similarProperty.Area м²
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <small class="text-muted">
+                                                @similarProperty.Category?.Name
+                                            </small>
+                                            <a href="/Property/Details/@similarProperty.Id" class="btn btn-sm btn-outline-primary">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <!-- Fallback ако няма подобни имоти -->
+                        <div class="col-12 text-center">
+                            <div class="py-5">
+                                <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No similar properties found</h5>
+                                <p class="text-muted">Check out our other listings</p>
+                                <a href="/Property" class="btn btn-primary">Browse All Properties</a>
+                            </div>
                         </div>
-                        <div class="property-info">
-                            <h5>Двустаен апартамент</h5>
-                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Лозенец</p>
-                            <p class="area"><i class="fas fa-ruler-combined"></i> 65 м²</p>
-                        </div>
-                    </div>
+                    }
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="https://via.placeholder.com/300x200" alt="Property">
-                            <div class="price-overlay">520,000 лв</div>
-                        </div>
-                        <div class="property-info">
-                            <h5>Четиристаен апартамент</h5>
-                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Младост</p>
-                            <p class="area"><i class="fas fa-ruler-combined"></i> 95 м²</p>
-                        </div>
+                @if (ViewBag.SimilarProperties != null && ((List<PropertyViewModel>)ViewBag.SimilarProperties).Any())
+                {
+                    <div class="text-center mt-4">
+                        <a href="/Property?CategoryId=@Model.CategoryName" class="btn btn-outline-primary">
+                            Виж още @Model.CategoryName имоти
+                        </a>
                     </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="https://via.placeholder.com/300x200" alt="Property">
-                            <div class="price-overlay">420,000 лв</div>
-                        </div>
-                        <div class="property-info">
-                            <h5>Тристаен с тераса</h5>
-                            <p class="location"><i class="fas fa-map-marker-alt"></i> София, Витоша</p>
-                            <p class="area"><i class="fas fa-ruler-combined"></i> 78 м²</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="#" class="btn btn-outline-primary">Виж още подобни имоти</a>
+                }
             </div>
         </div>
+
     </div>
-    </div>
+  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -365,7 +380,7 @@
         function shareProperty() {
             const propertyData = {
                 title: '@Model.Title',
-                text: `Check out this amazing property: @Model.Title in @Model.LocationName. Price: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))`,
+                text: `Check out this amazing property: @Model.Title in @Model.Location.City. Price: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))`,
                 url: window.location.href
             };
 
@@ -461,24 +476,24 @@
 
         function shareToFacebook() {
             const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent('@Model.Title - @Model.LocationName');
+            const text = encodeURIComponent('@Model.Title - @Model.Location.City');
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
         }
 
         function shareToTwitter() {
             const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent(`Check out this amazing property: @Model.Title in @Model.LocationName! 🏠✨`);
+            const text = encodeURIComponent(`Check out this amazing property: @Model.Title in @Model.Location.City! 🏠✨`);
             window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
         }
 
         function shareToWhatsApp() {
-            const text = encodeURIComponent(`Check out this property: @Model.Title in @Model.LocationName\n${window.location.href}`);
+            const text = encodeURIComponent(`Check out this property: @Model.Title in @Model.Location.City\n${window.location.href}`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
         function shareViaEmail() {
             const subject = encodeURIComponent(`Property Recommendation: @Model.Title`);
-            const body = encodeURIComponent(`Hi,\n\nI found this amazing property that might interest you:\n\n@Model.Title\nLocation: @Model.LocationName\nPrice: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))\n\nCheck it out here: ${window.location.href}\n\nBest regards`);
+            const body = encodeURIComponent(`Hi,\n\nI found this amazing property that might interest you:\n\n@Model.Title\nLocation: @Model.Location.City\nPrice: @(Model.ListingType == PropertyListingType.Rent ? Model.MonthlyRent?.ToString("C0") + "/month" : Model.Price.ToString("C0"))\n\nCheck it out here: ${window.location.href}\n\nBest regards`);
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 

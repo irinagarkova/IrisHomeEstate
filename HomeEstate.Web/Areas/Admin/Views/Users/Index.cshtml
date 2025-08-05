@@ -1,4 +1,5 @@
-﻿@model AdminUsersViewModel
+﻿@using HomeEstate.Services.Core.Dtos
+@model AdminUsersViewModel
 
 @{
     ViewData["Title"] = "Manage Users";
@@ -40,7 +41,7 @@
                         <option value="">All Roles</option>
                         @foreach (var role in Model.AvailableRoles)
                         {
-                            <option value="@role" @(Model.RoleFilter == role ? "selected" : "")>@role</option>
+                            <option value="@role">@role</option>
                         }
                     </select>
                 </div>
@@ -49,7 +50,7 @@
                     <select class="form-select" id="pageSizeSelect" onchange="loadUsers(1)">
                         @foreach (var size in Model.PageSizes)
                         {
-                            <option value="@size" @(Model.Users.PageSize == size ? "selected" : "")>@size</option>
+                            <option value="@size">@size</option>
                         }
                     </select>
                 </div>
@@ -105,7 +106,6 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Roles</th>
-                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -126,7 +126,7 @@
                                         </div>
                                         <div>
                                             <h6 class="mb-1">@user.UserName</h6>
-                                            <small class="text-muted">ID: @user.Id.Substring(0, 8)...</small>
+                                            <small class="text-muted">ID: @user.Id</small>
                                         </div>
                                     </div>
                                 </td>
@@ -150,16 +150,6 @@
                                             <span class="text-muted">No roles</span>
                                         }
                                     </div>
-                                </td>
-                                <td>
-                                    @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.Now)
-                                    {
-                                        <span class="badge bg-warning">Locked</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">Active</span>
-                                    }
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
@@ -197,42 +187,11 @@
 
         <!-- Pagination -->
         <div class="card-footer" id="paginationContainer">
-            @if (Model.Users.TotalPages > 1)
+            @await Html.PartialAsync("_GenericPagination", Model.Users, new ViewDataDictionary(ViewData)
             {
-                <nav aria-label="Users pagination">
-                    <ul class="pagination justify-content-center mb-0">
-                        @if (Model.Users.HasPreviousPage)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage - 1)); return false;">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                        }
-
-                        @{
-                            var startPage = Math.Max(1, Model.Users.CurrentPage - 2);
-                            var endPage = Math.Min(Model.Users.TotalPages, Model.Users.CurrentPage + 2);
-                        }
-
-                        @for (int i = startPage; i <= endPage; i++)
-                        {
-                            <li class="page-item @(i == Model.Users.CurrentPage ? "active" : "")">
-                                <a class="page-link" href="#" onclick="loadUsers(@i); return false;">@i</a>
-                            </li>
-                        }
-
-                        @if (Model.Users.HasNextPage)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="#" onclick="loadUsers(@(Model.Users.CurrentPage + 1)); return false;">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </nav>
-            }
+                ["LoadFunction"] = "loadProperties",
+                ["ShowTooltips"] = "true"
+            })
         </div>
     </div>
 </div>

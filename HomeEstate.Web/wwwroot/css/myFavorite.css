@@ -2,7 +2,9 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 80px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+    backdrop-filter:blur(10px);
     min-height: calc(100vh - 120px); /* Отчитаме височината на header-а */
     margin-top: 20px; /* Допълнително разстояние от header-а */
     border-radius: 20px 20px 0 0; /* Закръглени ъгли отгоре */
@@ -21,20 +23,23 @@
     font-weight: 700;
     margin-bottom: 15px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    background: linear-gradient(45deg, #FFD700, #FFA500);
-    -webkit-background-clip: text;
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
+        -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
-
+.h1{
+    background:red;
+}
 .favorites-subtitle {
     font-size: 1.2rem;
     opacity: 0.9;
     font-weight: 300;
+    color: #718096;
 }
 
 .stats-bar {
-    background: rgba(255, 255, 255, 0.1);
+    background: #718096;
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 20px;
@@ -60,7 +65,7 @@
 .stat-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -109,6 +114,9 @@
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
+}
+.h1 {
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
 }
 
 .cta-button {
@@ -176,6 +184,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         transition: transform 0.4s ease;
     }
 
@@ -204,7 +213,7 @@
     position: absolute;
     top: 15px;
     left: 15px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
@@ -250,7 +259,7 @@
 .detail-icon {
     width: 20px;
     height: 20px;
-    background: linear-gradient(45deg, #3498db, #2980b9);
+    background: linear-gradient(90deg, rgba(87, 199, 133, 1) 0%, rgba(42, 123, 155, 1) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -267,7 +276,7 @@
 
 .btn-view {
     flex: 1;
-    background: linear-gradient(45deg, #3498db, #2980b9);
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
     color: white;
     padding: 12px 20px;
     border-radius: 12px;
@@ -282,7 +291,7 @@
 }
 
     .btn-view:hover {
-        background: linear-gradient(45deg, #2980b9, #3498db);
+        background: linear-gradient(90deg, rgba(87, 199, 133, 1) 0%, rgba(42, 123, 155, 1) 100%);
         transform: translateY(-2px);
         color: white;
     }
@@ -380,7 +389,7 @@
 }
 
 .filter-bar {
-    background: rgba(255, 255, 255, 0.1);
+    background: #718096;
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 20px;

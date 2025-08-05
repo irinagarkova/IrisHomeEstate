@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HomeEstate.Services.Core.Interfaces;
+using HomeEstate.Web.Areas.Admin.Models;
 using HomeEstate.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

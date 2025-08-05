@@ -13,10 +13,6 @@
 </head>
 <body>
     <div class="form-container">
-        <div class="edit-indicator">
-            <i class="fas fa-edit"></i> Редактиране
-        </div>
-
         <div class="form-header">
             <h1 class="form-title">Редактирай имот</h1>
             <p class="form-subtitle">Променете данните на вашия имот</p>
@@ -47,24 +43,33 @@
                     <label class="form-label" asp-for="Price">
                         Цена (лв.) <span class="required">*</span>
                     </label>
-                    <input asp-for="Price" class="form-input" placeholder="150000" min="0" step="1000">
+                    <input asp-for="Price" class="form-input" placeholder="150000" min="0">
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label" asp-for="Area">
                         Площ (кв.м.) <span class="required">*</span>
                     </label>
-                    <input asp-for="Area" class="form-input" placeholder="85" min="1" step="0.1">
+                    <input asp-for="Area" class="form-input" placeholder="85" min="1">
                     <span asp-validation-for="Area" class="text-danger"></span>
                 </div>
             </div>
-
+            @if (Model.ExistingImages != null && Model.ExistingImages.Any())
+            {
+                for (int i = 0; i < Model.ExistingImages.Count; i++)
+                {
+                    <input type="hidden" asp-for="ExistingImages[i].Id" />
+                    <input type="hidden" asp-for="ExistingImages[i].ImageUrl" />
+                    <input type="hidden" asp-for="ExistingImages[i].PropertyId" />
+                    @* Добави всички properties на PropertyImageDto които искаш да запазиш *@
+                }
+            }
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" asp-for="LocationId">
+                    <label class="form-label" for="locationId">
                         Локация <span class="required">*</span>
                     </label>
-                    <select asp-for="LocationId" asp-items="Model.Locations" class="form-select">
+                    <select id="locationId" name="locationId" asp-for="LocationId" asp-items="Model.Locations" class="form-select" required>
                         <option value="">Изберете локация</option>
                     </select>
                     <span asp-validation-for="LocationId" class="text-danger"></span>
@@ -210,22 +215,722 @@
                 @* <a asp-action="Delete" asp-route-id="@Model.Title" class="btn btn-primary">Delete</a>*@
                 <form asp-action="Delete" method="POST">
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit"  class="btn btn-danger">
                         <i class="fas fa-trash"></i> Изтрий
                     </button>
                 </form>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit"  class="btn btn-primary">
                     <i class="fas fa-save"></i> Запази промените
                 </button>
             </div>
         </form>
     </div>
     @section Scripts {
-        <script>
-            // Form validation and rental fields toggle here
-            function initializeFormValidation() { ... }
-            document.addEventListener('DOMContentLoaded', initializeFormValidation);
-        </script>
+    @* Include jQuery Validation scripts *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize form validation
+            // initializeValidation();
+            
+            // Initialize form state
+            initializeFormState();
+            
+            // Add custom validation rules
+            // addCustomValidationRules();
+            
+            // Add event listeners
+            // addEventListeners();
+            
+            // Initialize existing images display
+            initializeExistingImages();
+            
+            // Initialize form status indicators
+            // initializeFormStatusIndicators();
+        });
+
+        function initializeValidation() {
+            // Configure jQuery Validation defaults
+            $.validator.setDefaults({
+                errorClass: 'text-danger',
+                validClass: 'valid',
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('text-danger');
+                    if (element.attr('type') === 'radio' || element.attr('type') === 'checkbox') {
+                        error.insertAfter(element.closest('.type-selection, .checkbox-group'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                highlight: function(element, errorClass, validClass) {
+                    $(element).addClass('is-invalid').removeClass('is-valid');
+                    $(element).closest('.form-group').addClass('has-error');
+                },
+                unhighlight: function(element, errorClass, validClass) {
+                    $(element).removeClass('is-invalid').addClass('is-valid');
+                    $(element).closest('.form-group').removeClass('has-error');
+                }
+            });
+
+            // Initialize unobtrusive validation
+            $.validator.unobtrusive.parse($('form'));
+        }
+
+        function addCustomValidationRules() {
+            // Custom validation for PropertyType (required)
+            $.validator.addMethod('propertytypeRequired', function(value, element) {
+                return $('input[name="PropertyType"]:checked').length > 0;
+            }, 'Моля изберете тип имот.');
+
+            // Custom validation for ListingType (required)
+            $.validator.addMethod('listingtypeRequired', function(value, element) {
+                return $('input[name="ListingType"]:checked').length > 0;
+            }, 'Моля изберете вид обява.');
+
+            // Custom validation for rental fields when rent is selected
+            $.validator.addMethod('rentalRequired', function(value, element) {
+                const listingType = $('input[name="ListingType"]:checked').val();
+                if (listingType === '2' || listingType === '3') { // Rent or Both
+                    return value && value.trim() !== '';
+                }
+                return true;
+            }, 'Това поле е задължително при наем.');
+
+            // Custom validation for positive numbers
+            $.validator.addMethod('positiveNumber', function(value, element) {
+                return !value || ($.isNumeric(value) && parseFloat(value) > 0);
+            }, 'Моля въведете положително число.');
+
+            // Add rules to form elements
+            // $('form').validate({
+            //     rules: {
+            //         Title: {
+            //             required: true,
+            //             minlength: 5,
+            //             maxlength: 100
+            //         },
+            //         Description: {
+            //             required: true,
+            //             minlength: 10,
+            //             maxlength: 1000
+            //         },
+            //         Price: {
+            //             required: true,
+            //             positiveNumber: true,
+            //             min: 1
+            //         },
+            //         Area: {
+            //             required: true,
+            //             positiveNumber: true,
+            //             min: 1
+            //         },
+            //         LocationId: {
+            //             required: true,
+            //             min: 1
+            //         },
+            //         CategoryId: {
+            //             required: true,
+            //             min: 1
+            //         },
+            //         PropertyType: {
+            //             propertytypeRequired: true
+            //         },
+            //         ListingType: {
+            //             listingtypeRequired: true
+            //         },
+            //         MonthlyRent: {
+            //             rentalRequired: true,
+            //             positiveNumber: true
+            //         },
+            //         SecurityDeposit: {
+            //             positiveNumber: true
+            //         },
+            //         MinimumLeasePeriod: {
+            //             digits: true,
+            //             min: 1,
+            //             max: 60
+            //         }
+            //     },
+            //     messages: {
+            //         Title: {
+            //             required: 'Заглавието е задължително.',
+            //             minlength: 'Заглавието трябва да е поне 5 символа.',
+            //             maxlength: 'Заглавието не може да надвишава 100 символа.'
+            //         },
+            //         Description: {
+            //             required: 'Описанието е задължително.',
+            //             minlength: 'Описанието трябва да е поне 10 символа.',
+            //             maxlength: 'Описанието не може да надвишава 1000 символа.'
+            //         },
+            //         Price: {
+            //             required: 'Цената е задължителна.',
+            //             min: 'Цената трябва да е положително число.'
+            //         },
+            //         Area: {
+            //             required: 'Площта е задължителна.',
+            //             min: 'Площта трябва да е положително число.'
+            //         },
+            //         LocationId: {
+            //             required: 'Моля изберете локация.',
+            //             min: 'Моля изберете валидна локация.'
+            //         },
+            //         CategoryId: {
+            //             required: 'Моля изберете категория.',
+            //             min: 'Моля изберете валидна категория.'
+            //         },
+            //         MonthlyRent: {
+            //             rentalRequired: 'Месечният наем е задължителен при избор на наем.'
+            //         },
+            //         MinimumLeasePeriod: {
+            //             digits: 'Моля въведете цяло число.',
+            //             min: 'Минималният срок трябва да е поне 1 месец.',
+            //             max: 'Минималният срок не може да надвишава 60 месеца.'
+            //         }
+            //     },
+            //     submitHandler: function(form) {
+            //         // Additional validation before submit
+            //         if (validateBeforeSubmit()) {
+            //             form.submit();
+            //         }
+            //     }
+            // });
+        }
+
+        function validateBeforeSubmit() {
+            let isValid = true;
+            let errorMessages = [];
+
+            // Validate PropertyType selection
+            if ($('input[name="PropertyType"]:checked').length === 0) {
+                errorMessages.push('Моля изберете тип имот.');
+                isValid = false;
+            }
+
+            // Validate ListingType selection
+            if ($('input[name="ListingType"]:checked').length === 0) {
+                errorMessages.push('Моля изберете вид обява.');
+                isValid = false;
+            }
+
+            // Validate rental fields if needed
+            const listingType = $('input[name="ListingType"]:checked').val();
+            if (listingType === '2' || listingType === '3') {
+                if (!$('#MonthlyRent').val()) {
+                    errorMessages.push('Месечният наем е задължителен при избор на наем.');
+                    isValid = false;
+                }
+            }
+
+            // Show error messages if any
+            if (!isValid) {
+                showValidationSummary(errorMessages);
+            }
+
+            return isValid;
+        }
+
+        function showValidationSummary(messages) {
+            const summaryHtml = messages.map(msg => `<li>${msg}</li>`).join('');
+            const validationSummary = `
+                <div class="alert alert-danger">
+                    <h4>Моля поправете следните грешки:</h4>
+                    <ul>${summaryHtml}</ul>
+                </div>
+            `;
+            
+            // Remove existing summary
+            $('.alert-danger').remove();
+            
+            // Add new summary at top of form
+            $('form').prepend(validationSummary);
+            
+            // Scroll to top
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+
+        function initializeFormState() {
+            // Initialize all basic form fields from ViewModel
+            // initializeBasicFields();
+            
+            // Initialize PropertyType selection
+            initializePropertyType();
+            
+            // Initialize ListingType selection
+            initializeListingType();
+            
+            // Initialize rental fields
+            initializeRentalFields();
+            
+            // Initialize checkboxes
+            initializeCheckboxes();
+            
+            // Initialize select dropdowns
+            initializeSelects();
+        }
+
+        function initializeBasicFields() {
+            // Initialize text inputs
+            const title = '@Html.Raw(Html.Encode(Model.Title ?? ""))';
+            if (title) $('#Title').val(title);
+            
+            const description = '@Html.Raw(Html.Encode(Model.Description ?? ""))';
+            if (description) $('#Description').val(description);
+            
+            // Initialize numeric fields
+            const price = '@Model.Price';
+            if (price && price !== '0') $('#Price').val(price);
+            
+            const area = '@Model.Area';
+            if (area && area !== '0') $('#Area').val(area);
+        }
+
+        function initializePropertyType() {
+            const propertyType = '@((int)Model.PropertyType)';
+            if (propertyType && propertyType !== '0') {
+                $(`input[name="PropertyType"][value="${propertyType}"]`).prop('checked', true);
+                updateVisualFeedback('PropertyType', propertyType);
+            }
+        }
+
+        function initializeListingType() {
+            const listingType = '@((int)Model.ListingType)';
+            if (listingType && listingType !== '0') {
+                $(`input[name="ListingType"][value="${listingType}"]`).prop('checked', true);
+                updateVisualFeedback('ListingType', listingType);
+                toggleRentalFields();
+            }
+        }
+
+        function initializeRentalFields() {
+            // Initialize rental numeric fields
+            const monthlyRent = '@(Model.MonthlyRent?.ToString() ?? "")';
+            if (monthlyRent) $('#MonthlyRent').val(monthlyRent);
+            
+            const securityDeposit = '@(Model.SecurityDeposit?.ToString() ?? "")';
+            if (securityDeposit) $('#SecurityDeposit').val(securityDeposit);
+            
+            const minimumLeasePeriod = '@(Model.MinimumLeasePeriod?.ToString() ?? "")';
+            if (minimumLeasePeriod) $('#MinimumLeasePeriod').val(minimumLeasePeriod);
+            
+            // Initialize available from date
+            const availableFrom = '@(Model.AvailableFrom?.ToString("yyyy-MM-dd") ?? "")';
+            if (availableFrom) $('#AvailableFrom').val(availableFrom);
+        }
+
+        function initializeCheckboxes() {
+            // Initialize boolean checkboxes
+            const petsAllowed = @Html.Raw(Model.PetsAllowed.ToString().ToLower());
+            $('#PetsAllowed').prop('checked', petsAllowed);
+            
+            const isFurnished = @Html.Raw(Model.IsFurnished.ToString().ToLower());
+            $('#IsFurnished').prop('checked', isFurnished);
+            
+            const isParking = @Html.Raw(Model.IsParking.ToString().ToLower());
+            $('#IsParking').prop('checked', isParking);
+            
+            const isActive = @Html.Raw(Model.IsActive.ToString().ToLower());
+            $('#IsActive').prop('checked', isActive);
+        }
+
+        function initializeSelects() {
+            // Initialize LocationId selection
+            const locationId = '@Model.LocationId';
+            if (locationId && locationId !== '0') {
+                $('select[name="LocationId"]').val(locationId);
+            }
+            
+            // Initialize CategoryId selection
+            const categoryId = '@Model.CategoryId';
+            if (categoryId && categoryId !== '0') {
+                $('select[name="CategoryId"]').val(categoryId);
+            }
+        }
+
+        function addEventListeners() {
+            // ListingType change handler
+            $('input[name="ListingType"]').on('change', function() {
+                const selectedValue = $(this).val();
+                updateVisualFeedbackEnhanced('ListingType', selectedValue);
+                toggleRentalFieldsEnhanced();
+                
+                // Revalidate rental fields
+                $('#MonthlyRent').valid();
+            });
+
+            // PropertyType change handler
+            $('input[name="PropertyType"]').on('change', function() {
+                const selectedValue = $(this).val();
+                updateVisualFeedbackEnhanced('PropertyType', selectedValue);
+            });
+
+            // Real-time validation for inputs
+            $('input, select, textarea').on('blur', function() {
+                $(this).valid();
+            });
+
+            // Format price and area inputs
+            $('#Price, #Area, #MonthlyRent, #SecurityDeposit').on('input', function() {
+                let value = $(this).val().replace(/[^0-9.]/g, '');
+                if (value.split('.').length > 2) {
+                    value = value.substring(0, value.lastIndexOf('.'));
+                }
+                $(this).val(value);
+            });
+
+            // Add progress tracking listeners
+            addProgressListeners();
+            
+            // Initialize auto-save (optional - comment out if not needed)
+            // initializeAutoSave();
+            
+            // Enhanced form interactions
+            addEnhancedInteractions();
+        }
+
+        function addEnhancedInteractions() {
+            // Highlight form groups on focus
+            $('input, select, textarea').on('focus', function() {
+                $(this).closest('.form-group').addClass('focused');
+            }).on('blur', function() {
+                $(this).closest('.form-group').removeClass('focused');
+            });
+
+            // Character count for text areas and long inputs
+            $('#Description').on('input', function() {
+                const maxLength = 1000;
+                const currentLength = $(this).val().length;
+                const remaining = maxLength - currentLength;
+                
+                let countHtml = `<small class="char-count ${remaining < 50 ? 'text-warning' : 'text-muted'}">
+                    ${currentLength}/${maxLength} символа
+                </small>`;
+                
+                $(this).siblings('.char-count').remove();
+                $(this).after(countHtml);
+            });
+
+            $('#Title').on('input', function() {
+                const maxLength = 100;
+                const currentLength = $(this).val().length;
+                const remaining = maxLength - currentLength;
+                
+                let countHtml = `<small class="char-count ${remaining < 10 ? 'text-warning' : 'text-muted'}">
+                    ${currentLength}/${maxLength} символа
+                </small>`;
+                
+                $(this).siblings('.char-count').remove();
+                $(this).after(countHtml);
+            });
+
+            // Confirm before leaving page with unsaved changes
+            let formChanged = false;
+            $('input, select, textarea').on('change input', function() {
+                formChanged = true;
+            });
+
+            $(window).on('beforeunload', function(e) {
+                if (formChanged) {
+                    const message = 'Имате незапазени промени. Сигурни ли сте, че искате да напуснете страницата?';
+                    e.returnValue = message;
+                    return message;
+                }
+            });
+
+            // Clear the flag when form is submitted
+            $('form').on('submit', function() {
+                formChanged = false;
+            });
+
+            // Enhanced file upload with drag & drop
+            const $fileInput = $('input[type="file"]');
+            const $fileUploadArea = $('.file-upload');
+
+            $fileUploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('drag-over');
+            }).on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('drag-over');
+            }).on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('drag-over');
+                
+                const files = e.originalEvent.dataTransfer.files;
+                $fileInput[0].files = files;
+                $fileInput.trigger('change');
+            });
+        }
+
+        function toggleRentalFields() {
+            const listingType = $('input[name="ListingType"]:checked').val();
+            const $rentalFields = $('#rentalFields');
+            
+            if (listingType === '2' || listingType === '3') { // Rent or Both
+                $rentalFields.slideDown(300);
+                
+                // Make rental fields required
+                $('#MonthlyRent').rules('add', {
+                    required: true,
+                    messages: {
+                        required: 'Месечният наем е задължителен при избор на наем.'
+                    }
+                });
+            } else {
+                $rentalFields.slideUp(300);
+                
+                // Remove required rule from rental fields
+                $('#MonthlyRent').rules('remove', 'required');
+                
+                // Clear rental field values
+                $rentalFields.find('input').val('').removeClass('is-invalid is-valid');
+                $rentalFields.find('.text-danger').remove();
+            }
+        }
+
+        function updateVisualFeedback(groupName, selectedValue) {
+            // Remove selected class from all options
+            $(`input[name="${groupName}"]`).closest('.type-option').removeClass('selected');
+            
+            // Add selected class to chosen option
+            $(`input[name="${groupName}"][value="${selectedValue}"]`)
+                .closest('.type-option').addClass('selected');
+        }
+
+        // Custom validation for file uploads
+        $('input[type="file"]').on('change', function() {
+            const files = this.files;
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            let hasError = false;
+            let errorMessage = '';
+
+            if (files.length > 10) {
+                hasError = true;
+                errorMessage = 'Можете да качите максимум 10 снимки.';
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > maxSize) {
+                    hasError = true;
+                    errorMessage = 'Размерът на файла не може да надвишава 5MB.';
+                    break;
+                }
+                if (!allowedTypes.includes(files[i].type)) {
+                    hasError = true;
+                    errorMessage = 'Разрешени са само JPG, PNG и GIF файлове.';
+                    break;
+                }
+            }
+
+            if (hasError) {
+                $(this).val('').addClass('is-invalid');
+                $(this).next('.text-danger').remove();
+                $(this).after(`<span class="text-danger">${errorMessage}</span>`);
+            } else {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+                $(this).next('.text-danger').remove();
+            }
+        });
+
+        function initializeExistingImages() {
+            @if (Model.Id > 0 && Model.ExistingImages != null && Model.ExistingImages.Any())
+            {
+                <text>
+                        $('#currentImagesSection').show();
+
+                    const existingImages = @Html.Raw(Json.Serialize(Model.ExistingImages));
+                    debugger
+                    if (existingImages && existingImages.length > 0) {
+                        let imagesHtml = '';
+                        existingImages.forEach(function (img, index) {
+                            imagesHtml += `
+                                    <div class="image-item" data-image-id="${img.id}">
+                                        <img src="${img.imageUrl}" alt="Property Image ${index + 1}" class="current-image">
+                                        <button type="button" class="btn btn-danger btn-sm remove-image" data-image-id="${img.Id}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                `;
+                        });
+                        $('#currentImages').html(imagesHtml);
+                    }
+                </text>
+            }
+            }
+
+        function initializeFormStatusIndicators() {
+            // Add loading state for form submission
+            $('form').on('submit', function() {
+                const $submitBtn = $('button[type="submit"]');
+                const originalText = $submitBtn.html();
+                
+                $submitBtn.prop('disabled', true)
+                         .html('<i class="fas fa-spinner fa-spin"></i> Запазване...')
+                         .addClass('loading');
+                
+                // Re-enable after 30 seconds as fallback
+                setTimeout(function() {
+                    $submitBtn.prop('disabled', false)
+                             .html(originalText)
+                             .removeClass('loading');
+                }, 30000);
+            });
+            
+            // Show form completion status
+            showFormCompletionStatus();
+        }
+
+        function showFormCompletionStatus() {
+            let completedFields = 0;
+            let totalRequiredFields = 6; // Title, Description, Price, Area, LocationId, CategoryId
+            
+            // Check basic required fields
+            if ($('#Title').val().trim()) completedFields++;
+            if ($('#Description').val().trim()) completedFields++;
+            if ($('#Price').val() && parseFloat($('#Price').val()) > 0) completedFields++;
+            if ($('#Area').val() && parseFloat($('#Area').val()) > 0) completedFields++;
+            if ($('#LocationId').val() && $('#LocationId').val() !== '0') completedFields++;
+            if ($('#CategoryId').val() && $('#CategoryId').val() !== '0') completedFields++;
+            
+            const completionPercentage = Math.round((completedFields / totalRequiredFields) * 100);
+            
+            // Create or update progress indicator
+            let progressHtml = `
+                <div class="form-progress mb-3">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: ${completionPercentage}%" 
+                             aria-valuenow="${completionPercentage}" aria-valuemin="0" aria-valuemax="100">
+                            ${completionPercentage}% завършено
+                        </div>
+                    </div>
+                    <small class="text-muted">Попълнени ${completedFields} от ${totalRequiredFields} задължителни полета</small>
+                </div>
+            `;
+            
+            $('.form-progress').remove();
+            $('.form-header').after(progressHtml);
+        }
+
+        // Update progress when fields change
+        function updateFormProgress() {
+            setTimeout(showFormCompletionStatus, 100);
+        }
+
+        // Add to event listeners
+        function addProgressListeners() {
+            $('input, select, textarea').on('input change', updateFormProgress);
+            $('input[type="radio"]').on('change', updateFormProgress);
+        }
+
+        // Enhanced visual feedback with animations
+        function updateVisualFeedbackEnhanced(groupName, selectedValue) {
+            // Remove selected class from all options with animation
+            $(`input[name="${groupName}"]`).closest('.type-option')
+                .removeClass('selected')
+                .animate({ opacity: 0.7 }, 150)
+                .animate({ opacity: 1 }, 150);
+            
+            // Add selected class to chosen option with animation
+            $(`input[name="${groupName}"][value="${selectedValue}"]`)
+                .closest('.type-option')
+                .addClass('selected')
+                .animate({ 
+                    backgroundColor: '#e3f2fd',
+                    borderColor: '#2196f3' 
+                }, 300);
+        }
+
+        // Enhanced toggle for rental fields with animation
+        function toggleRentalFieldsEnhanced() {
+            const listingType = $('input[name="ListingType"]:checked').val();
+            const $rentalFields = $('#rentalFields');
+            
+            if (listingType === '2' || listingType === '3') { // Rent or Both
+                $rentalFields.slideDown(400, function() {
+                    // Animate in the fields
+                    $rentalFields.find('.form-group').each(function(index) {
+                        $(this).delay(index * 100).fadeIn(300);
+                    });
+                });
+                
+                // Make rental fields required
+                $('#MonthlyRent').rules('add', {
+                    required: true,
+                    messages: {
+                        required: 'Месечният наем е задължителен при избор на наем.'
+                    }
+                });
+            } else {
+                $rentalFields.slideUp(400);
+                
+                // Remove required rule from rental fields
+                $('#MonthlyRent').rules('remove', 'required');
+                
+                // Clear rental field values with animation
+                $rentalFields.find('input').fadeOut(200, function() {
+                    $(this).val('').removeClass('is-invalid is-valid').fadeIn(200);
+                });
+                $rentalFields.find('.text-danger').fadeOut(200);
+            }
+            
+            // Update form progress
+            updateFormProgress();
+        }
+
+        // Auto-save functionality (optional)
+        function initializeAutoSave() {
+            let autoSaveTimer;
+            
+            $('input, select, textarea').on('input change', function() {
+                clearTimeout(autoSaveTimer);
+                
+                autoSaveTimer = setTimeout(function() {
+                    // Here you could implement auto-save to localStorage or server
+                    console.log('Auto-saving form data...');
+                    saveFormDataToLocalStorage();
+                }, 2000); // Save after 2 seconds of inactivity
+            });
+        }
+
+        function saveFormDataToLocalStorage() {
+            const formData = {
+                Title: $('#Title').val(),
+                Description: $('#Description').val(),
+                Price: $('#Price').val(),
+                Area: $('#Area').val(),
+                LocationId: $('#LocationId').val(),
+                CategoryId: $('#CategoryId').val(),
+                PropertyType: $('input[name="PropertyType"]:checked').val(),
+                ListingType: $('input[name="ListingType"]:checked').val(),
+                MonthlyRent: $('#MonthlyRent').val(),
+                SecurityDeposit: $('#SecurityDeposit').val(),
+                MinimumLeasePeriod: $('#MinimumLeasePeriod').val(),
+                AvailableFrom: $('#AvailableFrom').val(),
+                PetsAllowed: $('#PetsAllowed').is(':checked'),
+                IsFurnished: $('#IsFurnished').is(':checked'),
+                IsParking: $('#IsParking').is(':checked')
+            };
+            
+            localStorage.setItem('propertyFormData_@Model.Id', JSON.stringify(formData));
+            
+            // Show auto-save indicator
+            showAutoSaveIndicator();
+        }
+
+        function showAutoSaveIndicator() {
+            const indicator = $('<div class="auto-save-indicator">Автоматично записано</div>');
+            $('body').append(indicator);
+            
+            indicator.fadeIn(300).delay(2000).fadeOut(300, function() {
+                $(this).remove();
+            });
+        }
+    </script>
+}
     }
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
 

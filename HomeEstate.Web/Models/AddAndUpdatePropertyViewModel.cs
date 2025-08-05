@@ -1,5 +1,6 @@
 ﻿using HomeEstate.Data.Models.Enum;
 using HomeEstate.Models;
+using HomeEstate.Services.Core.Dtos;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -25,6 +26,7 @@ namespace HomeEstate.Web.Models
 		public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
 
 		public List<IFormFile> Images { get; set; } = new();
+        public List<PropertyImageDto> ExistingImages { get; set; } = new(); 
         public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale; 
         public decimal? MonthlyRent { get; set; }
         public decimal? SecurityDeposit { get; set; }

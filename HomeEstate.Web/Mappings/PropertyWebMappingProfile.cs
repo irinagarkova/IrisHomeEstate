@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿    using AutoMapper;
 using HomeEstate.Models;
 using HomeEstate.Services.Core.Dtos;
 using HomeEstate.Web.Models;
@@ -17,10 +17,8 @@ namespace HomeEstate.Web.Mappings
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(p => p.Images))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(s => s.Category))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(l => l.Location))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(opt => opt.Price))
                 .ForMember(dest => dest.Owner, opt => opt.Ignore());
-
-            CreateMap<AddAndUpdatePropertyViewModel, PropertyDto>()
-                 .ForMember(dest => dest.Images, opt => opt.Ignore()).ReverseMap();
 
             CreateMap<PropertyDto, DetailsViewModel>();
 
@@ -33,7 +31,7 @@ namespace HomeEstate.Web.Mappings
                 .ReverseMap();
 
             CreateMap<AddAndUpdatePropertyViewModel, PropertyDto>()
-               .ForMember(dest => dest.Images, opt => opt.Ignore())
+               .ForMember(dest => dest.Images, opt => opt.MapFrom(src=> src.ExistingImages))
                .ForMember(dest => dest.MonthlyRent, opt => opt.MapFrom(src => src.MonthlyRent))
                .ForMember(dest => dest.SecurityDeposit, opt => opt.MapFrom(src => src.SecurityDeposit))
                .ForMember(dest => dest.MinimumLeasePeriod, opt => opt.MapFrom(src => src.MinimumLeasePeriod))
@@ -41,14 +39,22 @@ namespace HomeEstate.Web.Mappings
                .ForMember(dest => dest.PetsAllowed, opt => opt.MapFrom(src => src.PetsAllowed))
                .ForMember(dest => dest.IsFurnished, opt => opt.MapFrom(src => src.IsFurnished))
                .ForMember(dest => dest.IsParking, opt => opt.MapFrom(src => src.IsParking))
-               .ForMember(dest => dest.PropertyType, opt => opt.MapFrom(src => src.PropertyType))
-               .ReverseMap();
+               .ForMember(dest => dest.PropertyType, opt => opt.MapFrom(src => src.PropertyType));
+
+
+
+
+            CreateMap<PropertyDto, AddAndUpdatePropertyViewModel>()
+               .ForMember(dest => dest.Images, opt => opt.Ignore())
+               .ForMember(dest => dest.Locations, opt => opt.Ignore())
+               .ForMember(dest => dest.ExistingImages, opt => opt.MapFrom(src => src.Images));
+
 
             CreateMap<RegisterViewModel, ApplicationUser>()
              .ForMember(dest => dest.UserName, opt => opt.MapFrom(x => x.Email));
 
             CreateMap<SearchViewModel, SearchPropertyDto>().ReverseMap();
-            CreateMap<ApplicationUserViewModel, ApplicationUserDto>().ReverseMap();
+            CreateMap<ApplicationUserDto, ApplicationUserViewModel>().ReverseMap();
         }
     }
 }

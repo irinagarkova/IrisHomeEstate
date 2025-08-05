@@ -9,20 +9,21 @@ namespace HomeEstate.Services.Core.Interfaces
         Task UpdatePropertyAsync(PropertyDto property); //Edit
         Task DeletePropertyAsync(int id);
         Task<ICollection<PropertyDto>> GetPropertiesByUserIdAsync(string userId);
-        Task<PaginatedDto<PropertyDto>> GetAllPropertiesAsync(int page, int pageSize);
+        Task<Pagination<PropertyDto>> GetAllPropertiesAsync(int page, int pageSize);
         Task<ICollection<PropertyDto>> GetAllPropertiesAsync(SearchPropertyDto search); // Search
 
         // New methods for rent/sale functionality
         Task<ICollection<PropertyDto>> GetPropertiesByTypeAsync(PropertyListingType type);
         Task<ICollection<PropertyDto>> GetPropertiesForSaleAsync();
         Task<ICollection<PropertyDto>> GetPropertiesForRentAsync();
-        Task<PaginatedDto<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria);
+        Task<Pagination<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria);
         Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId);
-		IEnumerable<LocationDto> GetAllLocations();
+		Task<IEnumerable<LocationDto>> GetAllLocations();
 
         Task<RentalStatisticsDto> GetRentalStatisticsAsync(string userId);
         Task<int> GetTotalPropertiesCount();
         Task<List<PropertyDto>> GetRecentProperties(int count);
+        Task<ICollection<PropertyDto>> GetSimilarPropertiesAsync(int propertyId, int count);
     }
 
 }

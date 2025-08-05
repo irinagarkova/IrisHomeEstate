@@ -2,15 +2,25 @@
 @using Microsoft.AspNetCore.Identity
     @if (User.Identity.IsAuthenticated)
     {
-        <li class="nav-item">
-            <a class="nav-link" asp-controller="FavoriteProperty" asp-action="Index">
-                My Favorite Properties
-            </a>
-        </li>
-        <li class="nav-item">
-            Hello @User.Identity?.Name!
-        </li>
-        <li class="nav-item">
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link" href="/Admin">
+                    Admin Panel
+                </a>
+            </li>
+        }
+@* 
+         <li class="nav-item">
+             <a class="nav-link" asp-controller="MyProperty" asp-action="Index">My Properties </a>
+         </li> *@
+          <li class="nav-item">
+             <a class="nav-link" asp-controller="FavoriteProperty" asp-action="Index"> My Favorites </a>
+         </li> 
+         <li class="nav-item">
+             @User.Identity?.Name.Split("@").First()
+         </li>
+         <li class="nav-item">
             <form class="form-inline" asp-controller="Auth" asp-action="Logout">
                 <button type="submit" class="nav-link btn">Logout</button>
             </form>

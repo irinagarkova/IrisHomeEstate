@@ -1,0 +1,224 @@
+﻿/* Existing styles */
+.search-tabs {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+body {
+    padding-top: 70px;
+}
+
+.mb-3 {
+    text-align: center;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+    .tab.active {
+        color: #007bff;
+        border-bottom-color: #007bff;
+        background: rgba(0, 123, 255, 0.1);
+    }
+
+    .tab:hover {
+        color: #007bff;
+        background: rgba(0, 123, 255, 0.05);
+    }
+
+.rental-fields {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+    .rental-fields.hidden {
+        display: none;
+    }
+
+    .rental-fields h6 {
+        color: #28a745;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.required-indicator {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.property-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+    .property-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+#priceField {
+    transition: all 0.3s ease;
+}
+
+.fade-transition {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+    .fade-transition.show {
+        opacity: 1;
+    }
+
+/* ===== FAVORITE BUTTON FIXES ===== */
+
+/* Ensure proper positioning context */
+.property-card .position-relative {
+    position: relative !important;
+}
+
+.property-card .position-absolute {
+    position: absolute !important;
+}
+
+/* Favorite button specific styling */
+.favorite-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    z-index: 15 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+    .favorite-btn:hover {
+        background: rgba(255, 255, 255, 1) !important;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .favorite-btn:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .favorite-btn i {
+        font-size: 16px !important;
+        transition: all 0.3s ease;
+    }
+
+    .favorite-btn:hover i {
+        transform: scale(1.1);
+    }
+
+/* Ensure the favorite button container is properly positioned */
+.property-card .position-absolute.top-0.end-0 {
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 20 !important;
+}
+
+/* Badge positioning fix */
+.property-card .position-absolute.top-0.start-0 {
+    top: 1px !important;
+    left: 1px !important;
+    z-index: 10 !important;
+}
+
+/* Ensure carousel controls don't interfere */
+.carousel-control-prev,
+.carousel-control-next {
+    z-index: 5 !important;
+}
+
+/* Make sure images don't overlap buttons */
+.property-card .carousel-inner,
+.property-card .card-img-top {
+    position: relative;
+    z-index: 1;
+}
+
+/* Additional safety for button visibility */
+.property-card .btn-light {
+    color: #495057 !important;
+}
+
+    .property-card .btn-light:hover {
+        color: #495057 !important;
+    }
+
+/* Heart icon color fixes */
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Animation for heart */
+.favorite-btn i.fas.fa-heart {
+    animation: heartBeat 0.6s ease-in-out;
+}
+
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.2);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+
+    75% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Mobile responsiveness for favorite button */
+@media (max-width: 768px) {
+    .favorite-btn {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+        .favorite-btn i {
+            font-size: 14px !important;
+        }
+
+    .property-card .position-absolute.top-0.end-0 {
+        top: 5px !important;
+        right: 5px !important;
+    }
+
+    .property-card .position-absolute.top-0.start-0 {
+        top: 5px !important;
+        left: 5px !important;
+    }
+}

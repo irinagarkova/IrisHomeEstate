@@ -61,7 +61,7 @@ namespace HomeEstate.Services.Core.Services
             }
         }
 
-        public async Task<PaginatedDto<PropertyDto>> GetAllPropertiesAsync(int page, int pageSize)
+        public async Task<Pagination<PropertyDto>> GetAllPropertiesAsync(int page, int pageSize)
         {
             // Validate pagination parameters
             page = Math.Max(1, page); // Ensure page is at least 1
@@ -81,7 +81,7 @@ namespace HomeEstate.Services.Core.Services
                 .ToListAsync();
 
             var mappedProps = mapper.Map<List<PropertyDto>>(properties);
-            return new PaginatedDto<PropertyDto>
+            return new Pagination<PropertyDto>
             {
                 Items = mappedProps,
                 CurrentPage = page,
@@ -155,7 +155,15 @@ namespace HomeEstate.Services.Core.Services
                 throw new NotFoundException("Property", property.Id);
             }
 
-            mapper.Map(property, propertyToUpdate);
+            //mapper.Map(property, propertyToUpdate);
+            propertyToUpdate.LocationId = property.LocationId;
+            propertyToUpdate.Price = property.Price;
+            propertyToUpdate.CreatedOn = property.CreatedOn;
+            propertyToUpdate.AvailableFrom = property.AvailableFrom;
+            propertyToUpdate.Area = property.Area;
+            propertyToUpdate.CategoryId = property.CategoryId;
+            propertyToUpdate.ListingType = property.ListingType;
+            propertyToUpdate.PropertyType = property.PropertyType;
 
             // Обновяване на снимки
             if (property.Images != null && property.Images.Any())
@@ -223,40 +231,36 @@ namespace HomeEstate.Services.Core.Services
         {
             return await GetPropertiesByTypeAsync(PropertyListingType.Rent);
         }
-        public async Task<PaginatedDto<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria)
+        public async Task<Pagination<PropertyDto>> SearchPropertiesAsync(PropertySearchDto searchCriteria)
         {
-
             var query = dbContext.Properties
-                .Include(p => p.Location)
-                .Include(p => p.Category)
-                .Include(p => p.Images)
-                .Include(p => p.FavoriteProperties)
-                .Where(p => !p.IsDeleted);
+       .Include(p => p.Location)
+       .Include(p => p.Category)
+       .Include(p => p.Images)
+       .Include(p => p.FavoriteProperties)
+       .Where(p => !p.IsDeleted);
 
-            // Apply filters
             if (!string.IsNullOrEmpty(searchCriteria.Location))
             {
-                query = query.Where(p => p.Location.City.Contains(searchCriteria.Location) ||
-                                        p.Location.Address.Contains(searchCriteria.Location));
-                Console.WriteLine($"After location filter: {await query.CountAsync()} properties");
+                var locationLower = searchCriteria.Location.ToLower();
+                query = query.Where(p =>
+                    p.Location.City.ToLower().Contains(locationLower) ||
+                    p.Location.Address.ToLower().Contains(locationLower));
             }
 
             if (searchCriteria.CategoryId.HasValue)
             {
                 query = query.Where(p => p.CategoryId == searchCriteria.CategoryId.Value);
-                Console.WriteLine($"After category filter: {await query.CountAsync()} properties");
             }
 
             if (searchCriteria.ListingType.HasValue)
             {
-                query = query.Where(p => p.ListingType == searchCriteria.ListingType.Value ||
-                                        p.ListingType == PropertyListingType.Both);
-                Console.WriteLine($"After listing type filter: {await query.CountAsync()} properties");
+                query = query.Where(p =>
+                    p.ListingType == searchCriteria.ListingType.Value ||
+                    p.ListingType == PropertyListingType.Both);
             }
 
-            // Ако търсим за Sale properties 
-            if (searchCriteria.ListingType == PropertyListingType.Sale ||
-                (!searchCriteria.ListingType.HasValue && searchCriteria.MaxPrice.HasValue))
+            if (searchCriteria.ListingType == PropertyListingType.Sale || !searchCriteria.ListingType.HasValue)
             {
                 if (searchCriteria.MinPrice.HasValue)
                 {
@@ -267,13 +271,12 @@ namespace HomeEstate.Services.Core.Services
                 {
                     query = query.Where(p => p.Price <= searchCriteria.MaxPrice.Value);
                 }
-                Console.WriteLine($"After sale price filter: {await query.CountAsync()} properties");
             }
 
-            // Ако търсим за Rent properties
             if (searchCriteria.ListingType == PropertyListingType.Rent ||
                 searchCriteria.ListingType == PropertyListingType.Both ||
-                (!searchCriteria.ListingType.HasValue && searchCriteria.MaxRent.HasValue))
+                searchCriteria.MinRent.HasValue ||
+                searchCriteria.MaxRent.HasValue)
             {
                 if (searchCriteria.MinRent.HasValue)
                 {
@@ -284,17 +287,6 @@ namespace HomeEstate.Services.Core.Services
                 {
                     query = query.Where(p => p.MonthlyRent.HasValue && p.MonthlyRent <= searchCriteria.MaxRent.Value);
                 }
-
-                if (searchCriteria.PetsAllowed.HasValue)
-                {
-                    query = query.Where(p => p.PetsAllowed == searchCriteria.PetsAllowed.Value);
-                }
-
-                if (searchCriteria.IsFurnished.HasValue)
-                {
-                    query = query.Where(p => p.IsFurnished == searchCriteria.IsFurnished.Value);
-                }
-                Console.WriteLine($"After rent filters: {await query.CountAsync()} properties");
             }
 
             if (searchCriteria.MinArea.HasValue)
@@ -307,16 +299,33 @@ namespace HomeEstate.Services.Core.Services
                 query = query.Where(p => p.Area <= searchCriteria.MaxArea.Value);
             }
 
-            // Сортиране / rent
+            if (searchCriteria.Bedrooms.HasValue)
+            {
+                var propertyType = (PropertyType)searchCriteria.Bedrooms.Value;
+                query = query.Where(p => p.PropertyType == propertyType);
+            }
+
+            if (searchCriteria.PetsAllowed.HasValue)
+            {
+                query = query.Where(p => p.PetsAllowed == searchCriteria.PetsAllowed.Value);
+            }
+
+            if (searchCriteria.IsFurnished.HasValue)
+            {
+                query = query.Where(p => p.IsFurnished == searchCriteria.IsFurnished.Value);
+            }
+
+            // Sorting
             query = searchCriteria.SortBy?.ToLower() switch
             {
-                "price-asc" => query.OrderBy(p => p.ListingType == PropertyListingType.Rent ? p.MonthlyRent : p.Price),
-                "price-desc" => query.OrderByDescending(p => p.ListingType == PropertyListingType.Rent ? p.MonthlyRent : p.Price),
+                "price-asc" => query.OrderBy(p => p.ListingType == PropertyListingType.Rent ? p.MonthlyRent ?? p.Price : p.Price),
+                "price-desc" => query.OrderByDescending(p => p.ListingType == PropertyListingType.Rent ? p.MonthlyRent ?? p.Price : p.Price),
                 "date-asc" => query.OrderBy(p => p.CreatedOn),
                 "date-desc" => query.OrderByDescending(p => p.CreatedOn),
+                "newest" => query.OrderByDescending(p => p.CreatedOn),
                 "area-asc" => query.OrderBy(p => p.Area),
                 "area-desc" => query.OrderByDescending(p => p.Area),
-                _ => query.OrderByDescending(p => p.CreatedOn)
+                _ => query.OrderByDescending(p => p.CreatedOn) 
             };
 
             var properties = await query.ToListAsync();
@@ -328,19 +337,15 @@ namespace HomeEstate.Services.Core.Services
                 return dto;
             }).ToList();
 
-            int totalProperties = result.Count;
-
-            // Calculate total pages
-            var totalPages = (int)Math.Ceiling((double)totalProperties / 10);
-
-            return new PaginatedDto<PropertyDto>
+            return new Pagination<PropertyDto>
             {
                 Items = result,
                 CurrentPage = 1,
-                TotalPages = totalPages,
-                PageSize = 10,
-                TotalItems = totalProperties
+                TotalPages = 1,
+                PageSize = result.Count,
+                TotalItems = result.Count
             };
+
         }
 
         public async Task<PropertyStatisticsDto> GetUserPropertyStatisticsAsync(string userId)
@@ -386,9 +391,9 @@ namespace HomeEstate.Services.Core.Services
 
         }
 
-		public IEnumerable<LocationDto> GetAllLocations()
+		public async Task<IEnumerable<LocationDto>> GetAllLocations()
 		{
-			return dbContext.Locations
+			return await dbContext.Locations
 					.Select(l => new LocationDto
 					{
 						Id = l.Id,
@@ -396,7 +401,7 @@ namespace HomeEstate.Services.Core.Services
 						Address = l.Address
 					})
 					.OrderBy(l => l.City)
-					.ToList();
+					.ToListAsync();
 		}
         private void ValidateRentalProperties(PropertyDto property, Dictionary<string, string> errors = null)
         {
@@ -473,5 +478,129 @@ namespace HomeEstate.Services.Core.Services
             }
             return mapped;
         }
+
+        //public async Task<ICollection<PropertyDto>> GetSimilarPropertiesAsync(int propertyId, int count = 4)
+        //{
+        //    Първо вземете текущия имот за да знаете категорията и локацията
+        //    var currentProperty = await dbContext.Properties
+        //        .Include(p => p.Category)
+        //        .Include(p => p.Location)
+        //        .FirstOrDefaultAsync(p => p.Id == propertyId && !p.IsDeleted);
+
+        //    if (currentProperty == null)
+        //        return new List<PropertyDto>();
+
+        //    var similarProperties = await dbContext.Properties
+        //        .Include(p => p.Location)
+        //        .Include(p => p.Category)
+        //        .Include(p => p.Images)
+        //        .Include(p => p.FavoriteProperties)
+        //        .Where(p => !p.IsDeleted &&
+        //                   p.Id != propertyId && // Изключете текущия имот
+        //                   (p.CategoryId == currentProperty.CategoryId || // Същата категория
+        //                    p.LocationId == currentProperty.LocationId)) // Или същата локация
+        //        .OrderBy(p => p.CategoryId == currentProperty.CategoryId ? 0 : 1) // Приоритет на категорията
+        //        .ThenBy(p => Math.Abs(p.Price - currentProperty.Price)) // Сортиране по близка цена
+        //        .Take(count)
+        //        .ToListAsync();
+
+        //    Ако няма достатъчно подобни, добавете други рандом имоти
+        //    if (similarProperties.Count < count)
+        //    {
+        //        var additionalProperties = await dbContext.Properties
+        //            .Include(p => p.Location)
+        //            .Include(p => p.Category)
+        //            .Include(p => p.Images)
+        //            .Include(p => p.FavoriteProperties)
+        //            .Where(p => !p.IsDeleted &&
+        //                       p.Id != propertyId &&
+        //                       !similarProperties.Select(sp => sp.Id).Contains(p.Id))
+        //            .OrderBy(x => Guid.NewGuid()) // Рандом подредба
+        //            .Take(count - similarProperties.Count)
+        //            .ToListAsync();
+
+        //        similarProperties.AddRange(additionalProperties);
+        //    }
+
+        //    return similarProperties.Select(p => mapper.Map<PropertyDto>(p)).ToList();
+        //}
+
+        // Добавете този метод в края на PropertyService класа, преди затварящата скоба
+
+        public async Task<ICollection<PropertyDto>> GetSimilarPropertiesAsync(int propertyId, int count)
+        {
+            try
+            {
+                // Вземане на основния имот
+                var mainProperty = await dbContext.Properties
+                    .Include(p => p.Location)
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == propertyId && !p.IsDeleted);
+
+                if (mainProperty == null)
+                {
+                    return new List<PropertyDto>();
+                }
+
+                // Търсене на подобни имоти според критерии:
+                // 1. Същия тип (категория)
+                // 2. Подобна цена (± 30%)
+                // 3. Същия град
+                // 4. Не включваме същия имот
+
+                var priceRange = mainProperty.Price * 0.3m; // 30% разлика в цената
+                var minPrice = mainProperty.Price - priceRange;
+                var maxPrice = mainProperty.Price + priceRange;
+
+                var similarProperties = await dbContext.Properties
+                    .Include(p => p.Location)
+                    .Include(p => p.Category)
+                    .Include(p => p.Images)
+                    .Include(p => p.FavoriteProperties)
+                    .Where(p => !p.IsDeleted &&
+                               p.Id != propertyId && // Не включваме същия имот
+                               (
+                                   // Същата категория
+                                   p.CategoryId == mainProperty.CategoryId ||
+                                   // Същия град
+                                   p.LocationId == mainProperty.LocationId ||
+                                   // Подобна цена
+                                   (p.Price >= minPrice && p.Price <= maxPrice)
+                               ))
+                    .OrderBy(p =>
+                        // Сортиране по приоритет - най-близо до основния имот
+                        Math.Abs(p.Price - mainProperty.Price) +
+                        (p.CategoryId == mainProperty.CategoryId ? 0 : 1000000) +
+                        (p.LocationId == mainProperty.LocationId ? 0 : 500000))
+                    .Take(count)
+                    .ToListAsync();
+
+                // Ако не намерим достатъчно подобни, добавяме други случайни имоти
+                if (similarProperties.Count < count)
+                {
+                    var additionalProperties = await dbContext.Properties
+                        .Include(p => p.Location)
+                        .Include(p => p.Category)
+                        .Include(p => p.Images)
+                        .Include(p => p.FavoriteProperties)
+                        .Where(p => !p.IsDeleted &&
+                                   p.Id != propertyId &&
+                                   !similarProperties.Select(sp => sp.Id).Contains(p.Id))
+                        .OrderByDescending(p => p.CreatedOn)
+                        .Take(count - similarProperties.Count)
+                        .ToListAsync();
+
+                    similarProperties.AddRange(additionalProperties);
+                }
+
+                return similarProperties.Select(p => mapper.Map<PropertyDto>(p)).ToList();
+            }
+            catch (Exception ex)
+            {
+                // В случай на грешка връщаме празен списък
+                return new List<PropertyDto>();
+            }
+        }
+
     }
 }

@@ -10,9 +10,9 @@ namespace HomeEstate.Services.Core.Interfaces
         Task<ApplicationUser> UpdateApplicationUser (ApplicationUserDto applicationUser);
         Task<int> GetTotalUsersCount();
         Task<List<ApplicationUserDto>> GetRecentUsers(int count);
-        Task<PaginatedDto<ApplicationUserDto>> GetAllUsersAsync(int page, int pageSize);
+        Task<Pagination<ApplicationUserDto>> GetAllUsersAsync(int page, int pageSize);
         Task DeleteUserAsync(string id);
-        Task<PaginatedDto<ApplicationUserWithRoleDto>> GetAllUsersWithRolesAsync(int page, int pageSize);
+        Task<Pagination<ApplicationUserWithRoleDto>> GetAllUsersWithRolesAsync(int page, int pageSize);
         Task<List<string>> GetAllRolesAsync();
         Task<List<string>> GetUserRolesAsync(string userId);
         Task<IdentityResult> AddUserToRoleAsync(string userId, string roleName);

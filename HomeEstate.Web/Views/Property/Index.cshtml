@@ -5,9 +5,14 @@
 @{
     ViewData["Title"] = "Properties";
 }
-@if ((bool)ViewData["SearchApplied"])
+
+<!-- CSS файлове директно в view-то -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="~/css/propertiesPage.css">
+
+@if ((bool?)ViewData["SearchApplied"] == true)
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info" id="searchResultsAlert">
         <i class="fas fa-search"></i>
         Search Results: Found @ViewData["ResultsCount"] properties
         @{
@@ -28,64 +33,137 @@
                 <span class="badge bg-secondary">Type: @criteria.ListingType</span>
             }
         }
+        <button type="button" class="btn-close" onclick="clearSearch()"></button>
     </div>
 }
+
 <div class="container-fluid mt-4">
     <!-- Search and Filter Section -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h4 class="mb-3">Search Properties</h4>
-                    <div class="search-tabs">
-                        <button type="button" class="tab active" data-listing-type="1">Buy</button>
-                        <button type="button" class="tab" data-listing-type="2">Rent</button>
-                    </div>
-                    <form id="searchForm" class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Location</label>
-                            <input type="text" class="form-control" id="searchLocation" name="Location" placeholder="City or neighborhood">
+                    <h4 class="mb-3">
+                        <i class="fas fa-search me-2"></i>Search Properties
+                    </h4>
 
+                    <!-- Tabs for Buy/Rent -->
+                    <div class="search-tabs">
+                        <button type="button" class="tab active" data-listing-type="1" id="buyTab">
+                            <i class="fas fa-home me-1"></i>Buy
+                        </button>
+                        <button type="button" class="tab" data-listing-type="2" id="rentTab">
+                            <i class="fas fa-key me-1"></i>Rent
+                        </button>
+                    </div>
+
+                    <form id="searchForm" class="row g-3">
+                        <input type="hidden" id="listingTypeInput" name="ListingType" value="1">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Location -->
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>Location
+                            </label>
+                            <input type="text" class="form-control" id="searchLocation"
+                                   name="Location" placeholder="City or neighborhood">
                         </div>
+
+                        <!-- Property Type -->
                         <div class="col-md-2">
-                            <label class="form-label">Property Type</label>
-                            <select class="form-select" id="searchCategory">
+                            <label class="form-label">
+                                <i class="fas fa-building me-1"></i>Property Type
+                            </label>
+                            <select class="form-select" id="searchCategory" name="CategoryId">
                                 <option value="">All Types</option>
-                                <option value="1" >Apartment</option>
-                                <option value="2" >House</option>
-                                <option value="3" >Office</option>
-                                <option value="4" >Villa</option>
+                                <option value="1">Apartment</option>
+                                <option value="2">House</option>
+                                <option value="3">Office</option>
+                                <option value="4">Villa</option>
                             </select>
                         </div>
+
+                        <!-- Property Size -->
                         <div class="col-md-2">
-                            <label class="form-label">Property Size</label>
-                            <select class="form-select">
-                            <option value="">Any Size</option>
-                            <option value="1">1 Bedroom</option>
-                            <option value="2">2 Bedrooms</option>
-                            <option value="3">3 Bedrooms</option>
-                            <option value="4">4+ Bedrooms</option>
-                        </select>
+                            <label class="form-label">
+                                <i class="fas fa-bed me-1"></i>Property Size
+                            </label>
+                            <select class="form-select" id="bedroomsSelect" name="Bedrooms">
+                                <option value="">Any Size</option>
+                                <option value="1">1 Bedroom</option>
+                                <option value="2">2 Bedrooms</option>
+                                <option value="3">3 Bedrooms</option>
+                                <option value="4">4+ Bedrooms</option>
+                            </select>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Max Price</label>
-                            <input type="number" class="form-control" id="maxPrice" placeholder="Any">
+
+                        <!-- Price Field (changes between sale/rent) -->
+                        <div class="col-md-2" id="priceField">
+                            <label class="form-label" id="priceLabel">
+                                <i class="fas fa-dollar-sign me-1"></i>Max Price
+                            </label>
+                            <input type="number" class="form-control" id="maxPrice"
+                                   name="MaxPrice" placeholder="Any">
                         </div>
+
+                        <!-- Sort By -->
                         <div class="col-md-2">
-                            <label class="form-label">Sort By</label>
-                            <select class="form-select" id="sortBy">
+                            <label class="form-label">
+                                <i class="fas fa-sort me-1"></i>Sort By
+                            </label>
+                            <select class="form-select" id="sortBy" name="SortBy">
                                 <option value="newest">Newest First</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
-                                <option value="area">Area: Largest First</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="area-desc">Area: Largest First</option>
                             </select>
                         </div>
+
+                        <!-- Search Button -->
                         <div class="col-md-1 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-search"></i> Search
+                                <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </form>
+
+                    <!-- Additional Rental Fields -->
+                    <div class="rental-fields hidden" id="rentalFields">
+                        <h6 class="mt-3">
+                            <i class="fas fa-home me-2"></i>Rental Preferences
+                        </h6>
+                        <!-- Checkboxes for rental preferences -->
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="IsFurnished" value="true" id="furnishedCheck">
+                                    <label class="form-check-label" for="furnishedCheck">
+                                        <i class="fas fa-couch me-1"></i>Furnished
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="PetsAllowed" value="true" id="petsCheck">
+                                    <label class="form-check-label" for="petsCheck">
+                                        <i class="fas fa-paw me-1"></i>Pets Allowed
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="HasParking" value="true" id="parkingCheck">
+                                    <label class="form-check-label" for="parkingCheck">
+                                        <i class="fas fa-car me-1"></i>Parking Available
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,7 +173,18 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h5 id="resultCount" class="mb-0">Showing @Model.Count() properties</h5>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">
+                <i class="fas fa-times"></i> Clear Search
+            </button>
         </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center d-none my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Searching properties...</p>
     </div>
 
     <!-- Properties Grid -->
@@ -137,7 +226,7 @@
                                 <img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">
                             }
 
-                            <!-- Property Badge - Fixed Logic -->
+                            <!-- Property Badge -->
                             <div class="position-absolute top-0 start-0 m-2">
                                 @if (property.ListingType == PropertyListingType.Sale)
                                 {
@@ -153,7 +242,6 @@
                                     <span class="badge bg-info">For Rent</span>
                                 }
                             </div>
-
 
                             <!-- Favorite Button -->
                             @if (User.Identity.IsAuthenticated)
@@ -200,278 +288,286 @@
                 </div>
             }
         </div>
+    </div>
 
-        <!-- List View (Hidden by default) -->
-        <div class="d-none" id="propertiesList">
-            @foreach (var property in Model)
-            {
-                <div class="card mb-3 property-item" data-property-id="@property.Id">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            @if (property.Images != null && property.Images.Any())
-                            {
-                                <img src="@property.Images.First().ImageUrl" class="img-fluid rounded-start h-100" alt="Property image" style="object-fit: cover;">
-                            }
-                            else
-                            {
-                                <img src="/images/no-image.png" class="img-fluid rounded-start h-100" alt="No image" style="object-fit: cover;">
-                            }
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h5 class="card-title">@property.Title</h5>
-                                    @if (User.Identity.IsAuthenticated)
-                                    {
-                                        <button class="btn btn-sm btn-light rounded-circle favorite-btn" data-property-id="@property.Id" data-is-favorite="@property.IsFavorite.ToString().ToLower()">
-                                            <i class="@(property.IsFavorite ? "fas" : "far") fa-heart text-danger"></i>
-                                        </button>
-                                    }
+    <!-- No Results Message -->
+    <div id="noResults" class="text-center d-none my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                <h5>No properties found</h5>
+                <p class="text-muted">Try adjusting your search criteria or browse all properties</p>
+                <button type="button" class="btn btn-primary" onclick="clearSearch()">
+                    <i class="fas fa-home"></i> Browse All Properties
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript код директно в view-то -->
+<script>
+    console.log('jQuery available?', typeof $ !== 'undefined');
+    $(document).ready(function () {
+        // Дефинираме променлива за authentication статуса в началото
+        const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
+
+        let currentListingType = 1; // Default to Buy
+        let hasActiveSearch = false;
+
+        // Get DOM elements
+        const buyTab = $('#buyTab');
+        const rentTab = $('#rentTab');
+        const listingTypeInput = $('#listingTypeInput');
+        const rentalFields = $('#rentalFields');
+        const priceLabel = $('#priceLabel');
+        const maxPriceInput = $('#maxPrice');
+        const searchForm = $('#searchForm');
+
+        // Tab switching functionality
+        function switchTab(activeTab, listingType) {
+            // Update tab appearance
+            $('.tab').removeClass('active');
+            activeTab.addClass('active');
+
+            currentListingType = parseInt(listingType);
+            listingTypeInput.val(listingType);
+
+            // Show/hide rental fields and update labels
+            if (listingType === '2') { // Rent
+                showRentalFields();
+                updateForRent();
+            } else { // Buy
+                hideRentalFields();
+                updateForSale();
+            }
+        }
+
+        function showRentalFields() {
+            rentalFields.removeClass('hidden d-none').show();
+        }
+
+        function hideRentalFields() {
+            rentalFields.addClass('hidden d-none').hide();
+        }
+
+        function updateForRent() {
+            priceLabel.html('<i class="fas fa-dollar-sign me-1"></i>Max Rent Price');
+            maxPriceInput.attr('name', 'MaxRent').attr('placeholder', '2000').val('');
+        }
+
+        function updateForSale() {
+            priceLabel.html('<i class="fas fa-dollar-sign me-1"></i>Max Price');
+            maxPriceInput.attr('name', 'MaxPrice').attr('placeholder', 'Any').val('');
+        }
+
+        // Event listeners for tabs
+        buyTab.on('click', function () {
+            switchTab($(this), '1');
+        });
+
+        rentTab.on('click', function () {
+            switchTab($(this), '2');
+        });
+
+        // Form submission with AJAX
+        searchForm.on('submit', function (e) {
+            e.preventDefault();
+            performSearch();
+        });
+
+        // Real-time search with debounce
+        let searchTimeout;
+        $('#searchLocation, #maxPrice').on('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (hasActiveSearch) {
+                    performSearch();
+                }
+            }, 500);
+        });
+
+        // Immediate search on select changes
+        $('#searchCategory, #bedroomsSelect, #sortBy, #furnishedCheck, #petsCheck, #parkingCheck').on('change', function () {
+            if (hasActiveSearch) {
+                performSearch();
+            }
+        });
+
+        // Main search function
+        function performSearch() {
+            hasActiveSearch = true;
+            showLoading(true);
+
+            const formData = {
+                Location: $('#searchLocation').val(),
+                CategoryId: $('#searchCategory').val() || null,
+                Bedrooms: $('#bedroomsSelect').val() || null,
+                ListingType: currentListingType,
+                SortBy: $('#sortBy').val(),
+                IsFurnished: $('#furnishedCheck').is(':checked') || null,
+                PetsAllowed: $('#petsCheck').is(':checked') || null
+            };
+
+            // Add price field based on listing type
+            if (currentListingType === 2) { // Rent
+                formData.MaxRent = $('#maxPrice').val() || null;
+            } else { // Sale
+                formData.MaxPrice = $('#maxPrice').val() || null;
+            }
+
+            // Remove null/empty values
+            Object.keys(formData).forEach(key => {
+                if (formData[key] === null || formData[key] === '' || formData[key] === false) {
+                    delete formData[key];
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("SearchAjax", "Property")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    showLoading(false);
+
+                    if (response.success) {
+                        updatePropertyDisplay(response.properties);
+                        updateSearchSummary(response.properties.length, response.hasSearchCriteria);
+
+                        if (response.properties.length === 0) {
+                            showNoResults(true);
+                        } else {
+                            showNoResults(false);
+                        }
+                    } else {
+                        showError('Search failed: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showLoading(false);
+                    showError('An error occurred while searching. Please try again.');
+                    console.error('Search error:', error);
+                }
+            });
+        }
+
+        // Update property display
+        function updatePropertyDisplay(properties) {
+            const container = $('#propertiesGrid');
+
+            if (properties.length === 0) {
+                container.empty();
+                return;
+            }
+
+            let html = '';
+            properties.forEach(function (property) {
+                html += buildPropertyCard(property);
+            });
+
+            container.html(html);
+
+            // Reinitialize Bootstrap carousels
+            $('.carousel').each(function () {
+                new bootstrap.Carousel(this, { interval: false });
+            });
+        }
+
+        // Build property card HTML
+        function buildPropertyCard(property) {
+            const listingTypeBadges = getListingTypeBadges(property.listingType);
+            const favoriteBtn = buildFavoriteButton(property);
+            const images = buildImageCarousel(property);
+
+            return `
+                    <div class="col property-item" data-property-id="${property.id}">
+                        <div class="card h-100 property-card">
+                            <div class="position-relative">
+                                ${images}
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    ${listingTypeBadges}
                                 </div>
-                                <p class="card-text">@property.Description</p>
-                                <p class="card-text">
-                                    <span class="text-primary fs-4 fw-bold">@property.Price.ToString("C")</span>
-                                    <span class="ms-3"><i class="fas fa-expand"></i> @property.Area m²</span>
-                                    <span class="ms-3"><i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "Unknown")</span>
+                                ${favoriteBtn}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate">${property.title}</h5>
+                                <p class="card-text text-primary fs-4 fw-bold mb-2">${formatPrice(property.price)}</p>
+                                <div class="d-flex justify-content-between text-muted small mb-2">
+                                    <span><i class="fas fa-bed"></i> ${getPropertyType(property.propertyType)}</span>
+                                    <span><i class="fas fa-expand"></i> ${property.area} m²</span>
+                                </div>
+                                <p class="card-text small text-muted">
+                                    <i class="fas fa-map-marker-alt"></i> ${property.location?.city || 'Unknown'}
                                 </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">Posted on @property.CreatedOn.ToString("MMM dd, yyyy")</small>
-                                    <a href="/Property/Details/@property.Id" class="btn btn-primary btn-sm">View Details</a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="far fa-heart"></i> ${property.favoriteCount} favorites
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock"></i> ${formatDate(property.createdOn)}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-grid gap-2">
+                                    <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
+                                        View Details <i class="fas fa-arrow-right"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                `;
+        }
+
+        // Helper functions
+        function getListingTypeBadges(listingType) {
+            switch (listingType) {
+                case 1: return '<span class="badge bg-success">For Sale</span>';
+                case 2: return '<span class="badge bg-info">For Rent</span>';
+                case 3: return '<span class="badge bg-success me-1">For Sale</span><span class="badge bg-info">For Rent</span>';
+                default: return '';
             }
-        </div>
-    </div>
+        }
 
-    <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="text-center d-none">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+        function getPropertyType(propertyType) {
+            const types = { 1: 'OneBedroom', 2: 'TwoBedrooms', 3: 'ThreeBedrooms', 4: 'MultipleBedrooms' };
+            return types[propertyType] || 'Unknown';
+        }
 
-    <!-- No Results Message -->
-    <div id="noResults" class="text-center d-none">
-        <img src="/images/no-results.svg" alt="No results" style="max-width: 300px;" class="mb-3">
-        <h5>No properties found</h5>
-        <p class="text-muted">Try adjusting your search criteria</p>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Complete AJAX search implementation for property search
-        $(document).ready(function () {
-            // View toggle functionality
-            $('#gridView').click(function () {
-                $(this).addClass('active');
-                $('#listView').removeClass('active');
-                $('#propertiesGrid').parent().removeClass('d-none');
-                $('#propertiesList').addClass('d-none');
-            });
-
-            $('#listView').click(function () {
-                $(this).addClass('active');
-                $('#gridView').removeClass('active');
-                $('#propertiesGrid').parent().addClass('d-none');
-                $('#propertiesList').removeClass('d-none');
-            });
-
-            // Search form submission
-            $('#searchForm').submit(function (e) {
-                e.preventDefault();
-                performSearch();
-            });
-
-            // Favorite button click handler
-            $(document).on('click', '.favorite-btn', function (e) {
-                e.preventDefault();
-                var btn = $(this);
-                var propertyId = btn.data('property-id');
-                var isFavorite = btn.data('is-favorite') === 'true';
-
-                $.ajax({
-                    url: isFavorite ? '/FavoriteProperty/Remove' : '/FavoriteProperty/Add',
-                    type: 'POST',
-                    data: {
-                        id: propertyId,
-                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            var icon = btn.find('i');
-                            if (isFavorite) {
-                                icon.removeClass('fas').addClass('far');
-                                btn.data('is-favorite', 'false');
-                            } else {
-                                icon.removeClass('far').addClass('fas');
-                                btn.data('is-favorite', 'true');
-                            }
-                            updateFavoriteCount(propertyId, response.favoriteCount);
-                        } else {
-                            alert(response.message || 'An error occurred');
-                        }
-                    },
-                    error: function () {
-                        alert('An error occurred while updating favorites');
-                    }
-                });
-            });
-
-            // Main search function
-            function performSearch() {
-                var searchData = {
-                    Location: $('#searchLocation').val(),
-                    CategoryId: $('#searchCategory').val(),
-                    MinPrice: $('#minPrice').val(),
-                    MaxPrice: $('#maxPrice').val(),
-                    SortBy: $('#sortBy').val(),
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                };
-
-                $('#loadingSpinner').removeClass('d-none');
-                $('#propertiesContainer').addClass('d-none');
-
-                $.ajax({
-                    url: '/Property/Search',
-                    type: 'POST', // Changed to POST to match your controller action
-                    data: searchData,
-                    success: function (response) {
-                        $('#loadingSpinner').addClass('d-none');
-
-                        if (response.success && response.properties && response.properties.length > 0) {
-                            updatePropertyDisplay(response.properties);
-                            $('#resultCount').text('Showing ' + response.properties.length + ' properties');
-                            $('#propertiesContainer').removeClass('d-none');
-                            $('#noResults').addClass('d-none');
-                        } else {
-                            $('#propertiesContainer').addClass('d-none');
-                            $('#noResults').removeClass('d-none');
-                            $('#resultCount').text('No properties found');
-                        }
-                    },
-                    error: function () {
-                        $('#loadingSpinner').addClass('d-none');
-                        alert('An error occurred while searching');
-                    }
-                });
-            }
-
-            // Function to update property display dynamically
-            function updatePropertyDisplay(properties) {
-                var gridHtml = '';
-                var listHtml = '';
-
-                // Build grid view HTML
-                properties.forEach(function (property) {
-                    // Grid view card
-                    gridHtml += `
-                        <div class="col property-item" data-property-id="${property.id}">
-                            <div class="card h-100 property-card">
-                                <div class="position-relative">
-                                    ${buildImageCarousel(property)}
-
-                                    <!-- Property Badge -->
-                                    <div class="position-absolute top-0 start-0 m-2">
-                                        <span class="badge bg-primary">For Sale</span>
-                                    </div>
-
-                                    <!-- Favorite Button -->
-                                    ${buildFavoriteButton(property)}
-                                </div>
-
-                                <div class="card-body">
-                                    <h5 class="card-title text-truncate">${property.title}</h5>
-                                    <p class="card-text text-primary fs-4 fw-bold mb-2">${formatPrice(property.price)}</p>
-
-                                    <div class="d-flex justify-content-between text-muted small mb-2">
-                                        <span><i class="fas fa-bed"></i> ${property.bedrooms || 3} Beds</span>
-                                        <span><i class="fas fa-expand"></i> ${property.area} m²</span>
-                                    </div>
-
-                                    <p class="card-text small text-muted">
-                                        <i class="fas fa-map-marker-alt"></i> ${property.location?.city || property.city || 'Unknown'}
-                                    </p>
-
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <small class="text-muted">
-                                            <i class="far fa-heart"></i> ${property.favoriteCount || 0} favorites
-                                        </small>
-                                        <small class="text-muted">
-                                            <i class="far fa-clock"></i> ${formatDate(property.createdOn)}
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <div class="card-footer bg-transparent">
-                                    <div class="d-grid gap-2">
-                                        <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
-                                            View Details <i class="fas fa-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+        function buildFavoriteButton(property) {
+            // Използваме променливата която дефинирахме в началото
+            if (isUserAuthenticated) {
+                return `
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <button class="btn btn-sm btn-light rounded-circle favorite-btn"
+                                    data-property-id="${property.id}"
+                                    data-is-favorite="${property.isFavorite}">
+                                <i class="${property.isFavorite ? 'fas' : 'far'} fa-heart text-danger"></i>
+                            </button>
                         </div>
                     `;
+            }
+            return '';
+        }
 
-                    // List view card
-                    listHtml += `
-                        <div class="card mb-3 property-item" data-property-id="${property.id}">
-                            <div class="row g-0">
-                                <div class="col-md-4">
-                                    ${buildListImage(property)}
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <h5 class="card-title">${property.title}</h5>
-                                            ${buildFavoriteButton(property)}
-                                        </div>
-                                        <p class="card-text">${property.description || ''}</p>
-                                        <p class="card-text">
-                                            <span class="text-primary fs-4 fw-bold">${formatPrice(property.price)}</span>
-                                            <span class="ms-3"><i class="fas fa-expand"></i> ${property.area} m²</span>
-                                            <span class="ms-3"><i class="fas fa-map-marker-alt"></i> ${property.location?.city || property.city || 'Unknown'}</span>
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">Posted on ${formatDate(property.createdOn)}</small>
-                                            <a href="/Property/Details/${property.id}" class="btn btn-primary btn-sm">View Details</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+        function buildImageCarousel(property) {
+            if (property.images && property.images.length > 0) {
+                let html = `<div id="carousel-${property.id}" class="carousel slide" data-bs-ride="carousel">
+                                   <div class="carousel-inner">`;
+
+                property.images.slice(0, 3).forEach((image, index) => {
+                    html += `<div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                   <img src="${image.imageUrl}" class="d-block w-100" alt="Property image"
+                                        style="height: 250px; object-fit: cover;">
+                                </div>`;
                 });
 
-                // Update the DOM
-                $('#propertiesGrid').html(gridHtml);
-                $('#propertiesList').html(listHtml);
-            }
+                html += '</div>';
 
-            // Helper function to build image carousel
-            function buildImageCarousel(property) {
-                if (property.images && property.images.length > 0) {
-                    var carouselHtml = `
-                        <div id="carousel-${property.id}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                    `;
-
-                    property.images.slice(0, 3).forEach(function (image, index) {
-                        carouselHtml += `
-                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                <img src="${image.imageUrl || image.url}" class="d-block w-100" alt="Property image" style="height: 250px; object-fit: cover;">
-                            </div>
-                        `;
-                    });
-
-                    carouselHtml += '</div>';
-
-                    if (property.images.length > 1) {
-                        carouselHtml += `
+                if (property.images.length > 1) {
+                    html += `
                             <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
                             </button>
@@ -479,65 +575,151 @@
                                 <span class="carousel-control-next-icon"></span>
                             </button>
                         `;
+                }
+
+                html += '</div>';
+                return html;
+            } else {
+                return '<img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">';
+            }
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(price);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit'
+            });
+        }
+
+        function updateSearchSummary(count, hasSearchCriteria) {
+            $('#resultCount').text(`Showing ${count} properties`);
+
+            if (hasSearchCriteria && count > 0) {
+                $('#clearSearchBtn').show();
+                showSearchAlert(count);
+            } else {
+                $('#clearSearchBtn').hide();
+                hideSearchAlert();
+            }
+        }
+
+        function showSearchAlert(count) {
+            let alertHtml = `
+                    <div class="alert alert-info" id="searchResultsAlert">
+                        <i class="fas fa-search"></i>
+                        Search Results: Found ${count} properties
+                        <button type="button" class="btn-close" onclick="clearSearch()"></button>
+                    </div>
+                `;
+
+            $('#searchResultsAlert').remove();
+            $('.container-fluid').prepend(alertHtml);
+        }
+
+        function hideSearchAlert() {
+            $('#searchResultsAlert').remove();
+        }
+
+        function showLoading(show) {
+            if (show) {
+                $('#loadingSpinner').removeClass('d-none');
+                $('#propertiesContainer').css('opacity', '0.5');
+            } else {
+                $('#loadingSpinner').addClass('d-none');
+                $('#propertiesContainer').css('opacity', '1');
+            }
+        }
+
+        function showNoResults(show) {
+            if (show) {
+                $('#noResults').removeClass('d-none');
+                $('#propertiesContainer').addClass('d-none');
+            } else {
+                $('#noResults').addClass('d-none');
+                $('#propertiesContainer').removeClass('d-none');
+            }
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        // Clear search function
+        window.clearSearch = function () {
+            hasActiveSearch = false;
+            searchForm[0].reset();
+            $('#clearSearchBtn').hide();
+            hideSearchAlert();
+            location.reload(); // Reload to show all properties
+        };
+
+        // Favorite button functionality
+        $(document).on('click', '.favorite-btn', function (e) {
+            e.preventDefault();
+            const btn = $(this);
+            const propertyId = btn.data('property-id');
+            const isFavorite = btn.data('is-favorite') === true;
+
+            $.ajax({
+                url: isFavorite ? '@Url.Action("Remove", "FavoriteProperty")' : '@Url.Action("Add", "FavoriteProperty")',
+                type: 'POST',
+                data: {
+                    id: propertyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    const icon = btn.find('i');
+                    if (isFavorite) {
+                        icon.removeClass('fas').addClass('far');
+                        btn.data('is-favorite', false);
+                    } else {
+                        icon.removeClass('far').addClass('fas');
+                        btn.data('is-favorite', true);
                     }
-
-                    carouselHtml += '</div>';
-                    return carouselHtml;
-                } else {
-                    return '<img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">';
+                },
+                error: function () {
+                    showError('An error occurred while updating favorites');
                 }
-            }
-
-            // Helper function to build list view image
-            function buildListImage(property) {
-                if (property.images && property.images.length > 0) {
-                    return `<img src="${property.images[0].imageUrl || property.images[0].url}" class="img-fluid rounded-start h-100" alt="Property image" style="object-fit: cover;">`;
-                } else {
-                    return '<img src="/images/no-image.png" class="img-fluid rounded-start h-100" alt="No image" style="object-fit: cover;">';
-                }
-            }
-
-            // Helper function to build favorite button (only if user is authenticated)
-            function buildFavoriteButton(property) {
-                // Check if user is authenticated (you might need to adjust this check)
-                var isAuthenticated = $('input[name="__RequestVerificationToken"]').length > 0;
-
-                if (isAuthenticated) {
-                    var isFavorite = property.isFavorite || false;
-                    return `
-                        <div class="position-absolute top-0 end-0 m-2">
-                            <button class="btn btn-sm btn-light rounded-circle favorite-btn" data-property-id="${property.id}" data-is-favorite="${isFavorite.toString().toLowerCase()}">
-                                <i class="${isFavorite ? 'fas' : 'far'} fa-heart text-danger"></i>
-                            </button>
-                        </div>
-                    `;
-                }
-                return '';
-            }
-
-            // Helper function to format price
-            function formatPrice(price) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD' // Change to your currency
-                }).format(price);
-            }
-
-            // Helper function to format date
-            function formatDate(dateString) {
-                var date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: '2-digit',
-                    year: 'numeric'
-                });
-            }
-
-            // Function to update favorite count
-            function updateFavoriteCount(propertyId, count) {
-                var propertyItems = $('[data-property-id="' + propertyId + '"]');
-                propertyItems.find('small:contains("favorites")').html('<i class="far fa-heart"></i> ' + count + ' favorites');
-            }
+            });
         });
-    </script>
-}
+
+        // Initialize form in sale mode
+        updateForSale();
+    });
+
+    // Utility function to show notifications
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+        notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+        notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+            `;
+
+        document.body.appendChild(notification);
+
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 3000);
+    }
+</script>

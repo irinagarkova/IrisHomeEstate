@@ -22,5 +22,21 @@ namespace HomeEstate.Services.Core.Dtos
         public bool? PetsAllowed { get; set; }
         public bool? IsFurnished { get; set; }
         public string? SortBy { get; set; }
+
+
+        public bool HasSearchCriteria => 
+            !string.IsNullOrEmpty(Location) ||
+            CategoryId.HasValue ||
+            MinPrice.HasValue ||
+            MaxPrice.HasValue ||
+            MinRent.HasValue ||
+            MaxRent.HasValue ||
+            MinArea.HasValue ||
+            MaxArea.HasValue ||
+            ListingType.HasValue ||
+            Bedrooms.HasValue ||
+            PetsAllowed.HasValue ||
+            IsFurnished.HasValue ||
+            !string.IsNullOrEmpty(SortBy);
     }
 }

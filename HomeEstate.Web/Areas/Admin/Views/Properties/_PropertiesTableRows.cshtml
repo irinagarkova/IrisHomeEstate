@@ -1,6 +1,6 @@
-﻿@model IEnumerable<HomeEstate.Services.Core.Dtos.PropertyDto>
+﻿@model AdminPropertiesViewModel
 
-@foreach (var property in Model)  
+@foreach (var property in Model.Properties.Items)
 {
     <tr data-property-id="@property.Id">
         <td>
@@ -52,7 +52,7 @@
         </td>
         <td>
             <div class="btn-group" role="group">
-                <a asp-area="Admin" asp-controller="Properties" asp-action="Details" asp-route-id="@property.Id"
+                <a href="@Url.Action("Details", "Properties", new { area = "Admin", id = property.Id })"
                    class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
                     <i class="fas fa-eye"></i>
                 </a>

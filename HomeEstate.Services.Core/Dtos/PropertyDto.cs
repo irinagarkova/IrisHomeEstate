@@ -41,7 +41,7 @@ namespace HomeEstate.Services.Core.Dtos
 		public bool IsParking { get; set; }
 
 		public PropertyType PropertyType { get; set; }
-		public virtual ICollection<PropertyImageDto> Images { get; set; }
+		public virtual List<PropertyImageDto> Images { get; set; }
             = new List<PropertyImageDto>();
     }
 }
