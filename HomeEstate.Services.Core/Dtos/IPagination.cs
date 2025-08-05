@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace HomeEstate.Services.Core.Dtos
 {
-    public class PaginatedDto<T>
+    public class IPagination
     {
-        public List<T> Items { get; set; } = new List<T>();
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public int TotalItems { get; set; }

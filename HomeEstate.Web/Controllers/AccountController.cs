@@ -27,7 +27,7 @@ namespace HomeEstate.Web.Controllers
             try
             {
                 var user = await accountService.GetApplicationUser(User.Identity.Name);
-                var userViewModel = mapper.Map<ApplicationUser>(user);
+                var userViewModel = mapper.Map<ApplicationUserViewModel>(user);
                 return View(userViewModel);
             }
             catch (Exception ex)

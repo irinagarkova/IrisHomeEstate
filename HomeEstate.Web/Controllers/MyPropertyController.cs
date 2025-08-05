@@ -25,9 +25,7 @@ namespace HomeEstate.Web.Controllers
             this.logger = logger;
         }
 
-        /// <summary>
-        /// Показва имотите на текущия потребител
-        /// </summary>
+        
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -57,9 +55,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// AJAX метод за получаване на статистики за потребителя
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetStatistics()
         {
@@ -81,9 +76,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// AJAX метод за бързо изтриване на имот
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> DeleteQuick(int id)
         {
@@ -113,9 +105,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// Показва подробности за имот (само за собственика)
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -146,9 +135,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// Показва формата за редактиране на имот
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -172,9 +158,7 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// Изтрива имот с redirect обратно към MyProperty
-        /// </summary>
+    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -184,7 +168,7 @@ namespace HomeEstate.Web.Controllers
                 var property = await propertyService.GetPropertyAsync(id);
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                if (property.OwnerId != userId)
+                if (property.OwnerId != userId && !User.IsInRole("Admin"))
                 {
                     TempData["ErrorMessage"] = "Нямате права да изтриете този имот.";
                     return RedirectToAction("Index");
@@ -208,9 +192,6 @@ namespace HomeEstate.Web.Controllers
             return RedirectToAction("Index");
         }
 
-        /// <summary>
-        /// Активира/деактивира имот
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> ToggleActive(int id)
         {
@@ -236,9 +217,7 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        /// <summary>
-        /// Dashboard с обобщена информация
-        /// </summary>
+     
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {

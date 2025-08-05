@@ -1,0 +1,1036 @@
+﻿@{
+    ViewData["Title"] = "Terms of Service";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --text-color: #2c3e50;
+        --light-gray: #ecf0f1;
+        --border-color: #bdc3c7;
+        --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-alt: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.7;
+        color: var(--text-color);
+    }
+
+    .hero-section {
+        background: var(--gradient);
+        color: white;
+        padding: 4rem 0;
+        position: relative;
+        overflow: hidden;
+        margin: -20px -15px 0 -15px;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .terms-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+    }
+
+    .terms-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem;
+        text-align: center;
+        border-bottom: 3px solid var(--secondary-color);
+    }
+
+    .terms-content {
+        padding: 3rem;
+    }
+
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: var(--secondary-color);
+        transition: width 0.3s ease;
+    }
+
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .section-card:hover::before {
+        width: 100%;
+        opacity: 0.05;
+    }
+
+    .section-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .highlight-box {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1.5rem 0;
+    }
+
+    .btn-modern {
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    }
+
+    .table-of-contents {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .toc-item {
+        display: block;
+        color: var(--secondary-color);
+        text-decoration: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid transparent;
+    }
+
+    .toc-item:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateX(10px);
+        border-left-color: white;
+        text-decoration: none;
+    }
+
+    .terms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .term-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .term-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .term-card:hover {
+        border-color: var(--secondary-color);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .term-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .term-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .term-card:hover .term-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .contact-section {
+        background: var(--light-gray);
+        padding: 3rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .contact-info {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .back-to-home {
+        text-align: center;
+        margin: 3rem 0;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: #7f8c8d;
+        font-style: italic;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #ecf0f1;
+    }
+
+    .scroll-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(52, 152, 219, 0.2);
+        z-index: 1000;
+    }
+
+    .scroll-progress {
+        height: 100%;
+        background: var(--secondary-color);
+        width: 0%;
+        transition: width 0.1s ease;
+    }
+
+    .legal-notice {
+        background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+        border-left: 5px solid #fff;
+    }
+
+    .acceptance-box {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .acceptance-box::before {
+        content: '✓';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        font-size: 6rem;
+        opacity: 0.1;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 0;
+        }
+        
+        .terms-container {
+            margin: 1rem;
+            margin-top: -30px;
+            border-radius: 15px;
+        }
+        
+        .terms-header,
+        .terms-content {
+            padding: 2rem 1.5rem;
+        }
+        
+        .contact-info {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .terms-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<!-- Scroll Progress Indicator -->
+<div class="scroll-indicator">
+    <div class="scroll-progress"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-file-contract me-3"></i>
+                Terms of Service
+            </h1>
+            <p class="lead mb-0">
+                Please read these terms carefully before using our real estate platform
+            </p>
+            <div class="mt-4">
+                <small class="opacity-75">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    Effective Date: August 1, 2025
+                </small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="terms-container">
+        <div class="terms-header">
+            <h2 class="h3 mb-3">Условия за ползване</h2>
+            <p class="text-muted mb-0">
+                Последно обновени: <strong>1 август 2025</strong>
+            </p>
+        </div>
+
+        <div class="terms-content">
+            <!-- Acceptance Notice -->
+            <div class="acceptance-box fade-in">
+                <h3>
+                    <i class="fas fa-handshake me-2"></i>
+                    Приемане на условията
+                </h3>
+                <p class="mb-0">
+                    Използвайки Iris Home Estate, вие се съгласявате с всички условия и правила, 
+                    описани в този документ. Ако не се съгласявате, моля не използвайте нашите услуги.
+                </p>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="table-of-contents fade-in">
+                <h4 class="mb-3">
+                    <i class="fas fa-list me-2"></i>
+                    Съдържание
+                </h4>
+                <a href="#definitions" class="toc-item">
+                    <i class="fas fa-book me-2"></i>
+                    1. Определения
+                </a>
+                <a href="#account" class="toc-item">
+                    <i class="fas fa-user-cog me-2"></i>
+                    2. Потребителски акаунт
+                </a>
+                <a href="#services" class="toc-item">
+                    <i class="fas fa-home me-2"></i>
+                    3. Наши услуги
+                </a>
+                <a href="#responsibilities" class="toc-item">
+                    <i class="fas fa-tasks me-2"></i>
+                    4. Отговорности на потребителя
+                </a>
+                <a href="#prohibited" class="toc-item">
+                    <i class="fas fa-ban me-2"></i>
+                    5. Забранени дейности
+                </a>
+                <a href="#intellectual-property" class="toc-item">
+                    <i class="fas fa-copyright me-2"></i>
+                    6. Интелектуална собственост
+                </a>
+                <a href="#limitation" class="toc-item">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    7. Ограничения на отговорността
+                </a>
+                <a href="#termination" class="toc-item">
+                    <i class="fas fa-times-circle me-2"></i>
+                    8. Прекратяване
+                </a>
+                <a href="#governing-law" class="toc-item">
+                    <i class="fas fa-gavel me-2"></i>
+                    9. Приложимо право
+                </a>
+                <a href="#contact" class="toc-item">
+                    <i class="fas fa-envelope me-2"></i>
+                    10. Контакт
+                </a>
+            </div>
+
+            <!-- Key Terms Overview -->
+            <div class="terms-grid fade-in">
+                <div class="term-card">
+                    <div class="term-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h5>Регистрация</h5>
+                    <p>Задължително за публикуване на имоти и достъп до всички функции</p>
+                </div>
+                <div class="term-card">
+                    <div class="term-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h5>Сигурност</h5>
+                    <p>Ангажираме се да защитаваме вашите данни и сигурността на платформата</p>
+                </div>
+                <div class="term-card">
+                    <div class="term-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h5>Честност</h5>
+                    <p>Очакваме точни и честни описания на всички публикувани имоти</p>
+                </div>
+            </div>
+
+            <!-- Definitions -->
+            <section id="definitions" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3 class="section-title">1. Определения</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><strong>"Платформа"</strong></h6>
+                        <p>Iris Home Estate уебсайт и всички свързани услуги</p>
+                        
+                        <h6><strong>"Потребител"</strong></h6>
+                        <p>Всяко лице, което използва нашата платформа</p>
+                        
+                        <h6><strong>"Съдържание"</strong></h6>
+                        <p>Всички текстове, изображения, данни, публикувани в платформата</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><strong>"Услуги"</strong></h6>
+                        <p>Всички функционалности, предоставени от платформата</p>
+                        
+                        <h6><strong>"Акаунт"</strong></h6>
+                        <p>Вашият регистриран профил в платформата</p>
+                        
+                        <h6><strong>"Имот"</strong></h6>
+                        <p>Недвижима собственост, публикувана за продажба или наем</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Terms -->
+            <section id="account" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h3 class="section-title">2. Потребителски акаунт</h3>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Важно:</strong> Вие сте отговорни за сигурността на вашия акаунт
+                </div>
+
+                <h6>Регистрация:</h6>
+                <ul>
+                    <li>Предоставете точна и актуална информация</li>
+                    <li>Поддържайте сигурна парола</li>
+                    <li>Уведомете ни при компрометиране на акаунта</li>
+                    <li>Един акаунт на лице/организация</li>
+                </ul>
+
+                <h6>Отговорности:</h6>
+                <ul>
+                    <li>Вие сте отговорни за всички действия в акаунта ви</li>
+                    <li>Не споделяйте достъпните си данни</li>
+                    <li>Своевременно актуализирайте информацията си</li>
+                </ul>
+            </section>
+
+            <!-- Services -->
+            <section id="services" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3 class="section-title">3. Наши услуги</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i>Предоставяме:</h6>
+                        <ul>
+                            <li>Платформа за търсене на имоти</li>
+                            <li>Възможност за публикуване на обяви</li>
+                            <li>Система за любими имоти</li>
+                            <li>Контактни възможности</li>
+                            <li>Техническа поддръжка</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-times-circle text-danger me-2"></i>Не предоставяме:</h6>
+                        <ul>
+                            <li>Правни консултации</li>
+                            <li>Финансови услуги</li>
+                            <li>Гаранции за продажби</li>
+                            <li>Оценки на имоти</li>
+                            <li>Брокерски услуги</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="legal-notice">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Забележка:</strong> Ние сме технологична платформа, която свързва купувачи и продавачи. 
+                    Не участваме в сделките и не носим отговорност за тях.
+                </div>
+            </section>
+
+            <!-- User Responsibilities -->
+            <section id="responsibilities" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3 class="section-title">4. Отговорности на потребителя</h3>
+                
+                <h6>При публикуване на имоти:</h6>
+                <ul>
+                    <li><strong>Точност:</strong> Предоставете верни данни за имота</li>
+                    <li><strong>Законност:</strong> Имате право да продавате/отдавате имота</li>
+                    <li><strong>Снимки:</strong> Използвайте реални и актуални изображения</li>
+                    <li><strong>Цени:</strong> Посочвайте реалистични цени</li>
+                    <li><strong>Актуализация:</strong> Обновявайте статуса на обявата</li>
+                </ul>
+
+                <h6>При търсене на имоти:</h6>
+                <ul>
+                    <li>Използвайте платформата по предназначение</li>
+                    <li>Не злоупотребявайте с контактната информация</li>
+                    <li>Спазвайте етичните норми в комуникацията</li>
+                </ul>
+            </section>
+
+            <!-- Prohibited Activities -->
+            <section id="prohibited" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <h3 class="section-title">5. Забранени дейности</h3>
+                
+                <div class="warning-box">
+                    <h5>
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Строго забранени дейности
+                    </h5>
+                    <p class="mb-0">
+                        Нарушаването на тези правила води до незабавно прекратяване на акаунта
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Технически нарушения:</h6>
+                        <ul>
+                            <li>Хакерски атаки</li>
+                            <li>Спам съобщения</li>
+                            <li>Автоматизирани ботове</li>
+                            <li>Вредоносен софтуер</li>
+                            <li>Подправяне на данни</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Съдържание нарушения:</h6>
+                        <ul>
+                            <li>Невярна информация</li>
+                            <li>Нарушаване на авторски права</li>
+                            <li>Неподходящо съдържание</li>
+                            <li>Дискриминационни обяви</li>
+                            <li>Измамни схеми</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Intellectual Property -->
+            <section id="intellectual-property" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-copyright"></i>
+                </div>
+                <h3 class="section-title">6. Интелектуална собственост</h3>
+                
+                <h6>Наши права:</h6>
+                <ul>
+                    <li>Дизайнът и функционалността на платформата</li>
+                    <li>Логотипи, марки и търговски знаци</li>
+                    <li>Софтуерен код и алгоритми</li>
+                    <li>Уникални функции и иновации</li>
+                </ul>
+
+                <h6>Вашите права:</h6>
+                <ul>
+                    <li>Запазвате правата върху публикуваното съдържание</li>
+                    <li>Предоставяте ни лиценз за използване в платформата</li>
+                    <li>Можете да изтриете съдържанието си по всяко време</li>
+                </ul>
+            </section>
+
+            <!-- Limitation of Liability -->
+            <section id="limitation" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="section-title">7. Ограничения на отговорността</h3>
+                
+                <div class="legal-notice">
+                    <i class="fas fa-balance-scale me-2"></i>
+                    <strong>Важно правно съобщение:</strong> Моля, прочетете внимателно тази секция
+                </div>
+
+                <h6>Ние НЕ носим отговорност за:</h6>
+                <ul>
+                    <li>Неточна информация в обявите</li>
+                    <li>Проблеми между купувачи и продавачи</li>
+                    <li>Финансови загуби от сделки</li>
+                    <li>Технически проблеми извън наш контрол</li>
+                    <li>Действия на трети лица</li>
+                </ul>
+
+                <h6>Предоставяме услугите "как са":</h6>
+                <ul>
+                    <li>Без гаранции за непрекъснатост</li>
+                    <li>Без гаранции за точност</li>
+                    <li>Без гаранции за резултати</li>
+                </ul>
+            </section>
+
+            <!-- Termination -->
+            <section id="termination" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h3 class="section-title">8. Прекратяване</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Вие можете:</h6>
+                        <ul>
+                            <li>Да изтриете акаунта си по всяко време</li>
+                            <li>Да спрете използването на услугите</li>
+                            <li>Да изтриете публикуваното съдържание</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Ние можем:</h6>
+                        <ul>
+                            <li>Да спрем акаунта при нарушения</li>
+                            <li>Да ограничим достъпа до услугите</li>
+                            <li>Да изтрием неподходящо съдържание</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle me-2"></i>
+                    След прекратяване, някои клаузи продължават да важат (интелектуална собственост, 
+                    ограничения на отговорността, приложимо право).
+                </div>
+            </section>
+
+            <!-- Governing Law -->
+            <section id="governing-law" class="section-card fade-in">
+                <div class="section-icon">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <h3 class="section-title">9. Приложимо право</h3>
+                
+                <p>Тези условия се регулират от:</p>
+                <ul>
+                    <li><strong>Българското законодателство</strong></li>
+                    <li><strong>Европейските директиви</strong> (GDPR, Директива за електронната търговия)</li>
+                    <li><strong>Международните конвенции</strong> където е приложимо</li>
+                </ul>
+
+                <div class="info-box">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Всички спорове ще се решават от компетентните съдилища в София, България.
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="contact-section fade-in">
+                <h3>
+                    <i class="fas fa-envelope me-2"></i>
+                    Въпроси относно условията?
+                </h3>
+                <p>
+                    Ако имате въпроси относно тези условия за ползване или се нуждаете от разяснения, 
+                    моля свържете се с нашия правен отдел:
+                </p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>legal@irishomeestate.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+359 881 234 567</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>София 1000, България</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="mailto:legal@irishomeestate.com" class="btn-modern me-3">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Изпратете запитване
+                    </a>
+                    <a href="/Privacy" class="btn-modern btn-secondary">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Privacy Policy
+                    </a>
+                </div>
+            </section>
+
+            <!-- Changes and Updates -->
+            <section class="section-card fade-in">
+                <div class="section-icon" style="background: var(--gradient-alt);">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <h3 class="section-title">10. Промени в условията</h3>
+                
+                <div class="warning-box">
+                    <h5>
+                        <i class="fas fa-bell me-2"></i>
+                        Важно за актуализациите
+                    </h5>
+                    <p class="mb-0">
+                        Ние си запазваме правото да актуализираме тези условия. 
+                        Значителните промени ще бъдат съобщени предварително.
+                    </p>
+                </div>
+
+                <h6>Как ще научите за промените:</h6>
+                <ul>
+                    <li><strong>Имейл уведомления</strong> до регистрираните потребители</li>
+                    <li><strong>Съобщение в платформата</strong> при влизане</li>
+                    <li><strong>Актуализирана дата</strong> в началото на документа</li>
+                    <li><strong>30-дневен период</strong> за адаптация към промените</li>
+                </ul>
+
+                <div class="info-box">
+                    <i class="fas fa-clock me-2"></i>
+                    Продължавайки да използвате платформата след влизането в сила на промените, 
+                    вие се съгласявате с новите условия.
+                </div>
+            </section>
+
+            <!-- Agreement Summary -->
+            <div class="highlight-box fade-in">
+                <h3>
+                    <i class="fas fa-check-double me-2"></i>
+                    Обобщение на споразумението
+                </h3>
+                <p class="mb-3">
+                    Използвайки Iris Home Estate, вие се съгласявате да:
+                </p>
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li>Спазвате всички условия и правила</li>
+                            <li>Предоставяте точна информация</li>
+                            <li>Не нарушавате правата на други</li>
+                            <li>Използвате платформата законно</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li>Поемате отговорност за действията си</li>
+                            <li>Уважавате интелектуалната собственост</li>
+                            <li>Приемате ограниченията на отговорността</li>
+                            <li>Следите за актуализации</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="last-updated fade-in">
+                <p>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Тези условия за ползване са актуални към <strong>1 август 2025</strong>
+                </p>
+                <p class="small text-muted mb-0">
+                    Версия 2.1 | Документ ID: TOS-2025-08-01 | 
+                    <a href="#" class="text-muted">Архив на предишни версии</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Home Button -->
+<div class="back-to-home fade-in">
+    <a href="/" class="btn-modern me-3">
+        <i class="fas fa-arrow-left me-2"></i>
+        Обратно към началото
+    </a>
+    <a href="/Privacy" class="btn-modern btn-secondary">
+        <i class="fas fa-shield-alt me-2"></i>
+        Privacy Policy
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scroll progress indicator
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                const progressBar = document.querySelector('.scroll-progress');
+                if (progressBar) {
+                    progressBar.style.width = scrolled + '%';
+                }
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Intersection Observer for fade-in animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all fade-in elements
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Add click effect to term cards
+            document.querySelectorAll('.term-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'translateY(-8px) scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Highlight current section in table of contents
+            const sections = document.querySelectorAll('section[id]');
+            const tocItems = document.querySelectorAll('.toc-item');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (window.pageYOffset >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                tocItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href') === '#' + current) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Add print functionality
+        function printTerms() {
+            window.print();
+        }
+
+        // Add copy link functionality
+        function copyLink(sectionId) {
+            const url = window.location.origin + window.location.pathname + '#' + sectionId;
+            navigator.clipboard.writeText(url).then(() => {
+                // Show success message
+                const toast = document.createElement('div');
+                toast.textContent = 'Link copied to clipboard!';
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #27ae60;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    transition: all 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 2000);
+            });
+        }
+    </script>
+}
+
+<style>
+    .toc-item.active {
+        background: var(--secondary-color);
+        color: white;
+        border-left-color: white;
+    }
+
+    @@media print {
+        .hero-section,
+        .back-to-home,
+        .scroll-indicator,
+        .btn-modern {
+            display: none !important;
+        }
+        
+        .terms-container {
+            box-shadow: none;
+            margin-top: 0;
+        }
+        
+        .section-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>

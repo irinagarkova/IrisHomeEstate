@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HomeEstate.Services.Core.Interfaces;
-using HomeEstate.Web.Areas.Models;
-using HomeEstate.Web.Models;
+using HomeEstate.Web.Areas.Admin.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +25,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
         }
 
         // GET: Admin/Users
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string searchTerm = "", string roleFilter = "")
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 5, string searchTerm = "", string roleFilter = "")
         {
             try
             {
@@ -60,7 +59,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
 
         // AJAX endpoint for loading users
         [HttpGet]
-        public async Task<IActionResult> LoadUsers(int page = 1, int pageSize = 10, string searchTerm = "", string roleFilter = "")
+        public async Task<IActionResult> LoadUsers(int page = 1, int pageSize = 5, string searchTerm = "", string roleFilter = "")
         {
             try
             {
@@ -232,7 +231,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
         {
             try
             {
-                // Prevent admin from deleting themselves
                 var currentUser = User.Identity?.Name;
                 var userToDelete = await applicationUserService.GetApplicationUser(id);
 

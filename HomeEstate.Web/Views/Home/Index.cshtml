@@ -1,5 +1,5 @@
 ﻿@model ICollection<PropertyViewModel>
-@using System.Linq﻿
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,6 +112,8 @@
                             }
                         }
 
+
+
                         <span class="property-badge">@property.ListingType</span>
                     </div>
                     <div class="property-details">
@@ -119,7 +121,6 @@
                         <h3 class="property-title">@property.Title</h3>
                         <p class="property-location">📍 @property.Location.City</p>
                         <div class="property-features">
-                            <span class="feature">Rooms: @property.PropertyType</span>
                             <span class="feature">Area 📐: @property.Area m²</span>
                         </div>
                     </div>

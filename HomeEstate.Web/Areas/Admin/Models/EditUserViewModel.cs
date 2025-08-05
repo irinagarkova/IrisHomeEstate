@@ -1,4 +1,4 @@
-﻿namespace HomeEstate.Web.Areas.Models
+﻿namespace HomeEstate.Web.Areas.Admin.Models
 {
     public class EditUserViewModel
     {

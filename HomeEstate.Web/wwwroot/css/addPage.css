@@ -41,9 +41,9 @@ body {
     font-weight: 700;
     margin-bottom: 8px;
     background: var(--secondary);
-    -webkit-background-clip: text;
+  /*  -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background-clip: text;*/
 }
 
 .form-subtitle {

@@ -1,8 +1,7 @@
-﻿@model HomeEstate.Web.Areas.Models.AdminPropertiesViewModel
+﻿@model AdminPropertiesViewModel
 
 @{
     ViewData["Title"] = "Manage Properties";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="properties-management">
@@ -36,21 +35,21 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Sort By</label>
-                    <select class="form-select" id="sortSelect" onchange="loadProperties(1)">
-                        <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Newest First</option>
-                        <option value="oldest" @(Model.SortBy == "oldest" ? "selected" : "")>Oldest First</option>
-                        <option value="price-asc" @(Model.SortBy == "price-asc" ? "selected" : "")>Price: Low to High</option>
-                        <option value="price-desc" @(Model.SortBy == "price-desc" ? "selected" : "")>Price: High to Low</option>
-                        <option value="area-asc" @(Model.SortBy == "area-asc" ? "selected" : "")>Area: Small to Large</option>
-                        <option value="area-desc" @(Model.SortBy == "area-desc" ? "selected" : "")>Area: Large to Small</option>
+                    <select class="form-select" id="sortSelect" onchange="loadProperties(1)" asp-for="SortBy">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="area-asc">Area: Small to Large</option>
+                        <option value="area-desc">Area: Large to Small</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2"> 
                     <label class="form-label">Items per page</label>
-                    <select class="form-select" id="pageSizeSelect" onchange="loadProperties(1)">
+                    <select class="form-select" id="pageSizeSelect" onchange="loadProperties(1)" asp-for="Properties.PageSize">
                         @foreach (var size in Model.PageSizes)
                         {
-                            <option value="@size" @(Model.Properties.PageSize == size ? "selected" : "")>@size</option>
+                            <option value="@size" >@size</option>
                         }
                     </select>
                 </div>

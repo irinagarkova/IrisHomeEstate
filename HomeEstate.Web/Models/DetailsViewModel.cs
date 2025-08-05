@@ -16,9 +16,9 @@ namespace HomeEstate.Web.Models
 
         public DateTime CreatedOn { get; set; }
 
-        public string OwnerFullName { get; set; } = null!;
+        public ApplicationUserDto Owner { get; set; } = null!;
 
-        public string LocationName { get; set; } = null!;
+        public LocationDto Location { get; set; } = null!;
 
         public string CategoryName { get; set; } = null!;
 
@@ -33,6 +33,7 @@ namespace HomeEstate.Web.Models
         public bool IsFurnished { get; set; }
         public bool IsParking { get; set; }
         public bool IsActive { get; set; }
+        public int FavoriteCount { get; set; }
         //public virtual ICollection<PropertyImage> Images { get; set; }
         //     = new List<PropertyImage>();
     }

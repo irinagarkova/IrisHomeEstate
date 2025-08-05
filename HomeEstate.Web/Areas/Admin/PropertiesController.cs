@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using HomeEstate.Services.Core.Dtos;
 using HomeEstate.Services.Core.Interfaces;
-using HomeEstate.Web.Areas.Models;
+using HomeEstate.Web.Areas.Admin.Models;
 using HomeEstate.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,7 +55,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                         .Take(pageSize)
                         .ToList();
 
-                    properties = new PaginatedDto<PropertyDto>
+                    properties = new Pagination<PropertyDto>
                     {
                         Items = pagedItems,
                         CurrentPage = page,
@@ -110,7 +110,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                         .Take(pageSize)
                         .ToList();
 
-                    properties = new PaginatedDto<PropertyDto>
+                    properties = new Pagination<PropertyDto>
                     {
                         Items = pagedItems,
                         CurrentPage = page,
@@ -210,9 +210,9 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // AJAX DELETE endpoint
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteAjax(int id)
         {
             try

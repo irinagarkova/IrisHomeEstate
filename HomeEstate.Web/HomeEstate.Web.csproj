@@ -32,6 +32,7 @@
     <_ContentIncludedByDefault Remove="Views\Property\MyProperty.cshtml" />
     <_ContentIncludedByDefault Remove="wwwroot\css\admin.css" />
     <_ContentIncludedByDefault Remove="wwwroot\css\myFavorite.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\registerPage.css" />
   </ItemGroup>
 
 </Project>

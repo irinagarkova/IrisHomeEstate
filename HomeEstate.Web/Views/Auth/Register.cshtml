@@ -1,85 +1,178 @@
-﻿@model RegisterViewModel
-@{
-    ViewData["Title"] = "Register";
-}
+﻿<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/registerPage.css">
+  
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0" style="border-radius: 20px; margin-top: 50px;">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                        <h2 class="fw-bold">Join LearnHub</h2>
-                        <p class="text-muted">Create your Account and start learning today</p>
-                    </div>
+    <!-- Header -->
+    <header class="header">
+        <div>
+            <i class="fas fa-home"></i>
+            My Website
+        </div>
+    </header>
 
-                    <form asp-action="Register" method="post">
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="registration-container">
+            <!-- House Icon -->
+            <div class="house">
+                <i class="fas fa-home"></i>
+            </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label asp-for="FirstName" class="form-label">First Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <input asp-for="FirstName" class="form-control" placeholder="First name" />
-                                    </div>
-                                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label asp-for="LastName" class="form-label">Last Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <input asp-for="LastName" class="form-control" placeholder="Last name" />
-                                    </div>
-                                    <span asp-validation-for="LastName" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Title -->
+            <h1 class="title">Създай профил</h1>
+            <p class="subtitle">Присъедини се към нашата общност</p>
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
-                            </div>
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input asp-for="Password" class="form-control" placeholder="Create a password" />
-                            </div>
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
-                            </div>
-                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
-                            <i class="fas fa-user-plus me-2"></i>Create Account
-                        </button>
-                    </form>
-
-                    <div class="text-center">
-                        <p class="mb-0">
-                            Already have an Account?
-                            <a href="/Auth/Login" class="text-primary fw-bold">Sign in here</a>
-                        </p>
+            <!-- Registration Form -->
+            <form class="form" id="registrationForm">
+                <!-- Username Fields -->
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field username" placeholder="Username" required>
+                        <i class="input-icon fas fa-user"></i>
                     </div>
                 </div>
+                <!-- Email -->
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="email" class="input-field" placeholder="Имейл адрес" required>
+                        <i class="input-icon fas fa-envelope"></i>
+                    </div>
+                <!-- Phone (Optional) -->
+                    <div class="input-wrapper">
+                        <input type="tel" class="input-field" placeholder="Телефонен номер">
+                        <i class="input-icon fas fa-phone"></i>
+                        <span class="optional-tag">по избор</span>
+                    </div>
+                </div>
+                <!-- Password -->
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" class="input-field" placeholder="Парола" required id="password">
+                        <i class="input-icon fas fa-lock"></i>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                <!-- Confirm Password -->
+                    <div class="input-wrapper">
+                        <input type="password" class="input-field" placeholder="Потвърди паролата" required>
+                        <i class="input-icon fas fa-lock"></i>
+                    </div>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox" required id="terms">
+                    <label for="terms" class="checkbox-label">
+                        Съгласен съм с <a href="#">Условията за ползване</a> и <a href="#">Политиката за поверителност</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button">
+                    <i class="fas fa-user-plus"></i>
+                    Регистрирай се
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                <a href="/Auth/Login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Вече имаш профил? Влез тук
+                </a>
+            </div>
+
+            <!-- Footer Text -->
+            <div class="footer-text">
+                Като се регистрираш, приемаш нашите условия и политики. Твоите данни са защитени и няма да бъдат споделяни с трети страни.
             </div>
         </div>
-    </div>
-</div>
+    </main>
+
+    <script>
+        // Password visibility toggle
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthProgress = document.getElementById('strengthProgress');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            let text = '';
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            strengthProgress.className = 'strength-progress';
+            
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthProgress.classList.add('strength-weak');
+                    text = 'Слаба парола';
+                    break;
+                case 2:
+                case 3:
+                    strengthProgress.classList.add('strength-fair');
+                    text = 'Средна парола';
+                    break;
+                case 4:
+                    strengthProgress.classList.add('strength-good');
+                    text = 'Добра парола';
+                    break;
+                case 5:
+                    strengthProgress.classList.add('strength-strong');
+                    text = 'Силна парола';
+                    break;
+            }
+            
+            strengthText.textContent = password.length > 0 ? text : 'Въведи парола';
+        });
+
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Here you would typically send the form data to your server
+            alert('Формата е изпратена успешно!');
+        });
+    </script>
+</body>
+</html>

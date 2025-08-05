@@ -28,9 +28,23 @@ namespace HomeEstate.Web.Controllers
         {
             try
             {
-                // Вземане на всички имоти и взимане на първите 3
-                var allProperties = await propertyService.GetAllPropertiesAsync(1,10);
-                var featuredProperties = allProperties.Items.Take(3).ToList();
+                // Вземане на всички имоти
+                var allProperties = await propertyService.GetAllPropertiesAsync(1, 20); 
+
+                var featuredProperties = allProperties.Items
+                    .Where(p => p.Images != null && p.Images.Any())
+                    .TakeLast(3) 
+                    .ToList();
+
+                if (featuredProperties.Count < 3)
+                {
+                    var additionalProperties = allProperties.Items
+                        .Where(p => !featuredProperties.Any(fp => fp.Id == p.Id)) 
+                        .Take(3 - featuredProperties.Count)
+                        .ToList();
+
+                    featuredProperties.AddRange(additionalProperties);
+                }
 
                 // Мапване към ViewModel
                 var featuredViewModels = featuredProperties.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
@@ -49,6 +63,14 @@ namespace HomeEstate.Web.Controllers
         {
             return View();
         }
+
+        [Route("Terms")]
+        [Route("Home/Terms")]
+        public IActionResult Terms()
+        {
+            return View();
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(int? statusCode)

@@ -50,11 +50,25 @@ namespace HomeEstate
               .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
             builder.Services.AddControllersWithViews();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Auth/Login";
+                options.LogoutPath = "/Auth/Logout";
+                options.AccessDeniedPath = "/Home/AccessDenied";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(12);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
             builder.Services.AddRazorPages();
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "Admin"));
+                options.AddPolicy("AdminAreaAccess", policy => policy.RequireRole("Admin"));
+           
             });
             WebApplication app = builder.Build();
 
@@ -80,18 +94,17 @@ namespace HomeEstate
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "admin",
-                pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}",
-                defaults: new { area = "Admin" });
 
             app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-            //app.MapControllerRoute(
-            //    name: "default",
-            //    pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
+                name: "areas",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}"
+            ).RequireAuthorization("AdminAreaAccess");
+
+            app.MapControllerRoute(
+				name: "default",
+				pattern: "{controller=Home}/{action=Index}/{id?}");
+
+			app.MapRazorPages();
             SeedData(app);
             app.Run();
         }
