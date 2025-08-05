@@ -13,7 +13,9 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.0" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
+    <PackageReference Include="MimeKit" Version="4.13.0" />
   </ItemGroup>
 
 </Project>

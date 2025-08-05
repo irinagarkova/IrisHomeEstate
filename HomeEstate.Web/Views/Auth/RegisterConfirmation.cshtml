@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Password Reset Email Sent";
+}
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/registerConfirmation.css" />
+
+</head>
+<body>
+    <div class="confirmation-container">
+        <div class="success-icon">
+            <i class="fas fa-envelope-check"></i>
+        </div>
+
+        <h1 class="title">Имейлът е изпратен!</h1>
+        <p class="message">
+            Моля потвърдете вашият емайл, за да продължите.
+        </p>
+
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> Следващи стъпки:</h4>
+            <ul>
+                <li>Проверете входящата си поща</li>
+                <li>Потърсете имейл от "Iris Home Estate"</li>
+                <li>Проверете папката "Spam" или "Junk"</li>
+                <li>Кликнете върху линка в имейла</li>
+            </ul>
+        </div>
+
+        @* For testing purposes - remove in production *@
+        @if (TempData["ResetPasswordUrl"] != null)
+        {
+            <div class="test-link">
+                <strong><i class="fas fa-flask"></i> САМО ЗА ТЕСТВАНЕ:</strong>
+                <p>В реална среда този линк ще бъде изпратен на имейла. За тестване използвайте:</p>
+                <a href="@TempData["ResetPasswordUrl"]">@TempData["ResetPasswordUrl"]</a>
+            </div>
+        }
+
+        <div class="resend-section">
+            <p>Не получихте имейл?</p>
+            <a asp-action="ForgotPassword" class="btn">
+                <i class="fas fa-redo"></i>
+                Изпратете отново
+            </a>
+            <a asp-action="Login" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Назад към влизане
+            </a>
+        </div>
+    </div>
+</body>
+</html>

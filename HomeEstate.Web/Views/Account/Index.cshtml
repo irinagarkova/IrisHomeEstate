@@ -2,70 +2,209 @@
 
 @{
     ViewData["Title"] = "My Profile";
+    Layout = "_Layout";
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user me-2"></i>My Profile
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            @(Model.UserName?.Substring(0, 1).ToUpper() ?? "U")
+        </div>
+        <h1 class="mb-2">@Model.UserName</h1>
+        <p class="mb-3 opacity-75">@Model.Email</p>
+        <div class="verification-status @(Model.Email != null ? "verified" : "unverified")">
+            <i class="fas fa-@(Model.Email != null ? "check-circle" : "exclamation-circle")"></i>
+            @(Model.Email != null ? "Email Verified" : "Email Not Verified")
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="stat-number" id="totalProperties">
+                @Model.PropertiesCount
+            </div>
+            <div class="stat-label">My Properties</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-number" id="totalFavorites">
+                @Model.FavoritePropertiesCount
+            </div>
+            <div class="stat-label">Favorites</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-8">
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user me-2"></i>Personal Information
                     </h3>
-                    <a asp-action="Edit" class="btn btn-primary">
-                        <i class="fas fa-edit me-1"></i>Edit Profile
-                    </a>
                 </div>
                 <div class="card-body">
-                    @if (TempData["Success"] != null)
-                    {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            @TempData["Success"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            Username
                         </div>
-                    }
-
-                    @if (TempData["Error"] != null)
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @TempData["Error"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    }
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted">User Name</label>
-                            <p class="form-control-plaintext border-bottom pb-2">@Model.UserName</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted">Email</label>
-                            <p class="form-control-plaintext border-bottom pb-2">@Model.Email</p>
-                        </div>
+                        <div class="info-value">@Model.UserName</div>
                     </div>
-
-                    <div class="row">
-                        @* <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted">First Name</label>
-                            <p class="form-control-plaintext border-bottom pb-2">
-                                @(string.IsNullOrEmpty(Model.FirstName) ? "Not provided" : Model.FirstName)
-                            </p>
-                        </div> *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted">Phone Number</label>
-                            <p class="form-control-plaintext border-bottom pb-2">
-                                @(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)
-                            </p>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </div>
+                        <div class="info-value">@Model.Email</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Phone Number
+                        </div>
+                        <div class="info-value">
+                            @(string.IsNullOrEmpty(Model.PhoneNumber) ? 
+                                "<span class='text-muted'>Not provided</span>" : 
+                                Model.PhoneNumber)
                         </div>
                     </div>
                 </div>
-                <div class="card-footer text-muted">
-                    <small>
-                        <i class="fas fa-info-circle me-1"></i>
-                        Keep your profile information up to date for better service.
-                    </small>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="profile-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a asp-action="Edit" class="btn btn-primary-modern btn-modern">
+                            <i class="fas fa-edit"></i>
+                            Edit Profile
+                        </a>
+                        <a asp-controller="Property" asp-action="Add" class="btn btn-outline-modern btn-modern">
+                            <i class="fas fa-plus"></i>
+                            Add Property
+                        </a>
+                        <a asp-controller="MyProperty" asp-action="Index" class="btn btn-outline-modern btn-modern">
+                            <i class="fas fa-home"></i>
+                            My Properties
+                        </a>
+                        <a asp-controller="FavoriteProperty" asp-action="Index" class="btn btn-outline-modern btn-modern">
+                            <i class="fas fa-heart"></i>
+                            My Favorites
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTooltips();
+        });
+
+        function loadUserStatistics() {
+            fetch(`@Url.Action("GetUserStatistics","Account", new {area = ""})`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json)
+                .then(data => {
+                    document.getElementById('totalProperties').innerHTML = data.totalProperties
+                    document.getElementById('totalFavorites').innerHTML = data.favoritteProperties
+                });
+            
+        }
+
+       
+        function initializeTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Add smooth scroll behavior for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation to action buttons
+        document.querySelectorAll('.btn-modern').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Don't add loading for external links
+                if (this.getAttribute('href') && !this.getAttribute('href').startsWith('#')) {
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+                    this.style.pointerEvents = 'none';
+                    
+                    // Reset after 3 seconds as fallback
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                        this.style.pointerEvents = 'auto';
+                    }, 3000);
+                }
+            });
+        });
+    </script>
+}

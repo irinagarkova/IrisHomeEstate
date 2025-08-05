@@ -152,7 +152,6 @@
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            debugger
             const email = document.querySelector('input[type="email"]').value.trim();
             const password = document.querySelector('input[type="password"]').value;
             const rememberMe = document.getElementById('remember').checked;
@@ -196,7 +195,6 @@
             });
 
 
-            // debugger
             // const email = document.querySelector('input[type="email"]').value;
             // const password = document.querySelector('input[type="password"]').value;
 
@@ -246,5 +244,8 @@
            
         });
     </script>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
 </html>

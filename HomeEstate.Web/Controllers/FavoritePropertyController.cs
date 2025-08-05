@@ -57,7 +57,7 @@ namespace HomeEstate.Web.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false , message= "Error occured"});
+                return BadRequest(new { success = false , message= "Error occured"});
             }
             
         }

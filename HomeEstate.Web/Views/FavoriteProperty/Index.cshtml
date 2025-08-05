@@ -4,8 +4,6 @@
     ViewData["Title"] = "My Favorite Properties";
 }
 
-<!DOCTYPE html>
-<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,7 +94,7 @@
             <div class="properties-grid" id="propertiesContainer">
                 @foreach (var property in Model)
                 {
-                    <div class="property-card" data-category="@property.Category?.Name" data-price="@property.Price" data-area="@property.Area" data-title="@property.Title.ToLower()">
+                    <div class="property-card" data-category="@property.Category?.Name" data-price="@property.Price" data-area="@property.Area" data-title="@property.Title.ToLower()" data-id="@property.Id">
                         <div class="property-image">
                             @if (property.Images != null && property.Images.Any())
                             {
@@ -106,10 +104,6 @@
                             {
                                 <img src="/images/no-image.png" alt="No image available">
                             }
-
-                            <div class="favorite-badge">
-                                <i class="fas fa-heart"></i>
-                            </div>
 
                             @if (property.Category != null)
                             {
@@ -155,12 +149,11 @@
                                     <i class="fas fa-eye"></i>
                                     View Details
                                 </a>
-                                <form asp-controller="FavoriteProperty" asp-action="Remove" method="post" style="display: inline;">
-                                    <input type="hidden" name="id" value="@property.Id" />
-                                    <button type="submit" class="btn-remove" onclick="return confirmRemove('@property.Title')">
+                                
+                                    <button type="submit" class="btn-remove" onclick="return confirmRemove(@property.Id)">
                                         <i class="fas fa-heart-broken"></i>
                                     </button>
-                                </form>
+                                
                             </div>
                         </div>
                     </div>
@@ -185,85 +178,101 @@
             </div>
         }
     </div>
+    @section Scripts {
+        <script>
+            function switchView(viewType) {
+                const container = document.getElementById('propertiesContainer');
+                const buttons = document.querySelectorAll('.toggle-button');
 
-    <script>
-        function switchView(viewType) {
-            const container = document.getElementById('propertiesContainer');
-            const buttons = document.querySelectorAll('.toggle-button');
-            
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (viewType === 'list') {
-                container.parentElement.classList.add('list-view');
-            } else {
-                container.parentElement.classList.remove('list-view');
-            }
-        }
+                buttons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
 
-        function confirmRemove(propertyTitle) {
-            return confirm(`Are you sure you want to remove "${propertyTitle}" from your favorites?`);
-        }
-
-        // Search and Filter Functionality
-        document.getElementById('searchInput').addEventListener('input', filterProperties);
-        document.getElementById('categoryFilter').addEventListener('change', filterProperties);
-        document.getElementById('sortBy').addEventListener('change', sortProperties);
-
-        function filterProperties() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            const cards = document.querySelectorAll('.property-card');
-
-            cards.forEach(card => {
-                const title = card.dataset.title;
-                const category = card.dataset.category;
-                
-                const matchesSearch = title.includes(searchTerm);
-                const matchesCategory = !categoryFilter || category === categoryFilter;
-                
-                if (matchesSearch && matchesCategory) {
-                    card.style.display = 'block';
+                if (viewType === 'list') {
+                    container.parentElement.classList.add('list-view');
                 } else {
-                    card.style.display = 'none';
+                    container.parentElement.classList.remove('list-view');
                 }
+            }
+
+            function confirmRemove(id) {
+                $.ajax({
+                    url: '@Url.Action("Remove", "FavoriteProperty")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        $('.property-card[data-id="' + id + '"]').fadeOut(300, function () {
+                $(this).remove();
             });
-        }
+                    },
+                    error: function () {
+                        showError('An error occurred while updating favorites');
+                    }
+                });
+            }
 
-        function sortProperties() {
-            const sortBy = document.getElementById('sortBy').value;
-            const container = document.getElementById('propertiesContainer');
-            const cards = Array.from(container.children);
+            // Search and Filter Functionality
+            document.getElementById('searchInput').addEventListener('input', filterProperties);
+            document.getElementById('categoryFilter').addEventListener('change', filterProperties);
+            document.getElementById('sortBy').addEventListener('change', sortProperties);
 
-            cards.sort((a, b) => {
-                switch (sortBy) {
-                    case 'price-low':
-                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                    case 'price-high':
-                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                    case 'area-large':
-                        return parseFloat(b.dataset.area) - parseFloat(a.dataset.area);
-                    default: // newest
-                        return 0; // Keep original order
-                }
+            function filterProperties() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const categoryFilter = document.getElementById('categoryFilter').value;
+                const cards = document.querySelectorAll('.property-card');
+
+                cards.forEach(card => {
+                    const title = card.dataset.title;
+                    const category = card.dataset.category;
+
+                    const matchesSearch = title.includes(searchTerm);
+                    const matchesCategory = !categoryFilter || category === categoryFilter;
+
+                    if (matchesSearch && matchesCategory) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            function sortProperties() {
+                const sortBy = document.getElementById('sortBy').value;
+                const container = document.getElementById('propertiesContainer');
+                const cards = Array.from(container.children);
+
+                cards.sort((a, b) => {
+                    switch (sortBy) {
+                        case 'price-low':
+                            return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                        case 'price-high':
+                            return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                        case 'area-large':
+                            return parseFloat(b.dataset.area) - parseFloat(a.dataset.area);
+                        default: // newest
+                            return 0; // Keep original order
+                    }
+                });
+
+                cards.forEach(card => container.appendChild(card));
+            }
+
+            // Add smooth animations on load
+            document.addEventListener('DOMContentLoaded', function () {
+                const cards = document.querySelectorAll('.property-card');
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.6s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
             });
-
-            cards.forEach(card => container.appendChild(card));
-        }
-
-        // Add smooth animations on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.property-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
-    </script>
+        </script>
+    }
 </body>
 </html>

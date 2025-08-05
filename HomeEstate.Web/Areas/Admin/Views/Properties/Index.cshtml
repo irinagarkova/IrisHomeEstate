@@ -473,7 +473,6 @@
 
         function deleteProperty(propertyId) {
             showLoading(true);
-            debugger
             let id = propertyId
             fetch(`@Url.Action("DeleteAjax", "Properties", new { area = "Admin" })?id=${propertyId}`, {
                 method: 'POST',

@@ -1,11 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@model RegisterViewModel
+
+<!DOCTYPE html>
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="~/css/registerPage.css">
+    <link rel="stylesheet" href="~/css/registerPage.css" >
   
 </head>
 <body>
@@ -43,50 +45,63 @@
             <p class="subtitle">Присъедини се към нашата общност</p>
 
             <!-- Registration Form -->
-            <form class="form" id="registrationForm">
+            <form class="form" id="registrationForm" asp-action="Register" asp-controller="Auth" asp-area="">
                 <!-- Username Fields -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="text" class="input-field username" placeholder="Username" required>
+                        <input asp-for="FirstName" type="text" class="input-field" placeholder="Име" required>
                         <i class="input-icon fas fa-user"></i>
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
                     </div>
+                    
+
+                    <div class="input-wrapper">
+                        <input asp-for="LastName" type="text" class="input-field" placeholder="Име" required>
+                        <i class="input-icon fas fa-user"></i>
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                    
                 </div>
                 <!-- Email -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="email" class="input-field" placeholder="Имейл адрес" required>
+                        <input asp-for="Email" type="email" class="input-field" placeholder="Имейл адрес" required>
                         <i class="input-icon fas fa-envelope"></i>
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                 <!-- Phone (Optional) -->
                     <div class="input-wrapper">
-                        <input type="tel" class="input-field" placeholder="Телефонен номер">
+                        <input asp-for="PhoneNumber" type="tel" class="input-field" placeholder="Телефонен номер">
                         <i class="input-icon fas fa-phone"></i>
                         <span class="optional-tag">по избор</span>
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                     </div>
                 </div>
                 <!-- Password -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="password" class="input-field" placeholder="Парола" required id="password">
+                        <input asp-for="Password" type="password" class="input-field" placeholder="Парола" required id="password">
                         <i class="input-icon fas fa-lock"></i>
                         <button type="button" class="toggle-password" onclick="togglePassword()">
                             <i class="fas fa-eye" id="eyeIcon"></i>
                         </button>
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
                 <!-- Confirm Password -->
                     <div class="input-wrapper">
-                        <input type="password" class="input-field" placeholder="Потвърди паролата" required>
+                        <input asp-for="ConfirmPassword" type="password" class="input-field" placeholder="Потвърди паролата" required>
                         <i class="input-icon fas fa-lock"></i>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
                 </div>
 
                 <!-- Terms Checkbox -->
-                <div class="checkbox-group">
+                @* <div class="checkbox-group">
                     <input type="checkbox" class="checkbox" required id="terms">
                     <label for="terms" class="checkbox-label">
                         Съгласен съм с <a href="#">Условията за ползване</a> и <a href="#">Политиката за поверителност</a>
                     </label>
-                </div>
+                </div> *@
 
                 <!-- Submit Button -->
                 <button type="submit" class="submit-button">
@@ -123,56 +138,7 @@
                 passwordField.type = 'password';
                 eyeIcon.className = 'fas fa-eye';
             }
-        }
-
-        // Password strength checker
-        document.getElementById('password').addEventListener('input', function(e) {
-            const password = e.target.value;
-            const strengthProgress = document.getElementById('strengthProgress');
-            const strengthText = document.getElementById('strengthText');
-            
-            let strength = 0;
-            let text = '';
-            
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]/)) strength++;
-            if (password.match(/[A-Z]/)) strength++;
-            if (password.match(/[0-9]/)) strength++;
-            if (password.match(/[^a-zA-Z0-9]/)) strength++;
-            
-            strengthProgress.className = 'strength-progress';
-            
-            switch (strength) {
-                case 0:
-                case 1:
-                    strengthProgress.classList.add('strength-weak');
-                    text = 'Слаба парола';
-                    break;
-                case 2:
-                case 3:
-                    strengthProgress.classList.add('strength-fair');
-                    text = 'Средна парола';
-                    break;
-                case 4:
-                    strengthProgress.classList.add('strength-good');
-                    text = 'Добра парола';
-                    break;
-                case 5:
-                    strengthProgress.classList.add('strength-strong');
-                    text = 'Силна парола';
-                    break;
-            }
-            
-            strengthText.textContent = password.length > 0 ? text : 'Въведи парола';
-        });
-
-        // Form submission
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Here you would typically send the form data to your server
-            alert('Формата е изпратена успешно!');
-        });
+        }   
     </script>
 </body>
 </html>

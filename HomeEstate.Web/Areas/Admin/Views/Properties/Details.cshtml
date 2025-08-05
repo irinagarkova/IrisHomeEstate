@@ -1,5 +1,5 @@
-﻿@using HomeEstate.Services.Core.Dtos
-@model PropertyDto
+﻿
+@model AdminPropertyDetailsViewModel
 @{
     ViewData["Title"] = "Property Details";
 }
@@ -31,7 +31,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <h3 class="mb-2">@Model</h3>
+                            <h3 class="mb-2">@Model.Title</h3>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 @switch ((int)Model.ListingType)
                                 {
@@ -45,7 +45,7 @@
                                         <span class="badge bg-primary fs-6">Sale & Rent</span>
                                         break;
                                 }
-                                <span class="badge bg-secondary">@Model.Category?.Name</span>
+                                <span class="badge bg-secondary">@Model.CategoryName</span>
                                 <span class="badge bg-warning">@Model.PropertyType</span>
                             </div>
                             <p class="text-muted mb-0">

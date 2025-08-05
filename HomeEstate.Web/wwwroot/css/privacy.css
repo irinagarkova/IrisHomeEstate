@@ -1,0 +1,116 @@
+﻿:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-section {
+    background: var(--gradient);
+    color: white;
+    padding: 4rem 0;
+    margin: -20px -15px 0 -15px;
+}
+
+.privacy-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    margin-top: -60px;
+    position: relative;
+    z-index: 10;
+}
+
+.privacy-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 3rem;
+    text-align: center;
+    border-radius: 20px 20px 0 0;
+}
+
+.privacy-content {
+    padding: 3rem;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.highlight-box {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.btn-modern {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+    .btn-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+.back-to-home {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+@@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+
+    .privacy-container {
+        margin: 1rem;
+        margin-top: -30px;
+    }
+
+    .privacy-header, .privacy-content {
+        padding: 2rem 1.5rem;
+    }
+}

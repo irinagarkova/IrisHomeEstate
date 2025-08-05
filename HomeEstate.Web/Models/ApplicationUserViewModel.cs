@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace HomeEstate.Web.Models
 {
@@ -21,5 +22,8 @@ namespace HomeEstate.Web.Models
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [Display(Name = "Email")]
         public string Email { get; set; }
+
+        public int FavoritePropertiesCount { get; set; }
+        public int PropertiesCount { get; set; }
     }
 }

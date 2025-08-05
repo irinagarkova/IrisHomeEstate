@@ -182,7 +182,9 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                     return RedirectToAction("Index");
                 }
 
-                var viewModel = mapper.Map<DetailsViewModel>(property);
+                var viewModel = mapper.Map<AdminPropertyDetailsViewModel>(property);
+                viewModel.PropertyType = property.PropertyType;
+                viewModel.CategoryName = property.Category?.Name;
                 return View(viewModel);
             }
             catch (Exception ex)
