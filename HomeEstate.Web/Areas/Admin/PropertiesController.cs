@@ -55,9 +55,21 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                         .Take(pageSize)
                         .ToList();
 
+                    var dict = new Dictionary<int, List<PropertyDto>>();
+
+                    for (int pageNumber = 1; pageNumber <= totalPages; pageNumber++)
+                    {
+                        var pageItems = searchResults.Items
+                            .Skip((pageNumber - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+
+                        dict[pageNumber] = pageItems;
+                    }
                     properties = new Pagination<PropertyDto>
                     {
                         Items = pagedItems,
+                        Properties = dict,
                         CurrentPage = page,
                         PageSize = pageSize,
                         TotalItems = searchResults.Items.Count,
@@ -94,8 +106,8 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
 
                 var properties = await propertyService.GetAllPropertiesAsync(page, pageSize);
 
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
+                //if (!string.IsNullOrEmpty(searchTerm))
+                //{
                     var searchCriteria = new PropertySearchDto
                     {
                         Location = searchTerm,
@@ -110,22 +122,36 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                         .Take(pageSize)
                         .ToList();
 
+                   
+
                     properties = new Pagination<PropertyDto>
                     {
                         Items = pagedItems,
+                        //Properties = dict,
                         CurrentPage = page,
                         PageSize = pageSize,
                         TotalItems = searchResults.Items.Count,
                         TotalPages = totalPages
                     };
-                }
+                //}
 
                 var propertiesViewModel = properties.Items.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
+                
+                var dict = new Dictionary<int, List<PropertyViewModel>>();
+                for (int pageNumber = 1; pageNumber <= totalPages; pageNumber++)
+                {
+                    var pageItems = propertiesViewModel
+                        .Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
 
+                    dict[pageNumber] = pageItems;
+                }
                 return Json(new
                 {
                     success = true,
                     data = propertiesViewModel,
+                    dict = dict,
                     pagination = new
                     {
                         currentPage = properties.CurrentPage,

@@ -9,5 +9,6 @@ namespace HomeEstate.Services.Core.Dtos
     public class Pagination<T> : IPagination
     {
         public List<T> Items { get; set; } = new();
+        public Dictionary<int, List<T>> Properties { get; set; } = new();
     }
 }

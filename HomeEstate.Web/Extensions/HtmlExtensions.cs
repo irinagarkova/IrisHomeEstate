@@ -18,8 +18,8 @@ namespace HomeEstate.Web.Extensions
                 ["LoadFunction"] = loadFunction,
                 ["ShowTooltips"] = showTooltips.ToString().ToLower()
             };
-                
-            return htmlHelper.Partial("_GenericPagination", model, viewData);
+
+            return htmlHelper.Partial("_Pagination", model, viewData);
         }
     }
 }

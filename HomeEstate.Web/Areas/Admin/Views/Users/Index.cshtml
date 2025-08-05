@@ -187,7 +187,7 @@
 
         <!-- Pagination -->
         <div class="card-footer" id="paginationContainer">
-            @await Html.PartialAsync("_GenericPagination", Model.Users, new ViewDataDictionary(ViewData)
+            @await Html.PartialAsync("_Pagination", Model.Users, new ViewDataDictionary(ViewData)
             {
                 ["LoadFunction"] = "loadProperties",
                 ["ShowTooltips"] = "true"
