@@ -101,14 +101,6 @@ namespace HomeEstate.Web.Controllers
                 return Json(new {success = false, error = "Invalid credentials" });
             }
 
-            if (!await userManager.IsEmailConfirmedAsync(user))
-            {
-                // Email not confirmed - show message
-                ModelState.AddModelError(string.Empty, "You must confirm your email before logging in.");
-                return View(model);
-            }
-
-
             var result = await signInManager.PasswordSignInAsync(model.Email,
                                                                  model.Password,
                                                                  model.RememberMe,
