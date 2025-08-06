@@ -5,7 +5,7 @@
 }
 
 .edit-profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
     color: white;
     border-radius: 20px;
     padding: 3rem 2rem;
@@ -129,7 +129,7 @@
 }
 
 .btn-primary-modern {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
     color: white;
 }
 

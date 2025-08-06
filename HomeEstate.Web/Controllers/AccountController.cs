@@ -101,7 +101,6 @@ namespace HomeEstate.Web.Controllers
 
             try
             {
-                // Ensure the user can only edit their own profile
                 var currentUser = await accountService.GetApplicationUser(User.Identity.Name);
                 if (currentUser == null || currentUser.Id != model.Id)
                 {
@@ -125,56 +124,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetUserStatistics()
-        //{
-        //    try
-        //    {
-        //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //        if (string.IsNullOrEmpty(userId))
-        //        {
-        //            return Json(new { success = false, message = "User not found" });
-        //        }
-
-        //        // Get user properties count
-        //        var userProperties = await propertyService.GetPropertiesByUserIdAsync(userId);
-        //        var totalProperties = userProperties.Count;
-
-        //        // Get user favorites count
-        //        var userFavorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
-        //        var totalFavorites = userFavorites.Count;
-
-        //        // Get user statistics
-        //        var statistics = await propertyService.GetUserPropertyStatisticsAsync(userId);
-
-        //        // Calculate profile views (mock data - you would implement this based on your tracking system)
-        //        var profileViews = 48; // This would come from your analytics/tracking system
-
-        //        // Calculate days since registration
-        //        var user = await accountService.GetApplicationUser(User.Identity.Name);
-        //        var daysSinceRegistration = user != null ?
-        //            (DateTime.Now - DateTime.Parse("2024-01-15")).Days : 0; // You'd get actual registration date
-
-        //        var stats = new
-        //        {
-        //            totalProperties = totalProperties,
-        //            totalFavorites = totalFavorites,
-        //            totalViews = profileViews,
-        //            daysSinceRegistration = daysSinceRegistration,
-        //            propertiesForSale = statistics?.PropertiesForSale ?? 0,
-        //            propertiesForRent = statistics?.PropertiesForRent ?? 0,
-        //            totalPropertyViews = statistics?.TotalFavorites ?? 0
-        //        };
-
-        //        return Json(new { success = true, data = stats });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.LogError(ex, "Error getting user statistics for {UserName}", User.Identity.Name);
-        //        return Json(new { success = false, message = "Error loading statistics" });
-        //    }
-        //}
-
         [HttpGet]
         public async Task<IActionResult> GetUserActivity()
         {
@@ -186,7 +135,6 @@ namespace HomeEstate.Web.Controllers
                     return Json(new { success = false, message = "User not found" });
                 }
 
-                // This is mock data - in a real application, you would have an activity tracking system
                 var activities = new[]
                 {
                     new {
@@ -240,17 +188,10 @@ namespace HomeEstate.Web.Controllers
                     return NotFound("User not found");
                 }
 
-                // In a real application, you might want to:
-                // 1. Soft delete instead of hard delete
-                // 2. Send confirmation email
-                // 3. Keep audit trail
-                // 4. Handle user's properties (transfer ownership, delete, etc.)
-
                 await accountService.DeleteUserAsync(user.Id);
 
                 logger.LogInformation("User account deleted: {UserId}", user.Id);
 
-                // Sign out the user
                 await HttpContext.SignOutAsync();
 
                 TempData["Success"] = "Your account has been deleted successfully.";
@@ -281,7 +222,6 @@ namespace HomeEstate.Web.Controllers
                     return NotFound("User not found");
                 }
 
-                // Get user's recent properties
                 var userProperties = await propertyService.GetPropertiesByUserIdAsync(userId);
                 var recentProperties = userProperties
                     .OrderByDescending(p => p.CreatedOn)
@@ -289,14 +229,12 @@ namespace HomeEstate.Web.Controllers
                     .Select(p => mapper.Map<PropertyViewModel>(p))
                     .ToList();
 
-                // Get user's recent favorites
                 var userFavorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
                 var recentFavorites = userFavorites
                     .Take(5)
                     .Select(f => mapper.Map<PropertyViewModel>(f.Property))
                     .ToList();
 
-                // Get user statistics
                 var statistics = await propertyService.GetUserPropertyStatisticsAsync(userId);
 
                 var dashboardData = new
@@ -353,100 +291,5 @@ namespace HomeEstate.Web.Controllers
                 return Json(new { success = false, message = "An error occurred while changing password" });
             }
         }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateNotificationSettings(NotificationSettingsViewModel model)
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Json(new { success = false, message = "User not found" });
-                }
-
-                // In a real application, you would save these preferences to the database
-                // For now, we'll just return success
-                logger.LogInformation("Notification settings updated for user {UserId}", userId);
-
-                return Json(new { success = true, message = "Notification settings updated successfully" });
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error updating notification settings for {UserName}", User.Identity.Name);
-                return Json(new { success = false, message = "Error updating notification settings" });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ExportData()
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Forbid();
-                }
-
-                var user = await accountService.GetApplicationUser(User.Identity.Name);
-                var userProperties = await propertyService.GetPropertiesByUserIdAsync(userId);
-                var userFavorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
-
-                var exportData = new
-                {
-                    UserProfile = user,
-                    Properties = userProperties,
-                    Favorites = userFavorites.Select(f => f.Property),
-                    ExportDate = DateTime.UtcNow
-                };
-
-                var json = System.Text.Json.JsonSerializer.Serialize(exportData, new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-
-                var bytes = System.Text.Encoding.UTF8.GetBytes(json);
-                var fileName = $"user_data_export_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
-
-                logger.LogInformation("Data export requested by user {UserId}", userId);
-
-                return File(bytes, "application/json", fileName);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error exporting data for {UserName}", User.Identity.Name);
-                TempData["Error"] = "An error occurred while exporting your data.";
-                return RedirectToAction("Index");
-            }
-        }
-    }
-
-    // Additional ViewModels for the new functionality
-    public class ChangePasswordViewModel
-    {
-        [Required]
-        [DataType(DataType.Password)]
-        [Display(Name = "Current Password")]
-        public string CurrentPassword { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "New Password")]
-        public string NewPassword { get; set; } = string.Empty;
-
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm New Password")]
-        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; } = string.Empty;
-    }
-
-    public class NotificationSettingsViewModel
-    {
-        public bool EmailNotifications { get; set; }
-        public bool PropertyAlerts { get; set; }
-        public bool MarketingEmails { get; set; }
-        public bool SmsNotifications { get; set; }
     }
 }

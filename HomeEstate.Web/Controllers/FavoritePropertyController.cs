@@ -32,7 +32,6 @@ namespace HomeEstate.Web.Controllers
 
         public async Task<IActionResult> Index(int page = 1, int pageSize = 12, string searchTerm = "", string sortBy = "newest", string category = "")
         {
-            // Validate pagination parameters
             if (page < 1) page = 1;
             if (pageSize < 6) pageSize = 6;
             if (pageSize > 50) pageSize = 50;
@@ -42,7 +41,6 @@ namespace HomeEstate.Web.Controllers
                 var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
                 var propertyDtos = favorites.Select(fp => fp.Property).ToList();
 
-                // Apply search filter
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     propertyDtos = propertyDtos.Where(p =>
@@ -51,8 +49,6 @@ namespace HomeEstate.Web.Controllers
                         (p.Location?.City != null && p.Location.City.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                     ).ToList();
                 }
-
-                // Apply category filter
                 if (!string.IsNullOrEmpty(category))
                 {
                     propertyDtos = propertyDtos.Where(p =>
@@ -60,7 +56,6 @@ namespace HomeEstate.Web.Controllers
                     ).ToList();
                 }
 
-                // Apply sorting
                 propertyDtos = sortBy?.ToLower() switch
                 {
                     "oldest" => propertyDtos.OrderBy(p => p.CreatedOn).ToList(),
@@ -72,7 +67,6 @@ namespace HomeEstate.Web.Controllers
                     _ => propertyDtos.OrderByDescending(p => p.CreatedOn).ToList(), // newest (default)
                 };
 
-                // Calculate pagination
                 var totalItems = propertyDtos.Count;
                 var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
                 var skip = (page - 1) * pageSize;
@@ -80,14 +74,12 @@ namespace HomeEstate.Web.Controllers
 
                 var mapped = pagedItems.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
 
-                // Set all as favorites since they're from favorites list
                 foreach (var item in mapped)
                 {
                     item.IsFavorite = true;
                     item.FavoriteCount = await favoritePropertyService.GetFavoriteCountForPropertyAsync(item.Id);
                 }
 
-                // Get unique categories for filter
                 var allFavorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
                 var categories = allFavorites
                     .Where(f => f.Property?.Category != null)
@@ -96,7 +88,6 @@ namespace HomeEstate.Web.Controllers
                     .OrderBy(c => c)
                     .ToList();
 
-                // Create view model
                 var viewModel = new FavoritePropertyIndexViewModel
                 {
                     Properties = new Pagination<PropertyViewModel>
@@ -143,7 +134,6 @@ namespace HomeEstate.Web.Controllers
                 var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(User.Identity.Name);
                 var propertyDtos = favorites.Select(fp => fp.Property).ToList();
 
-                // Apply search filter
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     propertyDtos = propertyDtos.Where(p =>
@@ -153,7 +143,6 @@ namespace HomeEstate.Web.Controllers
                     ).ToList();
                 }
 
-                // Apply category filter
                 if (!string.IsNullOrEmpty(category))
                 {
                     propertyDtos = propertyDtos.Where(p =>
@@ -161,7 +150,6 @@ namespace HomeEstate.Web.Controllers
                     ).ToList();
                 }
 
-                // Apply sorting
                 propertyDtos = sortBy?.ToLower() switch
                 {
                     "oldest" => propertyDtos.OrderBy(p => p.CreatedOn).ToList(),
@@ -173,7 +161,6 @@ namespace HomeEstate.Web.Controllers
                     _ => propertyDtos.OrderByDescending(p => p.CreatedOn).ToList(),
                 };
 
-                // Calculate pagination
                 var totalItems = propertyDtos.Count;
                 var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
                 var skip = (page - 1) * pageSize;

@@ -108,36 +108,36 @@ nav {
         transition: all 0.3s ease;
     }
 
-        .footer-section ul li a {
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-block;
-            position: relative;
-            padding: 5px 0;
-        }
+ .footer-section ul li a {
+     color: #ffffff;
+     text-decoration: none;
+     font-size: 16px;
+     font-weight: 500;
+     transition: all 0.3s ease;
+     display: inline-block;
+     position: relative;
+     padding: 5px 0;
+ }
 
-            .footer-section ul li a:hover {
-                color: #667eea;
-                transform: translateX(8px);
-                text-decoration: none;
-            }
+.footer-section ul li a:hover {
+    color: #667eea;
+    transform: translateX(8px);
+    text-decoration: none;
+}
 
-            .footer-section ul li a::before {
-                content: '→';
-                position: absolute;
-                left: -20px;
-                opacity: 0;
-                transition: all 0.3s ease;
-                color: #667eea;
-            }
+.footer-section ul li a::before {
+    content: '→';
+    position: absolute;
+    left: -20px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    color: #667eea;
+}
 
-            .footer-section ul li a:hover::before {
-                opacity: 1;
-                left: -15px;
-            }
+.footer-section ul li a:hover::before {
+    opacity: 1;
+    left: -15px;
+}
 
 .footer-content {
     max-width: 1400px;

@@ -39,10 +39,8 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                     RecentUsers = mapper.Map<List<ApplicationUserViewModel>>(await applicationUserService.GetRecentUsers(5)),
                     RecentProperties = mapper.Map<List<PropertyViewModel>>(await propertyService.GetRecentProperties(5))
                 };
-
-                // Calculate monthly stats (you might want to add these methods to your services)
-                dashboardData.NewUsersThisMonth = 0; // Implement this in ApplicationUserService
-                dashboardData.NewPropertiesThisMonth = 0; // Implement this in PropertyService
+                dashboardData.NewUsersThisMonth = 0;
+                dashboardData.NewPropertiesThisMonth = 0; 
 
                 return View(dashboardData);
             }

@@ -241,7 +241,8 @@ body {
     font-weight: 700;
     color: #2d3748;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, #2d3748 0%, #667eea 100%);
+    background: linear-gradient(90deg, rgb(42, 123, 155) 0%, rgb(87, 199, 133) 50%);
+    background-clip: border-box;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -260,6 +261,16 @@ body {
     text-align: left;
 }
 
+.input-icon {
+    position: absolute;
+    left: 18px;
+    top: 40%;
+    transform: translateY(-50%);
+    color: var(--secondary);
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
 .input-group {
     margin-bottom: 25px;
 }

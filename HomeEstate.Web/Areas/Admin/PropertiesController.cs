@@ -95,7 +95,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // AJAX endpoint for loading properties
+
         [HttpGet]
         public async Task<IActionResult> LoadProperties(int page = 1, int pageSize = 10, string searchTerm = "", string sortBy = "newest")
         {
@@ -106,8 +106,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
 
                 var properties = await propertyService.GetAllPropertiesAsync(page, pageSize);
 
-                //if (!string.IsNullOrEmpty(searchTerm))
-                //{
                     var searchCriteria = new PropertySearchDto
                     {
                         Location = searchTerm,
@@ -133,7 +131,7 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                         TotalItems = searchResults.Items.Count,
                         TotalPages = totalPages
                     };
-                //}
+             
 
                 var propertiesViewModel = properties.Items.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
                 
@@ -170,7 +168,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/Properties/Details/5
         public async Task<IActionResult> Details(int id)
         {
             try
@@ -195,7 +192,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/Properties/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -218,7 +214,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Properties/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

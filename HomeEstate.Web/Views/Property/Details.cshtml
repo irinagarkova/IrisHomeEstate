@@ -17,17 +17,6 @@
 
 </head>
 <body>
-    <!-- Breadcrumb -->
-    <div class="container">
-        <nav aria-label="breadcrumb" class="breadcrumb-custom">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/Property">Properties</a></li>
-                <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
-            </ol>
-        </nav>
-    </div>
-
     <!-- Hero Section -->
     <div class="hero-section">
         <div class="container">
@@ -120,7 +109,7 @@
                 </div>
 
                 <!-- Property Features -->
-                <div class="property-card">
+                <div class="property-new">
                     <div class="property-info">
                         <h3 class="mb-4"><i class="fas fa-star me-2"></i>Property Features</h3>
                         
@@ -155,15 +144,6 @@
                                 </div>
                             </div>
                             
-                            <div class="info-item">
-                                <div class="info-icon">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold">Owner</div>
-                                    <div class="text-muted">@Model.Owner</div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Feature Badges -->
@@ -194,7 +174,7 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Price Section -->
-                <div class="property-card">
+                <div class="property-new">
                     <div class="price-section">
                         @if (Model.ListingType == PropertyListingType.Sale)
                         {

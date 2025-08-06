@@ -39,7 +39,7 @@
 }
 
 .stats-bar {
-    background: #718096;
+    background: #AFBBC7;
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 20px;
@@ -237,7 +237,7 @@
 .property-price {
     font-size: 1.8rem;
     font-weight: 800;
-    color: #27ae60;
+    color: black;
     margin-bottom: 15px;
 }
 
@@ -389,7 +389,7 @@
 }
 
 .filter-bar {
-    background: #718096;
+    background: #AFBBC7;
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 20px;

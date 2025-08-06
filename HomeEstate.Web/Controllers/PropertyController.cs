@@ -42,9 +42,12 @@ namespace HomeEstate.Web.Controllers
         {
             // Validate page parameters
             if (page < 1) page = 1;
-            if (pageSize < 6) pageSize = 6;
-            if (pageSize > 50) pageSize = 50;
-
+            if (pageSize < 5) pageSize = 5;
+            if (pageSize > 100) pageSize = 100;
+            if(searchCriteria.ListingType == null)
+            {
+                searchCriteria.ListingType = PropertyListingType.Sale;
+            }
             searchCriteria ??= new PropertySearchDto();
             searchCriteria.Page = page;
             searchCriteria.PageSize = pageSize;
@@ -102,7 +105,7 @@ namespace HomeEstate.Web.Controllers
                     PageSize = propertyDtos.PageSize,
                 },
                 SearchCriteria = searchCriteria,
-                PageSizes = new List<int> { 5, 10, 25, 50 }
+                PageSizes = new List<int> { 5, 10, 25, 50, 100 }
             };
 
             return View(viewModel);

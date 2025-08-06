@@ -38,18 +38,17 @@ namespace HomeEstate.Services.Core.Services
             await dbContext.AddAsync(newProperty);
             await dbContext.SaveChangesAsync();
 
-            if (property.Images != null && property.Images.Any())
-            {
-                var propertyImages = property.Images.Select(img => new PropertyImage
-                {
-                    PropertyId = newProperty.Id,
-                    ImageUrl = img.ImageUrl,
-                    IsDeleted = false
-                }).ToList();
+            //if (property.Images != null && property.Images.Any())
+            //{
+            //    var propertyImages = property.Images.Select(img => new PropertyImage
+            //    {
+            //        PropertyId = newProperty.Id,
+            //        ImageUrl = img.ImageUrl,
+            //        IsDeleted = false
+            //    }).ToList();
 
-                await dbContext.PropertyImages.AddRangeAsync(propertyImages);
-                await dbContext.SaveChangesAsync();
-            }
+            //    await dbContext.PropertyImages.AddRangeAsync(propertyImages);
+            //} 
         }
 
         public async Task DeletePropertyAsync(int id)
@@ -78,6 +77,7 @@ namespace HomeEstate.Services.Core.Services
                 .Include(p => p.Location)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
+                .Include(p => p.Owner)
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
 

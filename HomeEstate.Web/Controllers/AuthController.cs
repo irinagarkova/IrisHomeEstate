@@ -98,9 +98,7 @@ namespace HomeEstate.Web.Controllers
 
             if (user == null)
             {
-                // User not found - return invalid login attempt
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View(model);
+                return Json(new {success = false, error = "Invalid credentials" });
             }
 
             if (!await userManager.IsEmailConfirmedAsync(user))
@@ -119,9 +117,8 @@ namespace HomeEstate.Web.Controllers
             {
                 return Json(new { Success = true });
             }
+            return Json(new { success = false, error = "Invalid credentials" });
 
-            ModelState.AddModelError(string.Empty, "Invalid credentials");
-            return View(model);
         }
 
         [HttpPost]
@@ -214,11 +211,9 @@ namespace HomeEstate.Web.Controllers
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                // Don't reveal that the user does not exist or is not confirmed
                 return RedirectToAction("ForgotPasswordConfirmation");
             }
 
-            // Generate password reset token
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var callbackUrl = Url.Action("ResetPassword", "Auth",
                 new { token = token, email = model.Email }, Request.Scheme);
@@ -278,7 +273,7 @@ namespace HomeEstate.Web.Controllers
             if (remoteError != null)
             {
                 TempData["Error"] = $"Error from Google: {remoteError}";
-                return RedirectToAction("Login", "Home"); // Or wherever you want to redirect on error
+                return RedirectToAction("Login", "Home");
             }
 
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -300,112 +295,87 @@ namespace HomeEstate.Web.Controllers
                 var existingUser = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
                 if (existingUser != null)
                 {
-                    // Update claims
                     await UpdateUserClaimsFromGoogle(existingUser, info);
-
-                    // Force complete re-authentication
                     await signInManager.SignOutAsync();
-
-                    // Wait a moment (sometimes needed for cookie clearing)
                     await Task.Delay(100);
-
-                    // Sign back in with fresh data
                     await signInManager.SignInAsync(existingUser, isPersistent: false);
+
                     return RedirectToAction("Index", "Home");
                 }
             }
 
-                // If user doesn't exist, create new account automatically
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var name = info.Principal.FindFirstValue(ClaimTypes.Name);
 
-                if (email != null)
+            if (email != null)
+            {
+                var applicationUser = await userManager.FindByEmailAsync(email);
+                if (applicationUser != null)
                 {
-                    var applicationUser = await userManager.FindByEmailAsync(email);
-                    if (applicationUser != null)
-                    {
-                        await userManager.AddLoginAsync(applicationUser, info);
-                        await signInManager.SignInAsync(applicationUser, isPersistent: false);
-                        return RedirectToAction("Index", "Home");
-                    }
-
-                    var user = new ApplicationUser
-                    {
-                        UserName = email,
-                        Email = email,
-                        EmailConfirmed = true
-                    };
-
-                    var createResult = await userManager.CreateAsync(user);
-                    if (createResult.Succeeded)
-                    {
-                        await userManager.AddLoginAsync(user, info);
-
-                        // Add additional claims
-                        var claims = new List<Claim>();
-                        if (!string.IsNullOrEmpty(name))
-                            claims.Add(new Claim(ClaimTypes.Name, name));
-
-                        var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
-                        if (!string.IsNullOrEmpty(givenName))
-                            claims.Add(new Claim(ClaimTypes.GivenName, givenName));
-
-                        var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
-                        if (!string.IsNullOrEmpty(surname))
-                            claims.Add(new Claim(ClaimTypes.Surname, surname));
-
-                        if (claims.Any())
-                            await userManager.AddClaimsAsync(user, claims);
-
-                        await signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Index", "Home");
-                    }
+                    await userManager.AddLoginAsync(applicationUser, info);
+                    await UpdateUserClaimsFromGoogle(applicationUser, info);
+                    await signInManager.SignInAsync(applicationUser, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
                 }
+                var user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true
+                };
 
-                TempData["Error"] = "Unable to load user information from Google.";
-                return RedirectToAction("Login", "Home");
+                var createResult = await userManager.CreateAsync(user);
+                if (createResult.Succeeded)
+                {
+                    await userManager.AddLoginAsync(user, info);
+                    await userManager.AddToRoleAsync(user, "User");
+                    await UpdateUserClaimsFromGoogle(user, info);
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
-            private IActionResult RedirectToLocal(string returnUrl)
+            TempData["Error"] = "Unable to load user information from Google.";
+            return RedirectToAction("Login", "Home");
+        }
+
+        private async Task UpdateUserClaimsFromGoogle(ApplicationUser user, ExternalLoginInfo info)
+        {
+            var existingClaims = await userManager.GetClaimsAsync(user);
+
+            var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+            var picture = info.Principal.FindFirstValue("picture");
+            var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+            var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
+
+            await UpdateClaim(user, existingClaims, ClaimTypes.Name, name);
+            await UpdateClaim(user, existingClaims, "picture", picture);
+            await UpdateClaim(user, existingClaims, ClaimTypes.GivenName, givenName);
+            await UpdateClaim(user, existingClaims, ClaimTypes.Surname, surname);
+        }
+
+        private async Task UpdateClaim(ApplicationUser user, IList<Claim> existingClaims, string claimType, string newValue)
+        {
+            if (string.IsNullOrEmpty(newValue)) return;
+
+            var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
+
+            if (existingClaim != null && existingClaim.Value != newValue)
+            {
+                await userManager.RemoveClaimAsync(user, existingClaim);
+                await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
+            }
+            else if (existingClaim == null)
+            {
+                await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
+            }
+        }
+        private IActionResult RedirectToLocal(string returnUrl)
             {
                 if (Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
                 else
                     return RedirectToAction("Index", "Home");
-            }
-
-            private async Task UpdateUserClaimsFromGoogle(ApplicationUser user, ExternalLoginInfo info)
-            {
-                var existingClaims = await userManager.GetClaimsAsync(user);
-
-                // Extract Google data
-                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
-                var picture = info.Principal.FindFirstValue("picture");
-                var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
-                var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
-
-                // Update claims
-                await UpdateClaim(user, existingClaims, ClaimTypes.Name, name);
-                await UpdateClaim(user, existingClaims, "picture", picture);
-                await UpdateClaim(user, existingClaims, ClaimTypes.GivenName, givenName);
-                await UpdateClaim(user, existingClaims, ClaimTypes.Surname, surname);
-            }
-
-            private async Task UpdateClaim(ApplicationUser user, IList<Claim> existingClaims, string claimType, string newValue)
-            {
-                if (string.IsNullOrEmpty(newValue)) return;
-
-                var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
-
-                if (existingClaim != null && existingClaim.Value != newValue)
-                {
-                    await userManager.RemoveClaimAsync(user, existingClaim);
-                    await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
-                }
-                else if (existingClaim == null)
-                {
-                    await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
-                }
             }
         }
     } 

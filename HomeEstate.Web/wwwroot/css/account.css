@@ -138,6 +138,7 @@
 }
     .stat-icon favorite {
         background: red;
+        opacity: 0.6;
     }
 
     .stat-number {
@@ -177,24 +178,26 @@
 }
 
 .btn-primary-modern {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--secondary);
     color: white;
+
 }
 
     .btn-primary-modern:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         color: white;
+        
     }
 
 .btn-outline-modern {
     background: transparent;
-    border: 2px solid #667eea;
-    color: #667eea;
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
 }
 
     .btn-outline-modern:hover {
-        background: #667eea;
+        background: var(--secondary);
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);

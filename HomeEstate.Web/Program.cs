@@ -4,6 +4,7 @@ using HomeEstate.Services.Core.Interfaces;
 using HomeEstate.Services.Core.Mappings;
 using HomeEstate.Services.Core.Services;
 using HomeEstate.Web.Mappings;
+using HomeEstate.Web.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ namespace HomeEstate
                 options.SlidingExpiration = true;
                 options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
             builder.Services.AddAuthentication()
@@ -107,7 +108,7 @@ namespace HomeEstate
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseMiddleware<AuthenticationRefreshMiddleware>();
 
             app.MapControllerRoute(
                 name: "areas",
