@@ -10,30 +10,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="~/css/propertiesPage.css">
 
-@if (ViewData.ContainsKey("SearchApplied") && (bool)ViewData["SearchApplied"])
-{
-    <div class="alert alert-info" id="searchResultsAlert">
-        <i class="fas fa-search"></i>
-        Search Results: Found @Model.Properties.TotalItems properties
-        @if (Model.SearchCriteria != null)
-        {
-            @if (!string.IsNullOrEmpty(Model.SearchCriteria.Location))
-            {
-                <span class="badge bg-secondary">Location: @Model.SearchCriteria.Location</span>
-            }
-            @if (Model.SearchCriteria.CategoryId.HasValue)
-            {
-                <span class="badge bg-secondary">Category: @Model.SearchCriteria.CategoryId</span>
-            }
-            @if (Model.SearchCriteria.ListingType.HasValue)
-            {
-                <span class="badge bg-secondary">Type: @Model.SearchCriteria.ListingType</span>
-            }
-        }
-        <button type="button" class="btn-close" onclick="clearSearch()"></button>
-    </div>
-}
-
 <div class="container-fluid mt-4">
     <!-- Search and Filter Section -->
     <div class="row mb-4">
@@ -64,7 +40,7 @@
                                 <i class="fas fa-map-marker-alt me-1"></i>Location
                             </label>
                             <input type="text" class="form-control" id="searchLocation"
-                                   name="Location" placeholder="City or neighborhood" value="@Model.SearchCriteria?.Location">
+                                   name="Location" placeholder="City or neighborhood" asp-for="SearchCriteria.Location">
                         </div>
 
                         <!-- Property Type -->
@@ -214,9 +190,9 @@
                                             var first = true;
                                             foreach (var image in property.Images.Take(3))
                                             {
-                                                <div class="carousel-item @(first ? "active" : "")">
-                                                    <img src="@image.ImageUrl" class="d-block w-100" alt="Property image" style="height: 250px; object-fit: cover;">
-                                                </div>
+                                                    <div class="carousel-item @(first ? "active" : "")">
+                                                        <img src="@image.ImageUrl" class="d-block w-100" alt="Property image" style="height: 250px; object-fit: cover;">
+                                                    </div>
                                                 first = false;
                                             }
                                         }
@@ -267,7 +243,7 @@
 
                         <div class="card-body">
                             <h5 class="card-title text-truncate">@property.Title</h5>
-                            <p class="card-text text-primary fs-4 fw-bold mb-2">@property.Price.ToString("C")</p>
+                            <p class="card-text price">@property.Price.ToString("C")</p>
 
                             <div class="d-flex justify-content-between text-muted small mb-2">
                                 <span><i class="fas fa-bed"></i> @property.PropertyType</span>
@@ -316,32 +292,43 @@
     </div>
 
     <!-- Pagination -->
-    @if (Model.Properties.TotalPages > 1)
-    {
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        @await Html.PartialAsync("_Pagination", Model.Properties)
-                    </div>
+    
+</div>
+@if (Model.Properties.TotalPages > 1)
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @await Html.PartialAsync("_Pagination", Model.Properties)
                 </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+}
 
 @section Scripts {
     <script>
         let currentPage = @Model.Properties.CurrentPage;
         let currentPageSize = @Model.Properties.PageSize;
-        let currentSearchCriteria = @Html.Raw(Json.Serialize(Model.SearchCriteria));
+        let currentSearchCriteria = @Html.Raw(Json.Serialize(Model.SearchCriteria)); 
         let currentSortBy = '@Model.SortBy';
         let currentListingType = @((int)(Model.SearchCriteria?.ListingType ?? PropertyListingType.Sale));
         let hasActiveSearch = @Json.Serialize(ViewData.ContainsKey("SearchApplied") && (bool)ViewData["SearchApplied"]);
 
         $(document).ready(function () {
             const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
+                // $('.property-card').on('click', function (e) {
+                //     // Don't trigger if clicking on buttons or interactive elements
+                //     if ($(e.target).closest('button, a, input, select, textarea').length > 0) {
+                //         return;
+                //     }
 
+                //     const url = $(this).data('url');
+                //     if (url) {
+                //         window.location.href = url;
+                //     }
+                // });
             // Initialize form
             initializeSearchForm();
 
@@ -354,9 +341,9 @@
 
         function initializeSearchForm() {
             // Set listing type based on search criteria
-            if (currentSearchCriteria?.ListingType) {
-                currentListingType = currentSearchCriteria.ListingType;
-                switchTab(currentListingType);
+            if (currentSearchCriteria?.listingType) {
+                currentListingType = currentSearchCriteria.listingType;
+                switchTab(currentListingType); 
             }
 
             // Update form fields based on existing search criteria
@@ -441,15 +428,16 @@
 
         function updateFormFromSearchCriteria() {
             if (currentSearchCriteria) {
-                $('#searchLocation').val(currentSearchCriteria.Location || '');
-                $('#searchCategory').val(currentSearchCriteria.CategoryId || '');
-                $('#bedroomsSelect').val(currentSearchCriteria.Bedrooms || '');
-                $('#maxPrice').val(currentSearchCriteria.MaxPrice || currentSearchCriteria.MaxRent || '');
+                $('#searchLocation').val(currentSearchCriteria.location || '');
+                $('#searchCategory').val(currentSearchCriteria.categoryId || '');
+                $('#bedroomsSelect').val(currentSearchCriteria.bedrooms || '');
+                $('#maxPrice').val(currentSearchCriteria.maxPrice || currentSearchCriteria.maxRent || '');
                 $('#sortBy').val(currentSortBy || 'newest');
             }
         }
 
         function performSearch() {
+            debugger
             hasActiveSearch = true;
             showLoading(true);
 
@@ -473,10 +461,9 @@
                         } else {
                             showNoResults(false);
                         }
-
-                        // Show clear search button
-                        $('#clearSearchBtn').show();
-                        showSearchAlert(response.totalCount);
+                        if (currentSearchCriteria.hasSearchCriteria) {
+                             $('#clearSearchBtn').show();
+                        }
                     } else {
                         showError('Search failed: ' + (response.message || 'Unknown error'));
                     }
@@ -576,8 +563,8 @@
             const images = buildImageCarousel(property);
 
             return `
-                <div class="col property-item" data-property-id="${property.id}">
-                    <div class="card h-100 property-card">
+                        <div class="col property-item" data-property-id="${property.id}">
+                                    <div class="card h-100 property-card">
                         <div class="position-relative">
                             ${images}
                             <div class="position-absolute top-0 start-0 m-2">
@@ -752,26 +739,15 @@
             $('#resultCount').text(`Showing ${response.totalCount} properties`);
         }
 
-        function showSearchAlert(count) {
-            const alertHtml = `
-                <div class="alert alert-info" id="searchResultsAlert">
-                    <i class="fas fa-search"></i>
-                    Search Results: Found ${count} properties
-                    <button type="button" class="btn-close" onclick="clearSearch()"></button>
-                </div>
-            `;
-            $('#searchResultsAlert').remove();
-            $('.container-fluid').prepend(alertHtml);
-        }
+        
 
         function clearSearch() {
-            hasActiveSearch = false;
+            currentSearchCriteria.hasSearchCriteria = false;
             $('#searchForm')[0].reset();
             $('#clearSearchBtn').hide();
             $('#searchResultsAlert').remove();
-            currentListingType = 1;
-            switchTab(1);
-            location.href = '@Url.Action("Index", "Property")';
+            performSearch()
+            $('#clearSearchBtn').hide();
         }
 
         function toggleFavorite(btn) {

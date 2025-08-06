@@ -3,6 +3,7 @@
     ViewData["Title"] = "My Properties";
 }
 
+<link rel="stylesheet" href="~/css/myProperties.css" asp-append-version="true" />
 <div class="container-fluid main-content">
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)
@@ -208,7 +209,7 @@
 
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title">@property.Title</h5>
-                                        <p class="card-text text-primary fs-5 fw-bold">@property.Price.ToString("C")</p>
+                                        <p class="card-text price">@property.Price.ToString("C")</p>
 
                                         <div class="row text-muted small mb-2">
                                             <div class="col-6">

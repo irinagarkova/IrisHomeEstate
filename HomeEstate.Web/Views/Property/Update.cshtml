@@ -39,11 +39,11 @@
             </div>
 
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" id="priceField">
                     <label class="form-label" asp-for="Price">
                         Price (lv.) <span class="required">*</span>
                     </label>
-                    <input asp-for="Price" class="form-input" placeholder="150000" min="0">
+                    <input asp-for="Price" class="form-input" id="price" placeholder="150000" min="0">
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -94,15 +94,15 @@
                 </label>
                 <div class="type-selection">
                     <div class="type-option">
-                        <input type="radio" id="sale" asp-for="ListingType" value="1">
+                        <input type="radio" id="sale" name="listingType" asp-for="ListingType" value="1">
                         <label for="sale" class="type-label">Sale</label>
                     </div>
                     <div class="type-option">
-                        <input type="radio" id="rent" asp-for="ListingType" value="2">
+                        <input type="radio" id="rent" name="listingType" asp-for="ListingType" value="2">
                         <label for="rent" class="type-label">Rent</label>
                     </div>
                     <div class="type-option">
-                        <input type="radio" id="both" asp-for="ListingType" value="3">
+                        <input type="radio" id="both" name="listingType" asp-for="ListingType" value="3">
                         <label for="both" class="type-label">Both</label>
                     </div>
                 </div>
@@ -111,11 +111,11 @@
             <!-- Полета за наем -->
             <div id="rentalFields" style="display: none;">
                 <div class="form-row-three">
-                    <div class="form-group">
+                    <div class="form-group" id="rentalFields">
                         <label class="form-label" asp-for="MonthlyRent">
-                            Monthly rent (lv.)
+                            Monthly rent (lv.) <span class="rent-required"/>
                         </label>
-                        <input asp-for="MonthlyRent" class="form-input" placeholder="1200" min="0" step="50">
+                        <input asp-for="MonthlyRent" class="form-input" id="rentPrice" placeholder="1200" min="0" step="50">
                         <span asp-validation-for="MonthlyRent" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -230,7 +230,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
 
     <script>
+            const priceField = document.getElementById('priceField');
+            const rentalFields = document.getElementById('rentalFields');
+            const priceInput = document.getElementById('price');
+            const monthlyRentInput = document.getElementById('rentPrice');
+            const saleRadio = document.getElementById('sale');
+            const rentRadio = document.getElementById('rent');
+            const bothRadio = document.getElementById('both');
         $(document).ready(function() {
+               
+            
             // Initialize form validation
             // initializeValidation();
             
@@ -303,100 +312,12 @@
                 return !value || ($.isNumeric(value) && parseFloat(value) > 0);
             }, 'Моля въведете положително число.');
 
-            // Add rules to form elements
-            // $('form').validate({
-            //     rules: {
-            //         Title: {
-            //             required: true,
-            //             minlength: 5,
-            //             maxlength: 100
-            //         },
-            //         Description: {
-            //             required: true,
-            //             minlength: 10,
-            //             maxlength: 1000
-            //         },
-            //         Price: {
-            //             required: true,
-            //             positiveNumber: true,
-            //             min: 1
-            //         },
-            //         Area: {
-            //             required: true,
-            //             positiveNumber: true,
-            //             min: 1
-            //         },
-            //         LocationId: {
-            //             required: true,
-            //             min: 1
-            //         },
-            //         CategoryId: {
-            //             required: true,
-            //             min: 1
-            //         },
-            //         PropertyType: {
-            //             propertytypeRequired: true
-            //         },
-            //         ListingType: {
-            //             listingtypeRequired: true
-            //         },
-            //         MonthlyRent: {
-            //             rentalRequired: true,
-            //             positiveNumber: true
-            //         },
-            //         SecurityDeposit: {
-            //             positiveNumber: true
-            //         },
-            //         MinimumLeasePeriod: {
-            //             digits: true,
-            //             min: 1,
-            //             max: 60
-            //         }
-            //     },
-            //     messages: {
-            //         Title: {
-            //             required: 'Заглавието е задължително.',
-            //             minlength: 'Заглавието трябва да е поне 5 символа.',
-            //             maxlength: 'Заглавието не може да надвишава 100 символа.'
-            //         },
-            //         Description: {
-            //             required: 'Описанието е задължително.',
-            //             minlength: 'Описанието трябва да е поне 10 символа.',
-            //             maxlength: 'Описанието не може да надвишава 1000 символа.'
-            //         },
-            //         Price: {
-            //             required: 'Цената е задължителна.',
-            //             min: 'Цената трябва да е положително число.'
-            //         },
-            //         Area: {
-            //             required: 'Площта е задължителна.',
-            //             min: 'Площта трябва да е положително число.'
-            //         },
-            //         LocationId: {
-            //             required: 'Моля изберете локация.',
-            //             min: 'Моля изберете валидна локация.'
-            //         },
-            //         CategoryId: {
-            //             required: 'Моля изберете категория.',
-            //             min: 'Моля изберете валидна категория.'
-            //         },
-            //         MonthlyRent: {
-            //             rentalRequired: 'Месечният наем е задължителен при избор на наем.'
-            //         },
-            //         MinimumLeasePeriod: {
-            //             digits: 'Моля въведете цяло число.',
-            //             min: 'Минималният срок трябва да е поне 1 месец.',
-            //             max: 'Минималният срок не може да надвишава 60 месеца.'
-            //         }
-            //     },
-            //     submitHandler: function(form) {
-            //         // Additional validation before submit
-            //         if (validateBeforeSubmit()) {
-            //             form.submit();
-            //         }
-            //     }
-            // });
+            
         }
+
+            document.querySelectorAll('input[name="listingType"]').forEach(radio => {
+                radio.addEventListener('change', toggleFields);
+            });
 
         function validateBeforeSubmit() {
             let isValid = true;
@@ -545,6 +466,45 @@
             const categoryId = '@Model.CategoryId';
             if (categoryId && categoryId !== '0') {
                 $('select[name="CategoryId"]').val(categoryId);
+            }
+        }
+
+        function toggleFields() {
+            if (saleRadio.checked) {
+                // Продажба - показва цена, скрива наем
+                priceField.style.display = 'block';
+                rentalFields.style.display = 'none';
+                priceInput.required = true;
+                monthlyRentInput.required = false;
+                $("#rentPrice")[0].value = "";
+                $("#SecurityDeposit")[0].value = "";
+                $("#MinimumLeasePeriod")[0].value = "";
+                $("#AvailableFrom")[0].value = "";
+                $("#petsAllowed")[0].checked = "";
+                $("#isFurnished")[0].checked = "";
+                $("#isParking")[0].checked = "";
+                // Show price required asterisk, hide rent required
+                document.querySelector('.rent-required').style.display = 'none';
+
+            } else if (rentRadio.checked) {
+                // Наем - скрива цена, показва наем
+                priceField.style.display = 'none';
+                rentalFields.style.display = 'block';
+                priceInput.required = false;
+                monthlyRentInput.required = true;
+                    $("#price")[0].value = "";
+                // Show rent required asterisk
+                document.querySelector('.rent-required').style.display = 'inline';
+
+            } else if (bothRadio.checked) {
+                // И двете - показва всичко
+                priceField.style.display = 'block';
+                rentalFields.style.display = 'block';
+                priceInput.required = true;
+                monthlyRentInput.required = true;
+
+                // Show rent required asterisk
+                document.querySelector('.rent-required').style.display = 'inline';
             }
         }
 

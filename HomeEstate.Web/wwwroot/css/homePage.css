@@ -1,5 +1,5 @@
 ﻿.main-content {
-    margin-top: 80px; /* Регулирайте според височината на header-а */
+/*    margin-top: 80px;  Регулирайте според височината на header-а */
     padding-top: 20px;
 }
 
@@ -72,7 +72,6 @@ body {
 
 /* Hero Section */
 .hero {
-    margin-top: 80px;
     background-image: url('https://i.pinimg.com/736x/23/63/90/236390f5b087025e84d98ef13cb2200c.jpg');
     background-size: cover;
     background-position: center;
@@ -205,7 +204,6 @@ body {
     text-decoration: none;
     display: inline-block;
 }
-
     .search-btn:hover {
         background-color: #57C785;
         color: white;
@@ -220,6 +218,7 @@ body {
 .stats {
     background: var(--light);
     padding: 4rem 5%;
+    border-radius:8px;
 }
 
 .stats-container {
@@ -326,15 +325,15 @@ body {
 
 .property-badge {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
+    left: 0.5rem;
     background: var(--secondary);
     color: var(--white);
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    padding: 8px 16px;
+    border-radius: 20px;
     font-weight: 600;
-    font-size: 0.875rem;
-    z-index: 2; 
+    font-size: 0.85rem;
+    z-index: 2;
+    top: 0.7rem;
 }
 
 .property-details {
@@ -389,6 +388,7 @@ body {
 .services {
     background: var(--light);
     padding: 4rem 5%;
+    border-radius: 8px;
 }
 
 .services-grid {
@@ -440,6 +440,7 @@ body {
     color: var(--white);
     padding: 4rem 5%;
     text-align: center;
+    border-radius: 8px;
 }
 
 .cta-content {
@@ -464,7 +465,7 @@ body {
     justify-content: center;
 }
 
-/* Back to Top Button CSS - добавете към site.css */
+/* Back to Top Button CSS */
 
 .back-to-top {
     position: fixed;
@@ -472,7 +473,7 @@ body {
     right: 30px;
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%);
     color: white;
     border: none;
     border-radius: 50%;
@@ -498,7 +499,7 @@ body {
     .back-to-top:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #5a6fd8, #6b42a1);
+        background: linear-gradient(90deg, rgba(87, 199, 133, 1) 0%, rgba(42, 123, 155, 1) 100%);
     }
 
     .back-to-top:active {

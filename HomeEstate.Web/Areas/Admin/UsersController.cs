@@ -24,7 +24,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             this.logger = logger;
         }
 
-        // GET: Admin/Users
         public async Task<IActionResult> Index(int page = 1, int pageSize = 5, string searchTerm = "", string roleFilter = "")
         {
             try
@@ -57,7 +56,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // AJAX endpoint for loading users
         [HttpGet]
         public async Task<IActionResult> LoadUsers(int page = 1, int pageSize = 5, string searchTerm = "", string roleFilter = "")
         {
@@ -90,7 +88,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/Users/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -118,7 +115,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // GET: Admin/Users/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -156,7 +152,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditUserViewModel model)
@@ -169,7 +164,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
 
             try
             {
-                // Update user roles
                 var result = await applicationUserService.UpdateUserRolesAsync(model.Id, model.SelectedRoles);
 
                 if (result.Succeeded)
@@ -196,7 +190,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        // GET: Admin/Users/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -224,7 +217,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // POST: Admin/Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
@@ -240,7 +232,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Check if this is the last admin
                 var userRoles = await applicationUserService.GetUserRolesAsync(id);
                 if (userRoles.Contains("Admin"))
                 {
@@ -264,14 +255,11 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
-
-        // AJAX DELETE endpoint
         [HttpPost]
         public async Task<IActionResult> DeleteAjax(string id)
         {
             try
             {
-                // Prevent admin from deleting themselves
                 var currentUser = User.Identity?.Name;
                 var userToDelete = await applicationUserService.GetApplicationUser(id);
 
@@ -284,7 +272,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                     });
                 }
 
-                // Check if this is the last admin
                 var userRoles = await applicationUserService.GetUserRolesAsync(id);
                 if (userRoles.Contains("Admin"))
                 {
@@ -319,7 +306,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
             }
         }
 
-        // Role management endpoints
         [HttpPost]
         public async Task<IActionResult> AddRole(string userId, string roleName)
         {
@@ -392,7 +378,6 @@ namespace HomeEstate.Web.Areas.Admin.Controllers
                             continue;
                         }
 
-                        // Check if this is an admin
                         var userRoles = await applicationUserService.GetUserRolesAsync(id);
                         if (userRoles.Contains("Admin"))
                         {

@@ -12,10 +12,50 @@ body {
 .mb-3 {
     text-align: center;
 }
+p.card-text.price {
+    font-size: 1.3em;
+    color: #E68D7E;
+}
+.badge {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
 
 .tab {
+    color: #416b47;
+    border-bottom-color: #416b47;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+    .tab:hover {
+        color: black;
+        background: rgba(0, 123, 255, 0.05);
+    }
+
+.text-primary {
+    --bs-text-opacity: 1;
+    color: black !important;
+}
+
+
+.bg-success {
+    --bs-bg-opacity: 1;
+    background: var(--secondary);
+}
+.tab {
     padding: 10px 20px;
-    background: transparent;
+    background: rgba(0, 123, 255, 0.1);
+    color: #416b47;
+    border-bottom-color: #416b47;
     border: none;
     cursor: pointer;
     font-weight: 500;
@@ -25,14 +65,13 @@ body {
 }
 
     .tab.active {
-        color: #007bff;
-        border-bottom-color: #007bff;
-        background: rgba(0, 123, 255, 0.1);
+        color: #8ba38e;
+        border-bottom-color: #8ba38e;
+        background-color: #caccca;
     }
 
     .tab:hover {
-        color: #007bff;
-        background: rgba(0, 123, 255, 0.05);
+        color: #6b7280;
     }
 
 .rental-fields {

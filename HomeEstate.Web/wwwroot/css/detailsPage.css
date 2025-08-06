@@ -58,12 +58,23 @@ body {
         transform: scale(1.05);
     }
 
-.property-card {
+.property-new {
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    margin-bottom: 2rem;
+    margin-bottom: 2rem; /*
+    height : 13% !important*/
+
+    background: var(--white);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    cursor: pointer;
+    flex-direction: column;
+    height: 100%;
+    max-height:200px;
 }
 
 .price-section {

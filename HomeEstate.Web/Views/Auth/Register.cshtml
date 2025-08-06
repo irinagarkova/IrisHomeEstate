@@ -1,14 +1,13 @@
 ﻿@model RegisterViewModel
 
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="~/css/registerPage.css" >
-  
+    <link rel="stylesheet" href="~/css/registerPage.css">
 </head>
 <body>
     <!-- Animated Background Particles -->
@@ -24,14 +23,6 @@
         <div class="particle"></div>
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div>
-            <i class="fas fa-home"></i>
-            My Website
-        </div>
-    </header>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="registration-container">
@@ -41,56 +32,52 @@
             </div>
 
             <!-- Title -->
-            <h1 class="title">Създай профил</h1>
-            <p class="subtitle">Присъедини се към нашата общност</p>
+            <h1 class="title">Create an Account</h1>
+            <p class="subtitle">Join our community</p>
 
             <!-- Registration Form -->
             <form class="form" id="registrationForm" asp-action="Register" asp-controller="Auth" asp-area="">
                 <!-- Email -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input asp-for="Email" type="email" class="input-field" placeholder="Имейл адрес" required>
-                        <i class="input-icon fas fa-envelope"></i>
+                        <input asp-for="Email" type="email" class="input-field" placeholder="Email address" required>
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
-                <!-- Phone (Optional) -->
+                    <!-- Phone (Optional) -->
                     <div class="input-wrapper">
-                        <input asp-for="PhoneNumber" type="tel" class="input-field" placeholder="Телефонен номер">
-                        <i class="input-icon fas fa-phone"></i>
-                        <span class="optional-tag">по избор</span>
-                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        <input asp-for="PhoneNumber" class="input-field" placeholder="Phone number">
+                        <span class="optional-tag">optional</span>
                     </div>
                 </div>
+
                 <!-- Password -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input asp-for="Password" type="password" class="input-field" placeholder="Парола" required id="password">
-                        <i class="input-icon fas fa-lock"></i>
+                        <input asp-for="Password" type="password" class="input-field" placeholder="Password" required id="password">
                         <button type="button" class="toggle-password" onclick="togglePassword()">
                             <i class="fas fa-eye" id="eyeIcon"></i>
                         </button>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-                <!-- Confirm Password -->
+                    <!-- Confirm Password -->
                     <div class="input-wrapper">
-                        <input asp-for="ConfirmPassword" type="password" class="input-field" placeholder="Потвърди паролата" required>
-                        <i class="input-icon fas fa-lock"></i>
+                        <input asp-for="ConfirmPassword" type="password" class="input-field" placeholder="Confirm password" required>
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- Terms Checkbox -->
+                <!-- Terms Checkbox (optional section) -->
                 @* <div class="checkbox-group">
-                    <input type="checkbox" class="checkbox" required id="terms">
-                    <label for="terms" class="checkbox-label">
-                        Съгласен съм с <a href="#">Условията за ползване</a> и <a href="#">Политиката за поверителност</a>
-                    </label>
+                <input type="checkbox" class="checkbox" required id="terms">
+                <label for="terms" class="checkbox-label">
+                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </label>
                 </div> *@
 
                 <!-- Submit Button -->
                 <button type="submit" class="submit-button">
                     <i class="fas fa-user-plus"></i>
-                    Регистрирай се
+                    Register
                 </button>
             </form>
 
@@ -98,13 +85,13 @@
             <div class="login-link">
                 <a href="/Auth/Login">
                     <i class="fas fa-sign-in-alt"></i>
-                    Вече имаш профил? Влез тук
+                    Already have an account? Log in here
                 </a>
             </div>
 
             <!-- Footer Text -->
             <div class="footer-text">
-                Като се регистрираш, приемаш нашите условия и политики. Твоите данни са защитени и няма да бъдат споделяни с трети страни.
+                By registering, you agree to our terms and policies. Your data is protected and will not be shared with third parties.
             </div>
         </div>
     </main>
@@ -114,7 +101,7 @@
         function togglePassword() {
             const passwordField = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
-            
+
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 eyeIcon.className = 'fas fa-eye-slash';
@@ -122,7 +109,7 @@
                 passwordField.type = 'password';
                 eyeIcon.className = 'fas fa-eye';
             }
-        }   
+        }
     </script>
 </body>
 </html>

@@ -18,8 +18,9 @@ namespace HomeEstate.Web.Mappings
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(p => p.Images))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(s => s.Category))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(l => l.Location))
-                .ForMember(dest => dest.Price, opt => opt.MapFrom(opt => opt.Price))
-                .ForMember(dest => dest.Owner, opt => opt.MapFrom(s => s.Owner));
+                .ForMember(dest => dest.Owner, opt => opt.MapFrom(s => s.Owner))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src =>
+                           src.Price > 0 ? src.Price : src.MonthlyRent));
 
             CreateMap<PropertyDto, DetailsViewModel>();
 

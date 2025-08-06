@@ -7,6 +7,19 @@
     <UserSecretsId>aspnet-HomeEstate-9f58a34d-424f-44a6-a19f-369d81ab8e4f</UserSecretsId>
   </PropertyGroup>
 
+   <PropertyGroup>
+     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+     <NoWarn>$(NoWarn);TS1109</NoWarn>
+   </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="**/*.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<TypeScriptCompile Remove="**/*.cshtml" />
+	</ItemGroup>
+
   <ItemGroup>
     <Content Remove="Views\Shared\PrivacyPolicy.cshtml" />
   </ItemGroup>

@@ -1,12 +1,11 @@
 ﻿<!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/loginPage.css">
-
 </head>
 <body>
     <!-- Animated Background Particles -->
@@ -31,15 +30,15 @@
             </div>
 
             <!-- Title -->
-            <h1 class="title">Добре дошъл отново</h1>
-            <p class="subtitle">Влез в своя профил</p>
+            <h1 class="title">Welcome Back</h1>
+            <p class="subtitle">Sign in to your account</p>
 
             <!-- Login Form -->
             <form class="form" id="loginForm">
                 <!-- Email -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="email" class="input-field" placeholder="Имейл адрес" required>
+                        <input type="email" class="input-field" placeholder="Email address" required>
                         <i class="input-icon fas fa-envelope"></i>
                     </div>
                 </div>
@@ -47,7 +46,7 @@
                 <!-- Password -->
                 <div class="input-group">
                     <div class="input-wrapper">
-                        <input type="password" class="input-field" placeholder="Парола" required id="password">
+                        <input type="password" class="input-field" placeholder="Password" required id="password">
                         <i class="input-icon fas fa-lock"></i>
                         <button type="button" class="toggle-password" onclick="togglePassword()">
                             <i class="fas fa-eye" id="eyeIcon"></i>
@@ -59,30 +58,33 @@
                 <div class="form-options">
                     <div class="checkbox-group">
                         <input type="checkbox" class="checkbox" id="remember">
-                        <label for="remember" class="checkbox-label">Запомни ме</label>
+                        <label for="remember" class="checkbox-label">Remember me</label>
                     </div>
-                    <a href="#" class="forgot-link">Забравена парола?</a>
+                    <a href="#" class="forgot-link">Forgot password?</a>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit" class="submit-button">
-                    <i class="fas fa-sign-in-alt"></i> Влез
+                    <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
+
+            <!-- Google Login -->
             <a href="@Url.Action("GoogleLogin", "Auth")" class="btn btn-danger btn-lg">
                 <i class="fab fa-google"></i> Sign in with Google
             </a>
+
             <!-- Register Link -->
             <div class="register-link">
                 <a href="/Auth/Register">
                     <i class="fas fa-user-plus"></i>
-                    Нямаш профил? Регистрирай се тук
+                    Don't have an account? Register here
                 </a>
             </div>
 
             <!-- Footer Text -->
             <div class="footer-text">
-                Като влезеш, приемаш нашите условия за ползване. Данните ти са защитени с най-високи стандарти за сигурност.
+                By signing in, you agree to our Terms of Use. Your data is protected with the highest security standards.
             </div>
         </div>
     </main>
@@ -92,7 +94,7 @@
         function togglePassword() {
             const passwordField = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
-            
+
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 eyeIcon.className = 'fas fa-eye-slash';
@@ -110,28 +112,28 @@
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                min-width: 300px;
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                color: white;
-                font-weight: 500;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
-            `;
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        min-width: 300px;
+                        padding: 1rem 1.5rem;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        color: white;
+                        font-weight: 500;
+                        transform: translateX(100%);
+                        transition: transform 0.3s ease;
+                        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                    `;
 
             notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto;">&times;</button>
-                </div>
-            `;
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                            <span>${message}</span>
+                            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto;">&times;</button>
+                        </div>
+                    `;
 
             document.body.appendChild(notification);
 
@@ -149,8 +151,7 @@
             }, 5000);
         }
 
-
-        // ИМПЛЕМЕНТАЦИЯ ЗА LOGIN
+        // LOGIN IMPLEMENTATION
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -160,14 +161,14 @@
 
             // Validation
             if (!email || !password) {
-                showNotification('Моля въведете имейл и парола', 'error');
+                showNotification('Please enter your email and password', 'error');
                 return;
             }
 
             // Show loading state
             const submitButton = document.querySelector('.submit-button');
             const originalContent = submitButton.innerHTML;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Влизане...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
             submitButton.disabled = true;
 
             // Prepare form data
@@ -187,65 +188,20 @@
             $.ajax({
                 url: '/Auth/Login',
                 type: 'POST',
-                data: formData, // jQuery automatically sets correct Content-Type
+                data: formData,
                 success: function (response) {
-                    // Check if it's a redirect
                     if (response.success) {
                         window.location.href = '/'; // Redirect to home
+                    } else {
+                        showNotification(response.error);
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalContent;
                     }
-                },
+                }
             });
-
-
-            // const email = document.querySelector('input[type="email"]').value;
-            // const password = document.querySelector('input[type="password"]').value;
-
-            // // Show loading state
-            // const submitButton = document.querySelector('.submit-button');
-            // const originalContent = submitButton.innerHTML;
-            // submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Влизане...';
-            // submitButton.disabled = true;
-
-            // const form = document.createElement('form');
-            // form.method = 'POST';
-            // form.action = '/Auth/Login'; // Променете според вашия routing
-            
-            // // Добавяме полетата
-            // const emailInput = document.createElement('input');
-            // emailInput.type = 'hidden';
-            // emailInput.name = 'Email';
-            // emailInput.value = email;
-            // form.appendChild(emailInput);
-            
-            // const passwordInput = document.createElement('input');
-            // passwordInput.type = 'hidden';
-            // passwordInput.name = 'Password';
-            // passwordInput.value = password;
-            // form.appendChild(passwordInput);
-            
-            // const rememberInput = document.createElement('input');
-            // rememberInput.type = 'hidden';
-            // rememberInput.name = 'RememberMe';
-            // rememberInput.value = document.getElementById('remember').checked;
-            // form.appendChild(rememberInput);
-            
-            // // Добавяме CSRF токен ако има такъв
-            // const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
-            // if (csrfToken) {
-            //     const tokenInput = document.createElement('input');
-            //     tokenInput.type = 'hidden';
-            //     tokenInput.name = '__RequestVerificationToken';
-            //     tokenInput.value = csrfToken.value;
-            //     form.appendChild(tokenInput);
-            // }
-            
-            // // Изпращаме формата
-            // document.body.appendChild(form);
-            // form.submit();
-
-           
         });
     </script>
+
     @section Scripts {
         <partial name="_ValidationScriptsPartial" />
     }
