@@ -25,6 +25,7 @@ namespace HomeEstate.Web.Models
         public int CategoryId { get; set; }
 		public IEnumerable<SelectListItem> Locations { get; set; } = new List<SelectListItem>();
 
+        [Required]
 		public List<IFormFile> Images { get; set; } = new();
         public List<PropertyImageDto> ExistingImages { get; set; } = new(); 
         public PropertyListingType ListingType { get; set; } = PropertyListingType.Sale; 

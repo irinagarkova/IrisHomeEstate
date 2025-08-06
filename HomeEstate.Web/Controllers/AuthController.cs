@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace HomeEstate.Web.Controllers
 {
@@ -86,7 +87,6 @@ namespace HomeEstate.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
@@ -186,17 +186,17 @@ namespace HomeEstate.Web.Controllers
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             var user = await userManager.GetUserAsync(User);
-            
+
             if (model.NewPassword != model.ConfirmPassword)
             {
                 return Json(new { success = false, errors = new[] { "Passwords must match" } });
             }
-            var result =  await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (result.Succeeded)
             {
                 return Json(new { success = true });
             }
-            return Json(new {success = false, errors = result.Errors});
+            return Json(new { success = false, errors = result.Errors });
         }
         public IActionResult ForgotPassword()
         {
@@ -259,6 +259,153 @@ namespace HomeEstate.Web.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GoogleLogin(string returnUrl = null)
+        {
+            var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth", new { returnUrl });
+            var properties = signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            return Challenge(properties, "Google");
+        }
 
-    }
-}
+        // Google Callback Handler
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GoogleCallback(string returnUrl = null, string remoteError = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            if (remoteError != null)
+            {
+                TempData["Error"] = $"Error from Google: {remoteError}";
+                return RedirectToAction("Login", "Home"); // Or wherever you want to redirect on error
+            }
+
+            var info = await signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                TempData["Error"] = "Error loading Google login information.";
+                return RedirectToAction("Login", "Home");
+            }
+
+            // Try to sign in with existing external login
+            var result = await signInManager.ExternalLoginSignInAsync(
+                info.LoginProvider,
+                info.ProviderKey,
+                isPersistent: false,
+                bypassTwoFactor: true);
+
+            if (result.Succeeded)
+            {
+                var existingUser = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                if (existingUser != null)
+                {
+                    // Update claims
+                    await UpdateUserClaimsFromGoogle(existingUser, info);
+
+                    // Force complete re-authentication
+                    await signInManager.SignOutAsync();
+
+                    // Wait a moment (sometimes needed for cookie clearing)
+                    await Task.Delay(100);
+
+                    // Sign back in with fresh data
+                    await signInManager.SignInAsync(existingUser, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
+                // If user doesn't exist, create new account automatically
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+
+                if (email != null)
+                {
+                    var applicationUser = await userManager.FindByEmailAsync(email);
+                    if (applicationUser != null)
+                    {
+                        await userManager.AddLoginAsync(applicationUser, info);
+                        await signInManager.SignInAsync(applicationUser, isPersistent: false);
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    var user = new ApplicationUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true
+                    };
+
+                    var createResult = await userManager.CreateAsync(user);
+                    if (createResult.Succeeded)
+                    {
+                        await userManager.AddLoginAsync(user, info);
+
+                        // Add additional claims
+                        var claims = new List<Claim>();
+                        if (!string.IsNullOrEmpty(name))
+                            claims.Add(new Claim(ClaimTypes.Name, name));
+
+                        var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                        if (!string.IsNullOrEmpty(givenName))
+                            claims.Add(new Claim(ClaimTypes.GivenName, givenName));
+
+                        var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
+                        if (!string.IsNullOrEmpty(surname))
+                            claims.Add(new Claim(ClaimTypes.Surname, surname));
+
+                        if (claims.Any())
+                            await userManager.AddClaimsAsync(user, claims);
+
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+
+                TempData["Error"] = "Unable to load user information from Google.";
+                return RedirectToAction("Login", "Home");
+            }
+
+            private IActionResult RedirectToLocal(string returnUrl)
+            {
+                if (Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+                else
+                    return RedirectToAction("Index", "Home");
+            }
+
+            private async Task UpdateUserClaimsFromGoogle(ApplicationUser user, ExternalLoginInfo info)
+            {
+                var existingClaims = await userManager.GetClaimsAsync(user);
+
+                // Extract Google data
+                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+                var picture = info.Principal.FindFirstValue("picture");
+                var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
+
+                // Update claims
+                await UpdateClaim(user, existingClaims, ClaimTypes.Name, name);
+                await UpdateClaim(user, existingClaims, "picture", picture);
+                await UpdateClaim(user, existingClaims, ClaimTypes.GivenName, givenName);
+                await UpdateClaim(user, existingClaims, ClaimTypes.Surname, surname);
+            }
+
+            private async Task UpdateClaim(ApplicationUser user, IList<Claim> existingClaims, string claimType, string newValue)
+            {
+                if (string.IsNullOrEmpty(newValue)) return;
+
+                var existingClaim = existingClaims.FirstOrDefault(c => c.Type == claimType);
+
+                if (existingClaim != null && existingClaim.Value != newValue)
+                {
+                    await userManager.RemoveClaimAsync(user, existingClaim);
+                    await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
+                }
+                else if (existingClaim == null)
+                {
+                    await userManager.AddClaimAsync(user, new Claim(claimType, newValue));
+                }
+            }
+        }
+    } 

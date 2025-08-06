@@ -4,6 +4,7 @@ using HomeEstate.Services.Core.Interfaces;
 using HomeEstate.Services.Core.Mappings;
 using HomeEstate.Services.Core.Services;
 using HomeEstate.Web.Mappings;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,7 +33,6 @@ namespace HomeEstate
             builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            
             builder.Services
               .AddIdentity<ApplicationUser, IdentityRole>(options =>
               {
@@ -62,7 +62,18 @@ namespace HomeEstate
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
+            builder.Services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? throw new ArgumentException("Authentication ClientId should be defined in app settings");
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? throw new ArgumentException("Authentication: ClientSecret should be defined in app settings");
+                    options.SaveTokens = true;
 
+                    options.Scope.Add("profile");
+                    options.Scope.Add("email");
+                    options.SaveTokens = true;
+                    options.ClaimActions.MapJsonKey("picture", "picture");
+                });
             builder.Services.AddRazorPages();
             builder.Services.AddAuthorization(options =>
             {

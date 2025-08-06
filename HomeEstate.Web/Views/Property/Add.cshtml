@@ -69,7 +69,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="area">
-                       Area (sq/m) <span class="required">*</span>
+                        Area (sq/m) <span class="required">*</span>
                     </label>
                     <input type="number" id="area" name="area" asp-for="Area" class="form-input" required
                            placeholder="85" min="1">
@@ -185,20 +185,23 @@
 
             <div class="form-group">
                 <label class="form-label" for="images">
-                    Upload photos
+                    Upload photos <span class="required">*</span>
                 </label>
                 <div class="file-upload" id="fileUploadArea">
-                    <input type="file" id="images" name="images" asp-for="Images" multiple accept="image/*">
+                    <input type="file" id="images" name="images" asp-for="Images" multiple accept="image/*" required>
                     <div class="file-upload-label">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <span id="uploadText">Choose photos or drag them here</span>
                         <small style="display: block; margin-top: 10px; color: #666;">
-                            Maximum of 10 photos, up to 5MB each
+                            At least 1 photo required. Maximum of 10 photos, up to 5MB each
                         </small>
                     </div>
                 </div>
                 <div id="imagePreview" class="image-preview"></div>
                 <span asp-validation-for="Images" class="text-danger"></span>
+                <div id="imageValidationError" class="text-danger" style="display: none; margin-top: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> At least one image is required!
+                </div>
             </div>
 
             <div class="btn-group">
@@ -224,15 +227,19 @@
             const imagePreview = document.getElementById('imagePreview');
             const fileInput = document.getElementById('images');
             const uploadText = document.getElementById('uploadText');
+            const imageValidationError = document.getElementById('imageValidationError');
+
+            let selectedFiles = [];
+
             fileInput.addEventListener('change', function (e) {
                 const files = Array.from(e.target.files);
                 if (validateFiles(files)) {
                     selectedFiles = [...selectedFiles, ...files];
                     updateFileList();
                     updateFileDisplay();
+                    hideImageValidationError();
                 }
             });
-            let selectedFiles = [];
 
             function validateFiles(files) {
                 const maxSize = 5 * 1024 * 1024; // 5MB
@@ -240,17 +247,17 @@
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 
                 if (selectedFiles.length + files.length > maxFiles) {
-                    alert(`Можете да качите максимум ${maxFiles} снимки.`);
+                    alert(`You can upload a maximum of ${maxFiles} photos.`);
                     return false;
                 }
 
                 for (let file of files) {
                     if (file.size > maxSize) {
-                        alert(`Файлът "${file.name}" е твърде голям. Максимален размер: 5MB`);
+                        alert(`File "${file.name}" is too large. Maximum size: 5MB`);
                         return false;
                     }
                     if (!allowedTypes.includes(file.type.toLowerCase())) {
-                        alert(`Файлът "${file.name}" не е поддържан. Разрешени формати: JPG, PNG, GIF, WebP`);
+                        alert(`File "${file.name}" is not supported. Allowed formats: JPG, PNG, GIF, WebP`);
                         return false;
                     }
                 }
@@ -259,11 +266,11 @@
 
             function updateFileDisplay() {
                 if (selectedFiles.length > 0) {
-                    uploadText.innerHTML = `<i class="fas fa-check"></i> Избрани ${selectedFiles.length} файла`;
+                    uploadText.innerHTML = `<i class="fas fa-check"></i> Selected ${selectedFiles.length} file(s)`;
                     uploadText.style.color = '#28a745';
                     displayImagePreviews();
                 } else {
-                    uploadText.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
+                    uploadText.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Choose photos or drag them here';
                     uploadText.style.color = '';
                     imagePreview.innerHTML = '';
                 }
@@ -292,12 +299,31 @@
                 selectedFiles.splice(index, 1);
                 updateFileList();
                 updateFileDisplay();
+
+                // Show validation error if no images left
+                if (selectedFiles.length === 0) {
+                    showImageValidationError();
+                }
             };
 
             function updateFileList() {
                 const dt = new DataTransfer();
                 selectedFiles.forEach(file => dt.items.add(file));
                 fileInput.files = dt.files;
+            }
+
+            function showImageValidationError() {
+                imageValidationError.style.display = 'block';
+                const fileUploadArea = document.getElementById('fileUploadArea');
+                fileUploadArea.style.borderColor = '#dc3545';
+                fileUploadArea.style.backgroundColor = '#fff5f5';
+            }
+
+            function hideImageValidationError() {
+                imageValidationError.style.display = 'none';
+                const fileUploadArea = document.getElementById('fileUploadArea');
+                fileUploadArea.style.borderColor = '';
+                fileUploadArea.style.backgroundColor = '';
             }
 
             // Function to toggle fields based on listing type
@@ -339,30 +365,31 @@
                 radio.addEventListener('change', toggleFields);
             });
 
-            // File upload feedback
-            // const fileInput = document.querySelector('input[type="file"]');
-            const fileLabel = document.querySelector('.file-upload-label');
-
-            if (fileInput && fileLabel) {
-                fileInput.addEventListener('change', function (e) {
-                    const files = e.target.files;
-                    if (files.length > 0) {
-                        fileLabel.innerHTML = `<i class="fas fa-check"></i> Избрани ${files.length} файла`;
-                        fileLabel.style.color = '#28a745';
-                    } else {
-                        fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
-                        fileLabel.style.color = '';
-                    }
-                });
-            }
-
             // Form validation before submit
             document.getElementById('propertyForm').addEventListener('submit', function (e) {
+                let isValid = true;
+
+                // Check if images are uploaded
+                if (selectedFiles.length === 0) {
+                    e.preventDefault();
+                    showImageValidationError();
+                    isValid = false;
+
+                    // Scroll to image upload section
+                    document.getElementById('fileUploadArea').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+
+                    alert('Please upload at least one image!');
+                    return false;
+                }
+
                 const listingType = document.querySelector('input[name="listingType"]:checked');
 
                 if (!listingType) {
                     e.preventDefault();
-                    alert('Моля изберете вид обява!');
+                    alert('Please select a listing type!');
                     return false;
                 }
 
@@ -370,31 +397,34 @@
                 if (listingType.value === '1') { // Sale
                     if (!priceInput.value || priceInput.value <= 0) {
                         e.preventDefault();
-                        alert('Моля въведете валидна цена за продажба!');
+                        alert('Please enter a valid sale price!');
                         priceInput.focus();
                         return false;
                     }
                 } else if (listingType.value === '2') { // Rent
                     if (!monthlyRentInput.value || monthlyRentInput.value <= 0) {
                         e.preventDefault();
-                        alert('Моля въведете валиден месечен наем!');
+                        alert('Please enter a valid monthly rent!');
                         monthlyRentInput.focus();
                         return false;
                     }
                 } else if (listingType.value === '3') { // Both
                     if (!priceInput.value || priceInput.value <= 0) {
                         e.preventDefault();
-                        alert('Моля въведете валидна цена за продажба!');
+                        alert('Please enter a valid sale price!');
                         priceInput.focus();
                         return false;
                     }
                     if (!monthlyRentInput.value || monthlyRentInput.value <= 0) {
                         e.preventDefault();
-                        alert('Моля въведете валиден месечен наем!');
+                        alert('Please enter a valid monthly rent!');
                         monthlyRentInput.focus();
                         return false;
                     }
                 }
+
+                // If we reach here, the form is valid
+                return isValid;
             });
 
             // Initialize fields display on page load
@@ -407,10 +437,29 @@
             document.getElementById('priceField').style.display = 'block';
             document.getElementById('rentalFields').style.display = 'none';
 
-            const fileLabel = document.querySelector('.file-upload-label');
-            if (fileLabel) {
-                fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Изберете снимки или ги плъзнете тук';
-                fileLabel.style.color = '';
+            // Reset file upload display
+            selectedFiles = [];
+            const uploadText = document.getElementById('uploadText');
+            const imagePreview = document.getElementById('imagePreview');
+            const imageValidationError = document.getElementById('imageValidationError');
+
+            if (uploadText) {
+                uploadText.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Choose photos or drag them here';
+                uploadText.style.color = '';
+            }
+
+            if (imagePreview) {
+                imagePreview.innerHTML = '';
+            }
+
+            if (imageValidationError) {
+                imageValidationError.style.display = 'none';
+            }
+
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            if (fileUploadArea) {
+                fileUploadArea.style.borderColor = '';
+                fileUploadArea.style.backgroundColor = '';
             }
         }
     </script>
