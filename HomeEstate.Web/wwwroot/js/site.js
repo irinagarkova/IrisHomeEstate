@@ -113,5 +113,5 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeTabs();
     initializeSmoothScrolling();
     initializeBackToTop();
-    initializeSearchForm();
+    //initializeSearchForm();
 });

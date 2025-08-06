@@ -48,7 +48,7 @@ namespace HomeEstate
                   options.Password.RequiredUniqueChars = 0;
               })
               .AddEntityFrameworkStores<HomeEstateDbContext>()
-              .AddDefaultTokenProviders(); // da se dobavi ako  ima vreme
+              .AddDefaultTokenProviders();
             builder.Services.AddControllersWithViews();
 
             builder.Services.ConfigureApplicationCookie(options =>
@@ -57,7 +57,7 @@ namespace HomeEstate
                 options.LogoutPath = "/Auth/Logout";
                 options.AccessDeniedPath = "/Home/AccessDenied";
                 options.SlidingExpiration = true;
-                options.ExpireTimeSpan = TimeSpan.FromHours(12);
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -82,7 +82,6 @@ namespace HomeEstate
             {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

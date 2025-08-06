@@ -3,6 +3,7 @@ using HomeEstate.Models;
 using HomeEstate.Services.Core.Interfaces;
 using HomeEstate.Services.Core.Services;
 using HomeEstate.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -85,6 +86,7 @@ namespace HomeEstate.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
@@ -124,6 +126,7 @@ namespace HomeEstate.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
@@ -174,6 +177,26 @@ namespace HomeEstate.Web.Controllers
             }
 
             return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            var user = await userManager.GetUserAsync(User);
+            
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                return Json(new { success = false, errors = new[] { "Passwords must match" } });
+            }
+            var result =  await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                return Json(new { success = true });
+            }
+            return Json(new {success = false, errors = result.Errors});
         }
         public IActionResult ForgotPassword()
         {

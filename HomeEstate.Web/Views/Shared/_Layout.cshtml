@@ -10,40 +10,514 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/HomeEstate.styles.css" asp-append-version="true" />
 
-    
+    <style>
+        /* Enhanced Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6rem;
+            background-color: #57C785;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            transition: top 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            order: 3;
+        }
+
+        .hamburger-menu:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .hamburger-line {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        .hamburger-menu.active .hamburger-line:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .hamburger-menu.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-menu.active .hamburger-line:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        /* Mobile Menu Dropdown */
+        .mobile-menu {
+            position: fixed;
+            top: 6rem;
+            right: 0;
+            width: 350px;
+            background: linear-gradient(180deg, #57C785 0%, #4a9f6b 100%);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+            max-height: calc(100vh - 6rem);
+            overflow-y: auto;
+            border-radius: 15px 0 0 15px;
+        }
+
+        .mobile-menu.show {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu-content {
+            padding: 2rem;
+        }
+
+        .mobile-menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .mobile-menu-title {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .mobile-menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .mobile-menu-link:hover {
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+            text-decoration: none;
+            transform: translateX(5px);
+        }
+
+        .mobile-menu-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .mobile-menu-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .mobile-menu-button:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+        }
+
+        .mobile-menu-button i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Logo and Navigation Adjustments */
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            order: 1;
+        }
+
+        .logo:hover {
+            color: white;
+        }
+
+        /* Desktop Navigation */
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+            order: 2;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Menu Toggle for all screen sizes */
+        .menu-toggle-text {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        /* Property Action Buttons (Outside Menu) */
+        .property-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            order: 2;
+        }
+
+        .property-action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid transparent;
+        }
+
+        .property-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .property-action-btn.add-property {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .property-action-btn.add-property:hover {
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .property-action-btn.my-properties {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .property-action-btn.my-properties:hover {
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                width: 100%;
+                border-radius: 0;
+                transform: translateY(-100%);
+            }
+
+            .mobile-menu.show {
+                transform: translateY(0);
+            }
+
+            .property-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+                position: fixed;
+                top: 6rem;
+                right: 1rem;
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(10px);
+                padding: 1rem;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                z-index: 1001;
+                min-width: 200px;
+            }
+
+            .property-action-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 10px 16px;
+            }
+
+            header {
+                padding: 0 1rem;
+            }
+
+            nav {
+                padding: 0;
+            }
+        }
+
+        @@media (min-width: 769px) {
+            .hamburger-menu {
+                display: flex;
+                align-items: center;
+            }
+
+            .menu-toggle-text {
+                display: inline;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .mobile-menu-content {
+                padding: 1.5rem;
+            }
+
+            .property-actions {
+                right: 0.5rem;
+                left: 0.5rem;
+                min-width: auto;
+            }
+        }
+
+        /* User Menu Enhancements */
+        .user-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        /* Admin Panel Link Enhancement */
+        .admin-link {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white !important;
+        }
+
+        .admin-link:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+        }
+
+        /* Body padding adjustment */
+        body {
+            padding-top: 6rem;
+        }
+    </style>
 </head>
 <body>
     <header>
-            <nav>
+        <nav>
             <div class="logo">
-                <a class="logo"  asp-controller="Home" asp-action="Index">Iris Home Estate</a>
+                <a class="logo" asp-controller="Home" asp-action="Index">Iris Home Estate</a>
             </div>
+
+          
+            <!-- Desktop Navigation -->
             <ul class="nav-links">
                 <li>
-                    <a class="nav-link"  asp-controller="Property" asp-action="Index">Properties</a>
+                    <a class="nav-link" asp-controller="Property" asp-action="Index">Properties</a>
                 </li>
 
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <li>
-                        <a class="nav-link"  asp-controller="Property" asp-action="Add">Add Property</a>
-                    </li>
-                    <li>
-                        <a class="nav-link"  asp-controller="MyProperty" asp-action="Index">My Properties</a>
+                        <a class="nav-link" asp-controller="Property" asp-action="Add">Add Property</a>
                     </li>
                 }
-
-                <partial name="_LoginPartial" />
+                else
+                {
+                    <li>
+                        <a class="nav-link" asp-controller="Auth" asp-action="Register">Register</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
+                    </li>
+                }
             </ul>
-            </nav>
 
-       
+            <!-- Hamburger Menu -->
+            <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMobileMenu()">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <span class="menu-toggle-text d-none d-md-inline">Menu</span>
+            </div>
+        </nav>
     </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <!-- Main Navigation Section -->
+            @* <div class="mobile-menu-section">
+                <div class="mobile-menu-title">Navigation</div>
+                <div class="mobile-menu-item">
+                    <a href="@Url.Action("Index", "Property")" class="mobile-menu-link">
+                        <i class="fas fa-home"></i>
+                        Properties
+                    </a>
+                </div>
+            </div> *@
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <!-- User Section -->
+                <div class="mobile-menu-section">
+                    <div class="mobile-menu-title">My Account</div>
+                    <div class="user-section">
+                        <div class="user-name">@User.Identity?.Name.Split("@").First()</div>
+
+                        <div class="mobile-menu-item">
+                            <a href="@Url.Action("Index", "MyProperty")" class="mobile-menu-link">
+                                <i class="fas fa-home "></i>
+                                My Properties
+                            </a>
+                        </div>
+
+                        <div class="mobile-menu-item">
+                            <a href="@Url.Action("Index", "FavoriteProperty")" class="mobile-menu-link">
+                                <i class="fas fa-heart"></i>
+                                My Favorites
+                            </a>
+                        </div>
+
+                        <div class="mobile-menu-item">
+                            <a href="@Url.Action("Index", "Account")" class="mobile-menu-link">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                        </div>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="mobile-menu-item">
+                                <a href="/Admin" class="mobile-menu-link admin-link">
+                                    <i class="fas fa-cog"></i>
+                                    Admin Panel
+                                </a>
+                            </div>
+                        }
+
+                        <div class="mobile-menu-item">
+                            <form asp-controller="Auth" asp-action="Logout" method="post" style="margin: 0;">
+                                <button type="submit" class="mobile-menu-button">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Guest Section -->
+                <div class="mobile-menu-section">
+                    <div class="mobile-menu-title">Account</div>
+                    <div class="mobile-menu-item">
+                        <a href="@Url.Action("Login", "Auth")" class="mobile-menu-link">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login
+                        </a>
+                    </div>
+                    <div class="mobile-menu-item">
+                        <a href="@Url.Action("Register", "Auth")" class="mobile-menu-link">
+                            <i class="fas fa-user-plus"></i>
+                            Register
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+
+    <!-- Footer (unchanged) -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -58,7 +532,6 @@
                     <li><a href="/MyProperty">List Your Property</a></li>
                     <li><a href="/Home/Privacy">Privacy policy</a></li>
                     <li><a href="Home/Terms">Terms of service</a></li>
-
                 </ul>
             </div>
 
@@ -93,14 +566,64 @@
         </div>
     </footer>
 
-
     <button id="backToTopBtn" class="back-to-top" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i>
     </button>
+
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @* <script src="~/js/property-search.js" asp-append-version="true"></script> *@
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileOverlay');
+            const hamburger = document.getElementById('hamburgerMenu');
+            
+            menu.classList.toggle('show');
+            overlay.classList.toggle('show');
+            hamburger.classList.toggle('active');
+
+            // Prevent body scroll when menu is open
+            if (menu.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close menu when clicking on menu items
+        document.querySelectorAll('.mobile-menu-link').forEach(link => {
+            link.addEventListener('click', function() {
+                toggleMobileMenu();
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                // Mobile behavior - close menu and reset styles
+            }
+        });
+
+        // Enhanced back to top functionality
+        window.addEventListener('scroll', function() {
+            const backToTop = document.getElementById('backToTopBtn');
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        document.getElementById('backToTopBtn').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
