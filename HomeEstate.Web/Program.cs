@@ -18,7 +18,8 @@ namespace HomeEstate
 
             // Add services to the container.
             builder.Services.AddDbContext<HomeEstateDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Local") ?? Environment.GetEnvironmentVariable("DefaultConnection")));
 
 
             builder.Services.AddAutoMapper(cfg =>
@@ -65,15 +66,17 @@ namespace HomeEstate
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>
                 {
-                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? throw new ArgumentException("Authentication ClientId should be defined in app settings");
-                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? throw new ArgumentException("Authentication: ClientSecret should be defined in app settings");
+                    var clientId = builder.Configuration["Authentication:Google:ClientId"] ?? Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
+                    var clientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
+                    options.ClientId =  clientId ?? throw new ArgumentException("Authentication ClientId should be defined in app settings");
+                    options.ClientSecret = clientSecret ?? throw new ArgumentException("Authentication: ClientSecret should be defined in app settings");
                     options.SaveTokens = true;
 
                     options.Scope.Add("profile");
                     options.Scope.Add("email");
                     options.SaveTokens = true;
                     options.ClaimActions.MapJsonKey("picture", "picture");
-                });
+                }); 
             builder.Services.AddRazorPages();
             builder.Services.AddAuthorization(options =>
             {

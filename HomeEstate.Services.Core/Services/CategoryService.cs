@@ -41,7 +41,7 @@ namespace HomeEstate.Services.Core.Services
             var category = await dbContext.Categories
                 .FirstOrDefaultAsync(c =>c.Id == id);
 
-            if (category != null)
+            if (category == null)
             {
                 throw new NotFoundException("Category", id);
             }
@@ -52,6 +52,10 @@ namespace HomeEstate.Services.Core.Services
 
         public async Task<CategoryDto> GetCategoryByNameAsync(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException();
+            }
             var category = await dbContext.Categories
                 .FirstOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
 

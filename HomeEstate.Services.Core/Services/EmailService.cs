@@ -2,6 +2,7 @@
 using HomeEstate.Services.Core.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
@@ -23,8 +24,29 @@ namespace HomeEstate.Services.Core.Services
         {
             try
             {
-                var emailSettings = _configuration.GetSection("EmailSettings");
-
+                var emailSettings = new Dictionary<string, string>();
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("EmailSettings:SmtpUsername")))
+                {
+                    emailSettings.Add("AdminEmail", Environment.GetEnvironmentVariable("EmailSettings:AdminEmail"));
+                    emailSettings.Add("FromEmail", Environment.GetEnvironmentVariable("EmailSettings:FromEmail"));
+                    emailSettings.Add("FromName", Environment.GetEnvironmentVariable("EmailSettings:FromName"));
+                    emailSettings.Add("SmtpPassword", Environment.GetEnvironmentVariable("EmailSettings:SmtpPassword"));
+                    emailSettings.Add("SmtpPort", Environment.GetEnvironmentVariable("EmailSettings:SmtpPort"));
+                    emailSettings.Add("SmtpServer", Environment.GetEnvironmentVariable("EmailSettings:SmtpServer"));
+                    emailSettings.Add("SmtpUsername", Environment.GetEnvironmentVariable("EmailSettings:SmtpUsername"));
+                }
+                else
+                {
+                    var emailSection = _configuration.GetSection("EmailSettings");
+                    emailSettings.Add("AdminEmail", emailSection["AdminEmail"]);
+                    emailSettings.Add("FromEmail", emailSection["FromEmail"]);
+                    emailSettings.Add("FromName", emailSection["FromName"]);
+                    emailSettings.Add("SmtpPassword", emailSection["SmtpPassword"]);
+                    emailSettings.Add("SmtpPort", emailSection["SmtpPort"]);
+                    emailSettings.Add("SmtpServer", emailSection["SmtpServer"]);
+                    emailSettings.Add("SmtpUsername", emailSection["SmtpUsername"]);
+                }
+                
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress(
                     emailSettings["FromName"],

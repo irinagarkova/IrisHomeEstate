@@ -1,6 +1,6 @@
-﻿@model ICollection<PropertyViewModel>
+﻿@model MyPropertyIndexViewModel
 @{
-    ViewData["Title"] = "Моите имоти";
+    ViewData["Title"] = "My Properties";
 }
 
 <div class="container-fluid main-content">
@@ -65,7 +65,7 @@
                     <div class="card text-center">
                         <div class="card-body">
                             <h3 class="text-info">@stats.PropertiesForRent</h3>
-                            <p class="card-text">Properties or Rent</p>
+                            <p class="card-text">Properties for Rent</p>
                         </div>
                     </div>
                 </div>
@@ -80,10 +80,62 @@
             </div>
         }
     }
+
+    <!-- Search and Filter Controls -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Properties</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput"
+                               placeholder="Search by title, location..."
+                               value="@Model.SearchTerm">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchProperties()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" id="sortSelect" onchange="loadPage(1)">
+                        <option value="newest" >Newest First</option>
+                        <option value="oldest" >Oldest First</option>
+                        <option value="price-asc" >Price: Low to High</option>
+                        <option value="price-desc" >Price: High to Low</option>
+                        <option value="area-asc" >Area: Small to Large</option>
+                        <option value="area-desc" >Area: Large to Small</option>
+                        <option value="title" >Title A-Z</option>
+                    </select>
+                </div>
+                <div class="col-md-2"> 
+                    <label class="form-label">Items per page</label>
+                    <select class="form-select" id="pageSizeSelect" onchange="loadPage(1)">
+                        @foreach (var size in Model.PageSizes)
+                        {
+                            <option value="@size" >@size</option>
+                        } 
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quick Actions</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary" onclick="clearSearch()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <button class="btn btn-outline-info" onclick="refreshProperties()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Properties List -->
-    @if (!Model.Any())
+    @if (!Model.Properties.Items.Any())
     {
-        <div class="text-center py-5">
+        <div class="text-center py-5" id="emptyState">
             <i class="fas fa-home fa-4x text-muted mb-3"></i>
             <h3>You don't have properties created yet</h3>
             <p class="text-muted">Start by adding your first property</p>
@@ -94,87 +146,127 @@
     }
     else
     {
-        <div class="row">
-            @foreach (var property in Model)
-            {
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 property-card">
-                        <div class="position-relative">
-                            @if (property.Images != null && property.Images.Any())
-                            {
-                                <img src="@property.Images.First().ImageUrl" class="card-img-top" alt="@property.Title"
-                                     style="height: 200px; object-fit: cover;" onerror="this.src='/images/no-image.png'">
-                            }
-                            else
-                            {
-                                <div class="card-img-top d-flex align-items-center justify-content-center bg-light"
-                                     style="height: 200px;">
-                                    <i class="fas fa-home fa-3x text-muted"></i>
-                                </div>
-                            }
+        <!-- Properties Grid -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">My Properties List</h5>
+                    <small class="text-muted" id="resultsInfo">
+                        Showing @Model.Properties.Items.Count of @Model.Properties.TotalItems properties
+                    </small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading properties...</p>
+                </div>
 
-                            <!-- Status Badge -->
-                            <div class="position-absolute top-0 start-0 m-2">
-                                @switch ((int)property.ListingType)
-                                {
-                                    case 1:
-                                        <span class="badge bg-success">Sale</span>
-                                        break;
-                                    case 2:
-                                        <span class="badge bg-info">Rent</span>
-                                        break;
-                                    case 3:
-                                        <span class="badge bg-primary">Sale/Rent</span>
-                                        break;
-                                    default:
-                                        <span class="badge bg-secondary">Active</span>
-                                        break;
-                                }
+                <!-- Properties Grid -->
+                <div id="propertiesContainer" class="p-3">
+                    <div class="row" id="propertiesGrid">
+                        @foreach (var property in Model.Properties.Items)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4 property-item" data-property-id="@property.Id">
+                                <div class="card h-100 property-card">
+                                    <div class="position-relative">
+                                        @if (property.Images != null && property.Images.Any())
+                                        {
+                                            <img src="@property.Images.First().ImageUrl" class="card-img-top" alt="@property.Title"
+                                                 style="height: 200px; object-fit: cover;" onerror="this.src='/images/no-image.png'">
+                                        }
+                                        else
+                                        {
+                                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                                                 style="height: 200px;">
+                                                <i class="fas fa-home fa-3x text-muted"></i>
+                                            </div>
+                                        }
+
+                                        <!-- Status Badge -->
+                                        <div class="position-absolute top-0 start-0 m-2">
+                                            @switch ((int)property.ListingType)
+                                            {
+                                                case 1:
+                                                    <span class="badge bg-success">Sale</span>
+                                                    break;
+                                                case 2:
+                                                    <span class="badge bg-info">Rent</span>
+                                                    break;
+                                                case 3:
+                                                    <span class="badge bg-primary">Sale/Rent</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">Active</span>
+                                                    break;
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">@property.Title</h5>
+                                        <p class="card-text text-primary fs-5 fw-bold">@property.Price.ToString("C")</p>
+
+                                        <div class="row text-muted small mb-2">
+                                            <div class="col-6">
+                                                <i class="fas fa-expand-arrows-alt"></i> @property.Area m²
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "N/A")
+                                            </div>
+                                        </div>
+
+                                        <div class="row text-muted small mb-3">
+                                            <div class="col-6">
+                                                <i class="fas fa-calendar"></i> @property.CreatedOn.ToString("dd.MM.yyyy")
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="fas fa-heart"></i> @property.FavoriteCount favorites
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-auto">
+                                            <div class="btn-group w-100" role="group">
+                                                <a asp-action="Details" asp-controller="Property" asp-route-id="@property.Id"
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <a asp-controller="Property" asp-action="Update" asp-route-id="@property.Id"
+                                                   class="btn btn-outline-warning btn-sm">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        onclick="deleteProperty(@property.Id, '@property.Title')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">@property.Title</h5>
-                            <p class="card-text text-primary fs-5 fw-bold">@property.Price.ToString("C")</p>
-
-                            <div class="row text-muted small mb-2">
-                                <div class="col-6">
-                                    <i class="fas fa-expand-arrows-alt"></i> @property.Area m²
-                                </div>
-                                <div class="col-6">
-                                    <i class="fas fa-map-marker-alt"></i> @(property.Location?.City ?? "N/A")
-                                </div>
-                            </div>
-
-                            <div class="row text-muted small mb-3">
-                                <div class="col-6">
-                                    <i class="fas fa-calendar"></i> @property.CreatedOn.ToString("dd.MM.yyyy")
-                                </div>
-                                <div class="col-6">
-                                    <i class="fas fa-heart"></i> @property.FavoriteCount харесвания
-                                </div>
-                            </div>
-
-                            <div class="mt-auto">
-                                <div class="btn-group w-100" role="group">
-                                    <a   asp-action="Details" asp-controller="Property" asp-route-id="@property.Id"
-                                       class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> View
-                                    </a>
-                                    <a asp-controller="Property" asp-action="Update"   asp-route-id="@property.Id"
-                                       class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger btn-sm"
-                                            onclick="deleteProperty(@property.Id, '@property.Title')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
-            }
+
+                <!-- Empty State for Search -->
+                <div id="noResults" class="text-center py-5 d-none">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h5>No properties found</h5>
+                    <p class="text-muted">No properties match your search criteria.</p>
+                    <button class="btn btn-outline-primary" onclick="clearSearch()">
+                        Clear Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            
+                <div class="card-footer" id="paginationContainer">
+                    @await Html.PartialAsync("_Pagination", Model.Properties)
+                </div>
         </div>
     }
 </div>
@@ -184,25 +276,321 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Потвърждение за изтриване</h5>
+                <h5 class="modal-title">Confirm Deletion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the property? <strong id="propertyTitle"></strong>?</p>
-                <p class="text-danger">This action cannot be undone.</p>
+                <p>Are you sure you want to delete the property <strong id="propertyTitle"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    This action cannot be undone.
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rejection</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
             </div>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
+        let currentPage = @Model.Properties.CurrentPage;
+        let currentPageSize = @Model.Properties.PageSize;
+        let currentSearchTerm = '@Model.SearchTerm';
+        let currentSortBy = '@Model.SortBy';
+
         document.addEventListener('DOMContentLoaded', function () {
-            PropertyDeletion.initialize('@Url.Action("Delete", "MyProperty")');
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Enter key search
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    searchProperties();
+                }
+            });
+
+            // Auto-search with debounce
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchProperties();
+                }, 500);
+            });
         });
+
+        function loadPage(page = 1) {
+            currentPage = page;
+            currentPageSize = document.getElementById('pageSizeSelect').value;
+            currentSortBy = document.getElementById('sortSelect').value;
+            showLoading(true);
+            $.ajax({
+                url: `@Url.Action("LoadProperties", "MyProperty")?page=${currentPage}&pageSize=${currentPageSize}&sortBy=${currentSortBy}`,
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (data) {
+                    if(data.success) {
+                        updatePropertiesDisplay(data.data);
+                        updatePagination(data.pagination);
+                        updateResultsInfo(data.pagination);
+                        showLoading(false);
+                    } else {
+                        showError('Error loading properties');
+                    }
+                },
+                error: function () {
+                    showLoading(false);
+                    showError('An error occurred while loading page.');
+                }
+            });
+        }
+
+        function searchProperties() {
+            currentSearchTerm = document.getElementById('searchInput').value;
+            loadPage(1);
+        }
+            
+        function refreshProperties() {
+            loadPage(currentPage);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            currentSearchTerm = '';
+            loadPage(1);
+        }
+
+        function updatePropertiesDisplay(properties) {
+            const container = document.getElementById('propertiesGrid');
+            const emptyState = document.getElementById('noResults');
+
+            if (properties.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+
+            container.innerHTML = properties.map(property => `
+                <div class="col-md-6 col-lg-4 mb-4 property-item" data-property-id="${property.id}">
+                    <div class="card h-100 property-card">
+                        <div class="position-relative">
+                            ${property.images && property.images.length > 0
+                ? `<img src="${property.images[0].imageUrl}" class="card-img-top" alt="Property" style="height: 200px; object-fit: cover;">`
+                : `<div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;"><i class="fas fa-home fa-3x text-muted"></i></div>`
+            }
+                            <div class="position-absolute top-0 start-0 m-2">
+                                ${getListingTypeBadge(property.listingType)}
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${property.title}</h5>
+                            <p class="card-text text-primary fs-5 fw-bold">${formatPrice(property.price)}</p>
+                            <div class="row text-muted small mb-2">
+                                <div class="col-6"><i class="fas fa-expand-arrows-alt"></i> ${property.area} m²</div>
+                                <div class="col-6"><i class="fas fa-map-marker-alt"></i> ${property.location?.city || 'N/A'}</div>
+                            </div>
+                            <div class="row text-muted small mb-3">
+                                <div class="col-6"><i class="fas fa-calendar"></i> ${formatDate(property.createdOn)}</div>
+                                <div class="col-6"><i class="fas fa-heart"></i> ${property.favoriteCount} favorites</div>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="btn-group w-100" role="group">
+                                    <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="/Property/Update/${property.id}" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteProperty(${property.id}, '${property.title}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Reinitialize tooltips for new content
+            const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function updatePagination(pagination) {
+            const container = document.getElementById('paginationContainer');
+            if (!container) return;
+
+            if (pagination.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = '<nav><ul class="pagination justify-content-center mb-0">';
+
+            // Previous button
+            if (pagination.hasPreviousPage) {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.currentPage - 1}); return false;">&laquo;</a></li>`;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">&laquo;</span></li>';
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, pagination.currentPage - 2);
+            const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="loadPage(1); return false;">1</a></li>';
+                if (startPage > 2) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadPage(${i}); return false;">${i}</a>
+                </li>`;
+            }
+
+            if (endPage < pagination.totalPages) {
+                if (endPage < pagination.totalPages - 1) {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.totalPages}); return false;">${pagination.totalPages}</a></li>`;
+            }
+
+            // Next button
+            if (pagination.hasNextPage) {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.currentPage + 1}); return false;">&raquo;</a></li>`;
+            } else {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">&raquo;</span></li>';
+            }
+
+            paginationHtml += '</ul></nav>';
+            container.innerHTML = paginationHtml;
+        }
+
+        function updateResultsInfo(pagination) {
+            const info = document.getElementById('resultsInfo');
+            const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
+            const end = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems);
+            info.textContent = `Showing ${start}-${end} of ${pagination.totalItems} properties`;
+        }
+
+        function deleteProperty(propertyId, propertyTitle) {
+            document.getElementById('propertyTitle').textContent = propertyTitle;
+
+            document.getElementById('confirmDeleteBtn').onclick = () => performDelete(propertyId);
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function performDelete(propertyId) {
+            showLoading(true);
+
+            fetch(`@Url.Action("DeleteQuick", "MyProperty")?id=${propertyId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess(data.message);
+                        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                        loadPage(currentPage);
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Error deleting property');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        // Helper functions
+        function getListingTypeBadge(listingType) {
+            switch (listingType) {
+                case 1: return '<span class="badge bg-success">Sale</span>';
+                case 2: return '<span class="badge bg-info">Rent</span>';
+                case 3: return '<span class="badge bg-primary">Sale/Rent</span>';
+                default: return '<span class="badge bg-secondary">Active</span>';
+            }
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(price);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            const container = document.getElementById('propertiesContainer');
+
+            if (show) {
+                spinner.classList.remove('d-none');
+                container.style.opacity = '0.5';
+            } else {
+                spinner.classList.add('d-none');
+                container.style.opacity = '1';
+            }
+        }
+
+        function showSuccess(message) {
+            showToast(message, 'success');
+        }
+
+        function showError(message) {
+            showToast(message, 'danger');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 1060;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
     </script>
     @Html.AntiForgeryToken()
 }
