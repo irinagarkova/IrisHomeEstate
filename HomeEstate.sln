@@ -21,6 +21,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeEstate.Services.Common"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{D48848E2-50DC-4A1E-B427-004D6CE343E1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DE8872B0-5647-42C1-AA8D-4AC4EE3681C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeEstate.Services.Core.Tests", "HomeEstate.Services.Core.Tests\HomeEstate.Services.Core.Tests.csproj", "{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,10 @@ Global
 		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +70,7 @@ Global
 		{57AA5A2D-25F4-465D-809D-6FC868AD7164} = {96692E63-36A6-4495-ACDC-D469355D1F9C}
 		{3170F2CA-7CCB-4227-8BB8-C2C5C30A92BA} = {7D2C2B30-A751-44F6-982A-99EBEC1B4218}
 		{EFA7E1CD-BD86-4EAC-B598-95B54A5A4071} = {7D2C2B30-A751-44F6-982A-99EBEC1B4218}
+		{3AABBEF8-418B-4C4E-BBD5-7A6A5B9BA5A2} = {DE8872B0-5647-42C1-AA8D-4AC4EE3681C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {18DE518C-A3F7-4434-9954-4BB47EDD4E1A}

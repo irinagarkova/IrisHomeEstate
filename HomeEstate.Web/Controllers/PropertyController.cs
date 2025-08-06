@@ -110,7 +110,7 @@ namespace HomeEstate.Web.Controllers
         }
 
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize]
         public async Task<IActionResult> Add()
         {
             var model = new AddAndUpdatePropertyViewModel
@@ -139,9 +139,14 @@ namespace HomeEstate.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(AddAndUpdatePropertyViewModel model)
         {
+            if(model.Images == null)
+            {
+                ModelState.AddModelError("Images", "Upload at least 1 image");
+                return View(model);
+            }
             if (!ModelState.IsValid)
             {
-                model.Locations = await getLocations();
+                //model.Locations = await getLocations();
                 return View(model);
             }
             if (model.ListingType == PropertyListingType.Rent || model.ListingType == PropertyListingType.Both)
