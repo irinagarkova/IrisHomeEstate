@@ -1,36 +1,33 @@
 ﻿@using HomeEstate.Data.Models.Enum
 @using HomeEstate.Services.Core.Dtos
-@model ICollection<PropertyViewModel>
+@model PropertyIndexViewModel
 
 @{
     ViewData["Title"] = "Properties";
 }
 
-<!-- CSS файлове директно в view-то -->
+<!-- CSS files directly in view -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="~/css/propertiesPage.css">
 
-@if ((bool?)ViewData["SearchApplied"] == true)
+@if (ViewData.ContainsKey("SearchApplied") && (bool)ViewData["SearchApplied"])
 {
     <div class="alert alert-info" id="searchResultsAlert">
         <i class="fas fa-search"></i>
-        Search Results: Found @ViewData["ResultsCount"] properties
-        @{
-            var criteria = ViewData["SearchCriteria"] as PropertySearchDto;
-        }
-        @if (criteria != null)
+        Search Results: Found @Model.Properties.TotalItems properties
+        @if (Model.SearchCriteria != null)
         {
-            @if (!string.IsNullOrEmpty(criteria.Location))
+            @if (!string.IsNullOrEmpty(Model.SearchCriteria.Location))
             {
-                <span class="badge bg-secondary">Location: @criteria.Location</span>
+                <span class="badge bg-secondary">Location: @Model.SearchCriteria.Location</span>
             }
-            @if (criteria.CategoryId.HasValue)
+            @if (Model.SearchCriteria.CategoryId.HasValue)
             {
-                <span class="badge bg-secondary">Category: @criteria.CategoryId</span>
+                <span class="badge bg-secondary">Category: @Model.SearchCriteria.CategoryId</span>
             }
-            @if (criteria.ListingType.HasValue)
+            @if (Model.SearchCriteria.ListingType.HasValue)
             {
-                <span class="badge bg-secondary">Type: @criteria.ListingType</span>
+                <span class="badge bg-secondary">Type: @Model.SearchCriteria.ListingType</span>
             }
         }
         <button type="button" class="btn-close" onclick="clearSearch()"></button>
@@ -67,7 +64,7 @@
                                 <i class="fas fa-map-marker-alt me-1"></i>Location
                             </label>
                             <input type="text" class="form-control" id="searchLocation"
-                                   name="Location" placeholder="City or neighborhood">
+                                   name="Location" placeholder="City or neighborhood" value="@Model.SearchCriteria?.Location">
                         </div>
 
                         <!-- Property Type -->
@@ -91,10 +88,10 @@
                             </label>
                             <select class="form-select" id="bedroomsSelect" name="Bedrooms">
                                 <option value="">Any Size</option>
-                                <option value="1">1 Bedroom</option>
-                                <option value="2">2 Bedrooms</option>
-                                <option value="3">3 Bedrooms</option>
-                                <option value="4">4+ Bedrooms</option>
+                                <option value="1" >1 Bedroom</option>
+                                <option value="2" >2 Bedrooms</option>
+                                <option value="3" >3 Bedrooms</option>
+                                <option value="4" >4+ Bedrooms</option>
                             </select>
                         </div>
 
@@ -104,7 +101,7 @@
                                 <i class="fas fa-dollar-sign me-1"></i>Max Price
                             </label>
                             <input type="number" class="form-control" id="maxPrice"
-                                   name="MaxPrice" placeholder="Any">
+                                   name="MaxPrice" placeholder="Any" value="@Model.SearchCriteria?.MaxPrice">
                         </div>
 
                         <!-- Sort By -->
@@ -113,10 +110,10 @@
                                 <i class="fas fa-sort me-1"></i>Sort By
                             </label>
                             <select class="form-select" id="sortBy" name="SortBy">
-                                <option value="newest">Newest First</option>
-                                <option value="price-asc">Price: Low to High</option>
-                                <option value="price-desc">Price: High to Low</option>
-                                <option value="area-desc">Area: Largest First</option>
+                                <option value="newest" >Newest First</option>
+                                <option value="price-asc" >Price: Low to High</option>
+                                <option value="price-desc" >Price: High to Low</option>
+                                <option value="area-desc" >Area: Largest First</option>
                             </select>
                         </div>
 
@@ -133,7 +130,6 @@
                         <h6 class="mt-3">
                             <i class="fas fa-home me-2"></i>Rental Preferences
                         </h6>
-                        <!-- Checkboxes for rental preferences -->
                         <div class="row mt-3">
                             <div class="col-md-4">
                                 <div class="form-check">
@@ -169,13 +165,28 @@
         </div>
     </div>
 
-    <!-- Results Summary -->
+    <!-- Results Summary and Controls -->
     <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h5 id="resultCount" class="mb-0">Showing @Model.Count() properties</h5>
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSearch()" id="clearSearchBtn" style="display: none;">
+        <div class="col-md-8 d-flex align-items-center">
+            <h5 id="resultCount" class="mb-0">Showing @Model.Properties.TotalItems properties</h5>
+            <button type="button" class="btn btn-outline-secondary btn-sm ms-3" onclick="clearSearch()" id="clearSearchBtn" style="display: @(ViewData.ContainsKey("SearchApplied") && (bool)ViewData["SearchApplied"] ? "inline-block" : "none");">
                 <i class="fas fa-times"></i> Clear Search
             </button>
+        </div>
+        <div class="col-md-4">
+            <div class="row g-2">
+                <div class="col-auto">
+                    <label class="form-label small mb-0">Items per page:</label>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select form-select-sm" id="pageSizeSelect" onchange="changePageSize()">
+                        @foreach (var size in Model.PageSizes)
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -190,7 +201,7 @@
     <!-- Properties Grid -->
     <div id="propertiesContainer">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="propertiesGrid">
-            @foreach (var property in Model)
+            @foreach (var property in Model.Properties.Items)
             {
                 <div class="col property-item" data-property-id="@property.Id">
                     <div class="card h-100 property-card">
@@ -303,103 +314,181 @@
             </div>
         </div>
     </div>
+
+    <!-- Pagination -->
+    @if (Model.Properties.TotalPages > 1)
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        @await Html.PartialAsync("_Pagination", Model.Properties)
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
-<!-- JavaScript код директно в view-то -->
 @section Scripts {
-<script>
-    console.log('jQuery available?', typeof $ !== 'undefined');
-    $(document).ready(function () {
-        // Дефинираме променлива за authentication статуса в началото
-        const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
+    <script>
+        let currentPage = @Model.Properties.CurrentPage;
+        let currentPageSize = @Model.Properties.PageSize;
+        let currentSearchCriteria = @Html.Raw(Json.Serialize(Model.SearchCriteria));
+        let currentSortBy = '@Model.SortBy';
+        let currentListingType = @((int)(Model.SearchCriteria?.ListingType ?? PropertyListingType.Sale));
+        let hasActiveSearch = @Json.Serialize(ViewData.ContainsKey("SearchApplied") && (bool)ViewData["SearchApplied"]);
 
-        var currentListingType = 1; // Default to Buy
-        let hasActiveSearch = false;
+        $(document).ready(function () {
+            const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
 
-        // Get DOM elements
-        const buyTab = $('#buyTab');
-        const rentTab = $('#rentTab');
-        const listingTypeInput = $('#listingTypeInput');
-        const rentalFields = $('#rentalFields');
-        const priceLabel = $('#priceLabel');
-        const maxPriceInput = $('#maxPrice');
-        const searchForm = $('#searchForm');
+            // Initialize form
+            initializeSearchForm();
 
-        // Tab switching functionality
-        function switchTab(activeTab, listingType) {
-            // Update tab appearance
+            // Event listeners
+            attachEventListeners();
+
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        function initializeSearchForm() {
+            // Set listing type based on search criteria
+            if (currentSearchCriteria?.ListingType) {
+                currentListingType = currentSearchCriteria.ListingType;
+                switchTab(currentListingType);
+            }
+
+            // Update form fields based on existing search criteria
+            updateFormFromSearchCriteria();
+        }
+
+        function attachEventListeners() {
+            // Tab switching
+            $('#buyTab').on('click', function () {
+                switchTab(1);
+            });
+
+            $('#rentTab').on('click', function () {
+                switchTab(2);
+            });
+
+            // Form submission
+            $('#searchForm').on('submit', function (e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            // Real-time search with debounce
+            let searchTimeout;
+            $('#searchLocation, #maxPrice').on('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (hasActiveSearch) {
+                        performSearch();
+                    }
+                }, 500);
+            });
+
+            // Immediate search on select changes
+            $('#searchCategory, #bedroomsSelect, #sortBy, #furnishedCheck, #petsCheck, #parkingCheck').on('change', function () {
+                performSearch();
+            });
+
+            // Favorite button functionality
+            $(document).on('click', '.favorite-btn', function (e) {
+                e.preventDefault();
+                toggleFavorite($(this));
+            });
+        }
+
+        function switchTab(listingType) {
+            currentListingType = listingType;
+            
             $('.tab').removeClass('active');
-            activeTab.addClass('active');
-
-            currentListingType = parseInt(listingType);
-            listingTypeInput.val(listingType);
-
-            // Show/hide rental fields and update labels
-            if (listingType === '2') { // Rent
-                showRentalFields();
-                updateForRent();
-            } else { // Buy
+            if (listingType === 1) {
+                $('#buyTab').addClass('active');
                 hideRentalFields();
                 updateForSale();
+                loadPage(1);
+            } else {
+                $('#rentTab').addClass('active');
+                showRentalFields();
+                updateForRent();
+                loadPage(1);
             }
-        }
 
-        function showRentalFields() {
-            rentalFields.removeClass('hidden d-none').show();
-        }
-
-        function hideRentalFields() {
-            rentalFields.addClass('hidden d-none').hide();
-        }
-
-        function updateForRent() {
-            priceLabel.html('<i class="fas fa-dollar-sign me-1"></i>Max Rent Price');
-            maxPriceInput.attr('name', 'MaxRent').attr('placeholder', '2000').val('');
+            $('#listingTypeInput').val(listingType);
         }
 
         function updateForSale() {
-            priceLabel.html('<i class="fas fa-dollar-sign me-1"></i>Max Price');
-            maxPriceInput.attr('name', 'MaxPrice').attr('placeholder', 'Any').val('');
+            $('#priceLabel').html('<i class="fas fa-dollar-sign me-1"></i>Max Price');
+            $('#maxPrice').attr('name', 'MaxPrice').attr('placeholder', 'Any');
         }
 
-        // Event listeners for tabs
-        buyTab.on('click', function () {
-            switchTab($(this), '1');
-        });
+        function updateForRent() {
+            $('#priceLabel').html('<i class="fas fa-dollar-sign me-1"></i>Max Rent Price');
+            $('#maxPrice').attr('name', 'MaxRent').attr('placeholder', '2000');
+        }
 
-        rentTab.on('click', function () {
-            switchTab($(this), '2');
-        });
+        function showRentalFields() {
+            $('#rentalFields').removeClass('hidden d-none').slideDown();
+        }
 
-        // Form submission with AJAX
-        searchForm.on('submit', function (e) {
-            e.preventDefault();
-            performSearch();
-        });
+        function hideRentalFields() {
+            $('#rentalFields').addClass('hidden').slideUp();
+        }
 
-        // Real-time search with debounce
-        let searchTimeout;
-        $('#searchLocation, #maxPrice').on('input', function () {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                if (hasActiveSearch) {
-                    performSearch();
-                }
-            }, 500);
-        });
-
-        // Immediate search on select changes
-        $('#searchCategory, #bedroomsSelect, #sortBy, #furnishedCheck, #petsCheck, #parkingCheck').on('change', function () {
-            if (hasActiveSearch) {
-                performSearch();
+        function updateFormFromSearchCriteria() {
+            if (currentSearchCriteria) {
+                $('#searchLocation').val(currentSearchCriteria.Location || '');
+                $('#searchCategory').val(currentSearchCriteria.CategoryId || '');
+                $('#bedroomsSelect').val(currentSearchCriteria.Bedrooms || '');
+                $('#maxPrice').val(currentSearchCriteria.MaxPrice || currentSearchCriteria.MaxRent || '');
+                $('#sortBy').val(currentSortBy || 'newest');
             }
-        });
+        }
 
-        // Main search function
         function performSearch() {
             hasActiveSearch = true;
             showLoading(true);
 
+            const formData = collectFormData();
+
+            $.ajax({
+                url: '@Url.Action("SearchAjax", "Property")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({...formData, page: 1, pageSize: currentPageSize}),
+                success: function (response) {
+                    showLoading(false);
+                    if (response.success) {
+                        updatePropertyDisplay(response.properties);
+                        updatePagination(response);
+                        updateResultsInfo(response);
+                        currentPage = 1; // Reset to first page
+                        
+                        if (response.properties.length === 0) {
+                            showNoResults(true);
+                        } else {
+                            showNoResults(false);
+                        }
+
+                        // Show clear search button
+                        $('#clearSearchBtn').show();
+                        showSearchAlert(response.totalCount);
+                    } else {
+                        showError('Search failed: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showLoading(false);
+                    showError('An error occurred while searching. Please try again.');
+                }
+            });
+        }
+
+        function collectFormData() {
             const formData = {
                 Location: $('#searchLocation').val(),
                 CategoryId: $('#searchCategory').val() || null,
@@ -411,9 +500,9 @@
             };
 
             // Add price field based on listing type
-            if (currentListingType === 2) { // Rent
+            if (currentListingType === 2) {
                 formData.MaxRent = $('#maxPrice').val() || null;
-            } else { // Sale
+            } else {
                 formData.MaxPrice = $('#maxPrice').val() || null;
             }
 
@@ -424,39 +513,49 @@
                 }
             });
 
+            return formData;
+        }
+
+        function loadPage(page) {
+            currentPage = page;
+            const formData = collectFormData();
+            performSearchWithPage({...formData, page: page, pageSize: currentPageSize});
+        }
+
+        function changePageSize() {
+            currentPageSize = parseInt($('#pageSizeSelect').val());
+            loadPage(1); // Reset to first page when changing page size
+        }
+
+        function performSearchWithPage(searchData) {
+            showLoading(true);
+            debugger
+            const url = '@Url.Action("SearchAjax", "Property")' + `?page=${searchData.page}&pageSize=${searchData.pageSize}`;
+
+
             $.ajax({
-                url: '@Url.Action("SearchAjax", "Property")',
+                url: url,
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(formData),
+                data: JSON.stringify(searchData),
                 success: function (response) {
                     showLoading(false);
-
                     if (response.success) {
                         updatePropertyDisplay(response.properties);
-                        updateSearchSummary(response.properties.length, response.hasSearchCriteria);
-
-                        if (response.properties.length === 0) {
-                            showNoResults(true);
-                        } else {
-                            showNoResults(false);
-                        }
-                    } else {
-                        showError('Search failed: ' + (response.message || 'Unknown error'));
+                        updatePagination(response);
+                        updateResultsInfo(response);
                     }
                 },
-                error: function (xhr, status, error) {
+                error: function () {
                     showLoading(false);
-                    showError('An error occurred while searching. Please try again.');
-                    console.error('Search error:', error);
+                    showError('An error occurred while loading page.');
                 }
             });
         }
 
-        // Update property display
         function updatePropertyDisplay(properties) {
+            // Implementation similar to admin panel but adapted for public view
             const container = $('#propertiesGrid');
-
             if (properties.length === 0) {
                 container.empty();
                 return;
@@ -468,58 +567,53 @@
             });
 
             container.html(html);
-
-            // Reinitialize Bootstrap carousels
-            $('.carousel').each(function () {
-                new bootstrap.Carousel(this, { interval: false });
-            });
         }
 
-        // Build property card HTML
         function buildPropertyCard(property) {
+            // Build property card HTML (similar to server-side rendering)
             const listingTypeBadges = getListingTypeBadges(property.listingType);
             const favoriteBtn = buildFavoriteButton(property);
             const images = buildImageCarousel(property);
 
             return `
-                    <div class="col property-item" data-property-id="${property.id}">
-                        <div class="card h-100 property-card">
-                            <div class="position-relative">
-                                ${images}
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    ${listingTypeBadges}
-                                </div>
-                                ${favoriteBtn}
+                <div class="col property-item" data-property-id="${property.id}">
+                    <div class="card h-100 property-card">
+                        <div class="position-relative">
+                            ${images}
+                            <div class="position-absolute top-0 start-0 m-2">
+                                ${listingTypeBadges}
                             </div>
-                            <div class="card-body">
-                                <h5 class="card-title text-truncate">${property.title}</h5>
-                                <p class="card-text text-primary fs-4 fw-bold mb-2">${formatPrice(property.price)}</p>
-                                <div class="d-flex justify-content-between text-muted small mb-2">
-                                    <span><i class="fas fa-bed"></i> ${getPropertyType(property.propertyType)}</span>
-                                    <span><i class="fas fa-expand"></i> ${property.area} m²</span>
-                                </div>
-                                <p class="card-text small text-muted">
-                                    <i class="fas fa-map-marker-alt"></i> ${property.location?.city || 'Unknown'}
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <small class="text-muted">
-                                        <i class="far fa-heart"></i> ${property.favoriteCount} favorites
-                                    </small>
-                                    <small class="text-muted">
-                                        <i class="far fa-clock"></i> ${formatDate(property.createdOn)}
-                                    </small>
-                                </div>
+                            ${favoriteBtn}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">${property.title}</h5>
+                            <p class="card-text text-primary fs-4 fw-bold mb-2">${formatPrice(property.price)}</p>
+                            <div class="d-flex justify-content-between text-muted small mb-2">
+                                <span><i class="fas fa-bed"></i> ${getPropertyType(property.propertyType)}</span>
+                                <span><i class="fas fa-expand"></i> ${property.area} m²</span>
                             </div>
-                            <div class="card-footer bg-transparent">
-                                <div class="d-grid gap-2">
-                                    <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
-                                        View Details <i class="fas fa-arrow-right"></i>
-                                    </a>
-                                </div>
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-map-marker-alt"></i> ${property.location?.city || 'Unknown'}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="far fa-heart"></i> ${property.favoriteCount} favorites
+                                </small>
+                                <small class="text-muted">
+                                    <i class="far fa-clock"></i> ${formatDate(property.createdOn)}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="/Property/Details/${property.id}" class="btn btn-outline-primary btn-sm">
+                                    View Details <i class="fas fa-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
         }
 
         // Helper functions
@@ -532,23 +626,18 @@
             }
         }
 
-        function getPropertyType(propertyType) {
-            const types = { 1: 'OneBedroom', 2: 'TwoBedrooms', 3: 'ThreeBedrooms', 4: 'MultipleBedrooms' };
-            return types[propertyType] || 'Unknown';
-        }
-
         function buildFavoriteButton(property) {
-            // Използваме променливата която дефинирахме в началото
+            const isUserAuthenticated = @Json.Serialize(User.Identity.IsAuthenticated);
             if (isUserAuthenticated) {
                 return `
-                        <div class="position-absolute top-0 end-0 m-2">
-                            <button class="btn btn-sm btn-light rounded-circle favorite-btn"
-                                    data-property-id="${property.id}"
-                                    data-is-favorite="${property.isFavorite}">
-                                <i class="${property.isFavorite ? 'fas' : 'far'} fa-heart text-danger"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <button class="btn btn-sm btn-light rounded-circle favorite-btn"
+                                data-property-id="${property.id}"
+                                data-is-favorite="${property.isFavorite}">
+                            <i class="${property.isFavorite ? 'fas' : 'far'} fa-heart text-danger"></i>
+                        </button>
+                    </div>
+                `;
             }
             return '';
         }
@@ -556,26 +645,26 @@
         function buildImageCarousel(property) {
             if (property.images && property.images.length > 0) {
                 let html = `<div id="carousel-${property.id}" class="carousel slide" data-bs-ride="carousel">
-                                   <div class="carousel-inner">`;
+                               <div class="carousel-inner">`;
 
                 property.images.slice(0, 3).forEach((image, index) => {
                     html += `<div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                   <img src="${image.imageUrl}" class="d-block w-100" alt="Property image"
-                                        style="height: 250px; object-fit: cover;">
-                                </div>`;
+                               <img src="${image.imageUrl}" class="d-block w-100" alt="Property image"
+                                    style="height: 250px; object-fit: cover;">
+                            </div>`;
                 });
 
                 html += '</div>';
 
                 if (property.images.length > 1) {
                     html += `
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
-                        `;
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel-${property.id}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    `;
                 }
 
                 html += '</div>';
@@ -583,6 +672,11 @@
             } else {
                 return '<img src="/images/no-image.png" class="card-img-top" alt="No image" style="height: 250px; object-fit: cover;">';
             }
+        }
+
+        function getPropertyType(propertyType) {
+            const types = { 1: 'OneBedroom', 2: 'TwoBedrooms', 3: 'ThreeBedrooms', 4: 'MultipleBedrooms' };
+            return types[propertyType] || 'Unknown';
         }
 
         function formatPrice(price) {
@@ -599,33 +693,114 @@
             });
         }
 
-        function updateSearchSummary(count, hasSearchCriteria) {
-            $('#resultCount').text(`Showing ${count} properties`);
+        function updatePagination(response) {
+            // Update pagination controls dynamically
+            const paginationHtml = buildPaginationHtml(response);
+            $('.pagination').parent().html(paginationHtml);
+        }
 
-            if (hasSearchCriteria && count > 0) {
-                $('#clearSearchBtn').show();
-                showSearchAlert(count);
+        function buildPaginationHtml(response) {
+            if (response.totalPages <= 1) return '';
+
+            let html = '<nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center">';
+            html += `<div><small class="text-muted">Showing ${((response.currentPage - 1) * currentPageSize + 1)} to ${Math.min(response.currentPage * currentPageSize, response.totalCount)} of ${response.totalCount} results</small></div>`;
+            html += '<ul class="pagination justify-content-center mb-0">';
+
+            // Previous button
+            if (response.hasPreviousPage) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${response.currentPage - 1}); return false;">&laquo;</a></li>`;
             } else {
-                $('#clearSearchBtn').hide();
-                hideSearchAlert();
+                html += '<li class="page-item disabled"><span class="page-link">&laquo;</span></li>';
             }
+
+            // Page numbers
+            const startPage = Math.max(1, response.currentPage - 2);
+            const endPage = Math.min(response.totalPages, response.currentPage + 2);
+
+            if (startPage > 1) {
+                html += '<li class="page-item"><a class="page-link" href="#" onclick="loadPage(1); return false;">1</a></li>';
+                if (startPage > 2) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${i === response.currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadPage(${i}); return false;">${i}</a>
+                </li>`;
+            }
+
+            if (endPage < response.totalPages) {
+                if (endPage < response.totalPages - 1) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${response.totalPages}); return false;">${response.totalPages}</a></li>`;
+            }
+
+            // Next button
+            if (response.hasNextPage) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${response.currentPage + 1}); return false;">&raquo;</a></li>`;
+            } else {
+                html += '<li class="page-item disabled"><span class="page-link">&raquo;</span></li>';
+            }
+
+            html += '</ul></nav>';
+            return html;
+        }
+
+        function updateResultsInfo(response) {
+            $('#resultCount').text(`Showing ${response.totalCount} properties`);
         }
 
         function showSearchAlert(count) {
-            let alertHtml = `
-                    <div class="alert alert-info" id="searchResultsAlert">
-                        <i class="fas fa-search"></i>
-                        Search Results: Found ${count} properties
-                        <button type="button" class="btn-close" onclick="clearSearch()"></button>
-                    </div>
-                `;
-
+            const alertHtml = `
+                <div class="alert alert-info" id="searchResultsAlert">
+                    <i class="fas fa-search"></i>
+                    Search Results: Found ${count} properties
+                    <button type="button" class="btn-close" onclick="clearSearch()"></button>
+                </div>
+            `;
             $('#searchResultsAlert').remove();
             $('.container-fluid').prepend(alertHtml);
         }
 
-        function hideSearchAlert() {
+        function clearSearch() {
+            hasActiveSearch = false;
+            $('#searchForm')[0].reset();
+            $('#clearSearchBtn').hide();
             $('#searchResultsAlert').remove();
+            currentListingType = 1;
+            switchTab(1);
+            location.href = '@Url.Action("Index", "Property")';
+        }
+
+        function toggleFavorite(btn) {
+            const propertyId = btn.data('property-id');
+            const isFavorite = btn.data('is-favorite') === true;
+
+            $.ajax({
+                url: isFavorite ? '@Url.Action("Remove", "FavoriteProperty")' : '@Url.Action("Add", "FavoriteProperty")',
+                type: 'POST',
+                data: {
+                    id: propertyId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        const icon = btn.find('i');
+                        if (isFavorite) {
+                            icon.removeClass('fas').addClass('far');
+                            btn.data('is-favorite', false);
+                        } else {
+                            icon.removeClass('far').addClass('fas');
+                            btn.data('is-favorite', true);
+                        }
+                    }
+                },
+                error: function () {
+                    showError('An error occurred while updating favorites');
+                }
+            });
         }
 
         function showLoading(show) {
@@ -652,54 +827,10 @@
             showNotification(message, 'error');
         }
 
-        // Clear search function
-        window.clearSearch = function () {
-            hasActiveSearch = false;
-            searchForm[0].reset();
-            $('#clearSearchBtn').hide();
-            hideSearchAlert();
-            location.reload(); // Reload to show all properties
-        };
-
-        // Favorite button functionality
-        $(document).on('click', '.favorite-btn', function (e) {
-            e.preventDefault();
-            const btn = $(this);
-            const propertyId = btn.data('property-id');
-            const isFavorite = btn.data('is-favorite') === true;
-
-            $.ajax({
-                url: isFavorite ? '@Url.Action("Remove", "FavoriteProperty")' : '@Url.Action("Add", "FavoriteProperty")',
-                type: 'POST',
-                data: {
-                    id: propertyId,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (response) {
-                    const icon = btn.find('i');
-                    if (isFavorite) {
-                        icon.removeClass('fas').addClass('far');
-                        btn.data('is-favorite', false);
-                    } else {
-                        icon.removeClass('far').addClass('fas');
-                        btn.data('is-favorite', true);
-                    }
-                },
-                error: function () {
-                    showError('An error occurred while updating favorites');
-                }
-            });
-        });
-
-        // Initialize form in sale mode
-        updateForSale();
-    });
-
-    // Utility function to show notifications
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
-        notification.style.cssText = `
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+            notification.style.cssText = `
                 top: 20px;
                 right: 20px;
                 z-index: 9999;
@@ -707,21 +838,39 @@
                 border-radius: 8px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             `;
-        notification.innerHTML = `
+            notification.innerHTML = `
                 <div class="d-flex align-items-center">
                     <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
                     ${message}
                 </div>
             `;
 
-        document.body.appendChild(notification);
+            document.body.appendChild(notification);
 
-        // Remove notification after 3 seconds
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        function updateUrlParameter(url, param, paramVal) {
+            var newAdditionalURL = "";
+            var tempArray = url.split("?");
+            var baseURL = tempArray[0];
+            var additionalURL = tempArray[1];
+            var temp = "";
+            if (additionalURL) {
+                tempArray = additionalURL.split("&");
+                for (var i = 0; i < tempArray.length; i++) {
+                    if (tempArray[i].split('=')[0] != param) {
+                        newAdditionalURL += temp + tempArray[i];
+                        temp = "&";
+                    }
+                }
             }
-        }, 3000);
-    }
-</script>
+            var rows_txt = temp + "" + param + "=" + paramVal;
+            return baseURL + "?" + newAdditionalURL + rows_txt;
+        }
+    </script>
 }

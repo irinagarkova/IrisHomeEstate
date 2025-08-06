@@ -1,4 +1,4 @@
-﻿@model ICollection<PropertyViewModel>
+﻿@model FavoritePropertyIndexViewModel
 
 @{
     ViewData["Title"] = "My Favorite Properties";
@@ -18,7 +18,7 @@
             <p class="favorites-subtitle">Your curated collection of dream properties</p>
         </div>
 
-        @if (Model.Any())
+        @if (Model.Properties.Items.Any())
         {
             <!-- Stats Bar -->
             <div class="stats-bar">
@@ -28,7 +28,7 @@
                             <i class="fas fa-heart"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>@Model.Count()</h3>
+                            <h3 id="totalFavorites">@Model.Properties.TotalItems</h3>
                             <p>Favorite Properties</p>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>@Model.Sum(p => p.Price).ToString("C0")</h3>
+                            <h3 id="totalValue">@Model.Properties.Items.Sum(p => p.Price).ToString("C0")</h3>
                             <p>Total Value</p>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                             <i class="fas fa-calculator"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>@((Model.Sum(p => p.Price) / Model.Count()).ToString("C0"))</h3>
+                            <h3 id="averagePrice">@((Model.Properties.Items.Any() ? Model.Properties.Items.Average(p => p.Price) : 0).ToString("C0"))</h3>
                             <p>Average Price</p>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                             <i class="fas fa-expand-arrows-alt"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>@Model.Sum(p => p.Area) m²</h3>
+                            <h3 id="totalArea">@Model.Properties.Items.Sum(p => p.Area) m²</h3>
                             <p>Total Area</p>
                         </div>
                     </div>
@@ -67,34 +67,57 @@
                 <div class="filter-content">
                     <div class="filter-item">
                         <i class="fas fa-search"></i>
-                        <input type="text" class="search-box" placeholder="Search properties..." id="searchInput">
+                        <input type="text" class="search-box" placeholder="Search properties..." 
+                               id="searchInput" value="@Model.SearchTerm">
                     </div>
                     <div class="filter-item">
                         <i class="fas fa-filter"></i>
                         <select class="filter-select" id="categoryFilter">
                             <option value="">All Categories</option>
-                            <option value="Apartment">Apartment</option>
-                            <option value="House">House</option>
-                            <option value="Office">Office</option>
-                            <option value="Villa">Villa</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat">@cat</option>
+                            }
                         </select>
                     </div>
                     <div class="filter-item">
                         <i class="fas fa-sort"></i>
                         <select class="filter-select" id="sortBy">
                             <option value="newest">Newest First</option>
+                            <option value="oldest" >Oldest First</option>
                             <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="area-large">Area: Largest First</option>
+                            <option value="price-high" >Price: High to Low</option>
+                            <option value="area-large" >Area: Largest First</option>
+                            <option value="area-small" >Area: Smallest First</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <i class="fas fa-list"></i>
+                        <select class="filter-select" id="pageSizeSelect">
+                            @foreach (var size in Model.PageSizes)
+                            {
+                                <option value="@size" >@size per page</option>
+                            }
                         </select>
                     </div>
                 </div>
             </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading favorites...</p>
+            </div>
+
             <!-- Properties Grid -->
             <div class="properties-grid" id="propertiesContainer">
-                @foreach (var property in Model)
+                @foreach (var property in Model.Properties.Items)
                 {
-                    <div class="property-card" data-category="@property.Category?.Name" data-price="@property.Price" data-area="@property.Area" data-title="@property.Title.ToLower()" data-id="@property.Id">
+                    <div class="property-card" data-category="@property.Category?.Name" 
+                         data-price="@property.Price" data-area="@property.Area" 
+                         data-title="@property.Title.ToLower()" data-id="@property.Id">
                         <div class="property-image">
                             @if (property.Images != null && property.Images.Any())
                             {
@@ -150,15 +173,107 @@
                                     View Details
                                 </a>
                                 
-                                    <button type="submit" class="btn-remove" onclick="return confirmRemove(@property.Id)">
-                                        <i class="fas fa-heart-broken"></i>
-                                    </button>
-                                
+                                <button type="button" class="btn-remove" onclick="confirmRemove(@property.Id)">
+                                    <i class="fas fa-heart-broken"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 }
             </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-5 d-none">
+                <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                <h5>No properties found</h5>
+                <p class="text-muted">No properties match your current filters.</p>
+                <button class="btn btn-outline-primary" onclick="clearFilters()">
+                    Clear Filters
+                </button>
+            </div>
+
+            <!-- Pagination -->
+                <div class="pagination-container mt-4" id="paginationContainer">
+                    <nav aria-label="Favorites pagination">
+                        <ul class="pagination justify-content-center">
+                            @if (Model.Properties.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(@(Model.Properties.CurrentPage - 1)); return false;">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                                </li>
+                            }
+
+                            @{
+                                var startPage = Math.Max(1, Model.Properties.CurrentPage - 2);
+                                var endPage = Math.Min(Model.Properties.TotalPages, Model.Properties.CurrentPage + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(1); return false;">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == Model.Properties.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="#" onclick="loadPage(@i); return false;">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < Model.Properties.TotalPages)
+                            {
+                                @if (endPage < Model.Properties.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(@Model.Properties.TotalPages); return false;">@Model.Properties.TotalPages</a>
+                                </li>
+                            }
+
+                            @if (Model.Properties.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="#" onclick="loadPage(@(Model.Properties.CurrentPage + 1)); return false;">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Showing @((Model.Properties.CurrentPage - 1) * Model.Properties.PageSize + 1) to 
+                            @(Math.Min(Model.Properties.CurrentPage * Model.Properties.PageSize, Model.Properties.TotalItems)) 
+                            of @Model.Properties.TotalItems favorite properties
+                        </small>
+                    </div>
+                </div>
         }
         else
         {
@@ -178,101 +293,343 @@
             </div>
         }
     </div>
+
     @section Scripts {
         <script>
-            function switchView(viewType) {
+            let currentPage = @Model.Properties.CurrentPage;
+            let currentPageSize = @Model.Properties.PageSize;
+            let currentSearchTerm = '@Model.SearchTerm';
+            let currentSortBy = '@Model.SortBy';
+            let currentCategory = '@Model.Category';
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initializeEventListeners();
+                loadStatistics();
+            });
+
+            function initializeEventListeners() {
+                // Search input with debounce
+                let searchTimeout;
+                document.getElementById('searchInput').addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        currentSearchTerm = this.value;
+                        loadFavorites(1);
+                    }, 500);
+                });
+
+                // Filter and sort changes
+                document.getElementById('categoryFilter').addEventListener('change', function() {
+                    currentCategory = this.value;
+                    loadFavorites(1);
+                });
+
+                document.getElementById('sortBy').addEventListener('change', function() {
+                    currentSortBy = this.value;
+                    loadFavorites(1);
+                });
+
+                document.getElementById('pageSizeSelect').addEventListener('change', function() {
+                    currentPageSize = parseInt(this.value);
+                    loadFavorites(1);
+                });
+            }
+
+            function loadFavorites(page = 1) {
+                currentPage = page;
+                showLoading(true);
+
+                $.ajax({
+                    url: `@Url.Action("LoadFavorites", "FavoriteProperty")?page=${currentPage}&pageSize=${currentPageSize}&sortBy=${sortBy[0].value}&category=${currentCategory}`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function (response) {
+                        if (response.success) {
+                            updateFavoritesDisplay(response.data);
+                            updatePagination(response.pagination);
+                            updateStatistics(response.data);
+                            showLoading(false);
+                        } else {
+                            showError('Error loading favorite properties');
+                        }
+                    },
+                    error: function () {
+                        showLoading(false);
+                        showError('An error occurred while loading page.');
+                    }
+                });
+            }
+
+            function loadPage(page) {
+                loadFavorites(page);
+            }
+
+            function updateFavoritesDisplay(properties) {
                 const container = document.getElementById('propertiesContainer');
-                const buttons = document.querySelectorAll('.toggle-button');
+                const noResults = document.getElementById('noResults');
 
-                buttons.forEach(btn => btn.classList.remove('active'));
-                event.target.classList.add('active');
-
-                if (viewType === 'list') {
-                    container.parentElement.classList.add('list-view');
-                } else {
-                    container.parentElement.classList.remove('list-view');
+                if (properties.length === 0) {
+                    container.innerHTML = '';
+                    noResults.classList.remove('d-none');
+                    return;
                 }
+
+                noResults.classList.add('d-none');
+
+                container.innerHTML = properties.map(property => `
+                    <div class="property-card" data-category="${property.category?.name || ''}" 
+                         data-price="${property.price}" data-area="${property.area}" 
+                         data-title="${property.title.toLowerCase()}" data-id="${property.id}">
+                        <div class="property-image">
+                            ${property.images && property.images.length > 0
+                                ? `<img src="${property.images[0].imageUrl}" alt="${property.title}" onerror="this.src='/images/no-image.png'">`
+                                : `<img src="/images/no-image.png" alt="No image available">`
+                            }
+                            ${property.category ? `<div class="property-type-badge">${property.category.name}</div>` : ''}
+                        </div>
+                        <div class="property-content">
+                            <h3 class="property-title">${property.title}</h3>
+                            <div class="property-price">${formatPrice(property.price)}</div>
+                            <div class="property-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+                                    <span>${property.area} m²</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <span>${property.location?.city || 'Unknown'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-bed"></i></div>
+                                    <span>${getPropertyType(property.propertyType)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-calendar"></i></div>
+                                    <span>${formatDate(property.createdOn)}</span>
+                                </div>
+                            </div>
+                            <div class="property-actions">
+                                <a href="/Property/Details/${property.id}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <button type="button" class="btn-remove" onclick="confirmRemove(${property.id})">
+                                    <i class="fas fa-heart-broken"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function updatePagination(pagination) {
+                const container = document.getElementById('paginationContainer');
+                if (!container || pagination.totalPages <= 1) {
+                    if (container) container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'block';
+
+                let paginationHtml = '<nav aria-label="Favorites pagination"><ul class="pagination justify-content-center">';
+
+                // Previous button
+                if (pagination.hasPreviousPage) {
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.currentPage - 1}); return false;"><i class="fas fa-chevron-left"></i></a></li>`;
+                } else {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>';
+                }
+
+                // Page numbers
+                const startPage = Math.max(1, pagination.currentPage - 2);
+                const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+
+                if (startPage > 1) {
+                    paginationHtml += '<li class="page-item"><a class="page-link" href="#" onclick="loadPage(1); return false;">1</a></li>';
+                    if (startPage > 2) {
+                        paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHtml += `<li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadPage(${i}); return false;">${i}</a>
+                    </li>`;
+                }
+
+                if (endPage < pagination.totalPages) {
+                    if (endPage < pagination.totalPages - 1) {
+                        paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    }
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.totalPages}); return false;">${pagination.totalPages}</a></li>`;
+                }
+
+                // Next button
+                if (pagination.hasNextPage) {
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadPage(${pagination.currentPage + 1}); return false;"><i class="fas fa-chevron-right"></i></a></li>`;
+                } else {
+                    paginationHtml += '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>';
+                }
+
+                paginationHtml += '</ul></nav>';
+                
+                // Add results info
+                const start = (pagination.currentPage - 1) * pagination.pageSize + 1;
+                const end = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems);
+                paginationHtml += `<div class="text-center mt-2"><small class="text-muted">Showing ${start} to ${end} of ${pagination.totalItems} favorite properties</small></div>`;
+
+                container.innerHTML = paginationHtml;
+            }
+
+            function updateStatistics(properties) {
+                if (properties.length === 0) return;
+
+                const totalValue = properties.reduce((sum, p) => sum + p.price, 0);
+                const averagePrice = totalValue / properties.length;
+                const totalArea = properties.reduce((sum, p) => sum + p.area, 0);
+
+                document.getElementById('totalFavorites').textContent = properties.length;
+                document.getElementById('totalValue').textContent = formatPrice(totalValue);
+                document.getElementById('averagePrice').textContent = formatPrice(averagePrice);
+                document.getElementById('totalArea').textContent = totalArea + ' m²';
+            }
+
+            function loadStatistics() {
+                fetch('@Url.Action("GetFavoriteStats", "FavoriteProperty")')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const stats = data.stats;
+                            document.getElementById('totalFavorites').textContent = stats.totalFavorites;
+                            document.getElementById('totalValue').textContent = formatPrice(stats.totalValue);
+                            document.getElementById('averagePrice').textContent = formatPrice(stats.averagePrice);
+                            document.getElementById('totalArea').textContent = stats.totalArea + ' m²';
+                        }
+                    })
+                    .catch(error => console.error('Error loading statistics:', error));
             }
 
             function confirmRemove(id) {
-                $.ajax({
-                    url: '@Url.Action("Remove", "FavoriteProperty")',
-                    type: 'POST',
-                    data: {
-                        id: id,
-                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                    },
-                    success: function (response) {
-                        $('.property-card[data-id="' + id + '"]').fadeOut(300, function () {
-                $(this).remove();
-            });
-                    },
-                    error: function () {
-                        showError('An error occurred while updating favorites');
-                    }
-                });
+                if (confirm('Are you sure you want to remove this property from your favorites?')) {
+                    removeFromFavorites(id);
+                }
             }
 
-            // Search and Filter Functionality
-            document.getElementById('searchInput').addEventListener('input', filterProperties);
-            document.getElementById('categoryFilter').addEventListener('change', filterProperties);
-            document.getElementById('sortBy').addEventListener('change', sortProperties);
-
-            function filterProperties() {
-                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-                const categoryFilter = document.getElementById('categoryFilter').value;
-                const cards = document.querySelectorAll('.property-card');
-
-                cards.forEach(card => {
-                    const title = card.dataset.title;
-                    const category = card.dataset.category;
-
-                    const matchesSearch = title.includes(searchTerm);
-                    const matchesCategory = !categoryFilter || category === categoryFilter;
-
-                    if (matchesSearch && matchesCategory) {
-                        card.style.display = 'block';
+            function removeFromFavorites(id) {
+                fetch('@Url.Action("Remove", "FavoriteProperty")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'id': id,
+                        '__RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadFavorites(currentPage);
+                        showSuccess('Property removed from favorites');
                     } else {
-                        card.style.display = 'none';
+                        showError('Failed to remove property from favorites');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('An error occurred while removing from favorites');
                 });
             }
 
-            function sortProperties() {
-                const sortBy = document.getElementById('sortBy').value;
+            function clearFilters() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('categoryFilter').value = '';
+                document.getElementById('sortBy').value = 'newest';
+                
+                currentSearchTerm = '';
+                currentCategory = '';
+                currentSortBy = 'newest';
+                
+                loadFavorites(1);
+            }
+
+            // Helper functions
+            function formatPrice(price) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(price);
+            }
+
+            function formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            }
+
+            function getPropertyType(propertyType) {
+                const types = {
+                    1: 'OneBedroom',
+                    2: 'TwoBedrooms', 
+                    3: 'ThreeBedrooms',
+                    4: 'MultipleBedrooms'
+                };
+                return types[propertyType] || 'Unknown';
+            }
+
+            function showLoading(show) {
+                const spinner = document.getElementById('loadingSpinner');
                 const container = document.getElementById('propertiesContainer');
-                const cards = Array.from(container.children);
 
-                cards.sort((a, b) => {
-                    switch (sortBy) {
-                        case 'price-low':
-                            return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                        case 'price-high':
-                            return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                        case 'area-large':
-                            return parseFloat(b.dataset.area) - parseFloat(a.dataset.area);
-                        default: // newest
-                            return 0; // Keep original order
-                    }
-                });
-
-                cards.forEach(card => container.appendChild(card));
+                if (show) {
+                    spinner.classList.remove('d-none');
+                    container.style.opacity = '0.5';
+                } else {
+                    spinner.classList.add('d-none');
+                    container.style.opacity = '1';
+                }
             }
 
-            // Add smooth animations on load
-            document.addEventListener('DOMContentLoaded', function () {
-                const cards = document.querySelectorAll('.property-card');
-                cards.forEach((card, index) => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(30px)';
-                    setTimeout(() => {
-                        card.style.transition = 'all 0.6s ease';
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, index * 100);
-                });
-            });
+            function showSuccess(message) {
+                showNotification(message, 'success');
+            }
+
+            function showError(message) {
+                showNotification(message, 'error');
+            }
+
+            function showNotification(message, type) {
+                const toast = document.createElement('div');
+                toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+                toast.style.cssText = `
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    min-width: 300px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                toast.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                    </div>
+                `;
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 5000);
+            }
         </script>
+        @Html.AntiForgeryToken()
     }
 </body>
 </html>

@@ -151,27 +151,7 @@ namespace HomeEstate.Services.Core.Tests.Services
             exception.Message.ShouldContain("not found");
         }
 
-        //[Fact]
-        //public async Task GetAllRolesAsync_ShouldReturnAllRoles()
-        //{
-        //    // Arrange
-        //    var roles = new List<IdentityRole>
-        //    {
-        //        new IdentityRole { Name = "Admin" },
-        //        new IdentityRole { Name = "User" }
-        //    };
-
-        //    A.CallTo(() => _roleManager.Roles).Returns(roles.AsQueryable());
-
-        //    // Act
-        //    var result = await _service.GetAllRolesAsync();
-
-        //    // Assert
-        //    result.ShouldNotBeNull();
-        //    result.Count.ShouldBe(2);
-        //    result.ShouldContain("Admin");
-        //    result.ShouldContain("User");
-        //}
+  
 
         [Fact]
         public async Task GetUserRolesAsync_WhenUserExists_ShouldReturnUserRoles()

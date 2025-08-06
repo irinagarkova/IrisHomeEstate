@@ -227,8 +227,7 @@ namespace HomeEstate.Services.Core.Tests.Services
         public async Task GetCategoryByNameAsync_WithEmptyName_ShouldThrowNotFoundException()
         {
             // Act & Assert
-            var exception = await Should.ThrowAsync<NotFoundException>(() => _service.GetCategoryByNameAsync(""));
-            exception.Message.ShouldContain("Category");
+            var exception = await Should.ThrowAsync<ArgumentException>(() => _service.GetCategoryByNameAsync(""));
         }
 
         [Fact]

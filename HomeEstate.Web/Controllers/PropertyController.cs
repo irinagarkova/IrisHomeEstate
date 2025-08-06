@@ -38,14 +38,20 @@ namespace HomeEstate.Web.Controllers
 
         [AllowAnonymous]
         [Authorize(Policy = "UserOrAdmin")]
-        public async Task<IActionResult> Index(PropertySearchDto? searchCriteria = null)
+        public async Task<IActionResult> Index(PropertySearchDto? searchCriteria = null, int page = 1, int pageSize = 5)
         {
+            // Validate page parameters
+            if (page < 1) page = 1;
+            if (pageSize < 6) pageSize = 6;
+            if (pageSize > 50) pageSize = 50;
 
-            // Ако searchCriteria е null, създайте празен
             searchCriteria ??= new PropertySearchDto();
+            searchCriteria.Page = page;
+            searchCriteria.PageSize = pageSize;
+
             Pagination<PropertyDto> propertyDtos;
 
-            // Ако има search критерии
+            // Check if has search criteria
             bool hasSearchCriteria = !string.IsNullOrEmpty(searchCriteria.Location) ||
                           searchCriteria.CategoryId.HasValue ||
                           searchCriteria.MaxPrice.HasValue ||
@@ -58,13 +64,11 @@ namespace HomeEstate.Web.Controllers
                 propertyDtos = await propertyService.SearchPropertiesAsync(searchCriteria);
                 ViewData["SearchApplied"] = true;
                 ViewData["SearchCriteria"] = searchCriteria;
-                ViewData["ResultsCount"] = propertyDtos.TotalItems;
             }
             else
             {
-                propertyDtos = await propertyService.GetAllPropertiesAsync(1, 10);
+                propertyDtos = await propertyService.GetAllPropertiesAsync(page, pageSize);
                 ViewData["SearchApplied"] = false;
-                ViewData["ResultsCount"] = propertyDtos.TotalItems;
             }
 
             var userName = User.Identity?.Name;
@@ -86,29 +90,47 @@ namespace HomeEstate.Web.Controllers
                 mappedProperties.Add(vm);
             }
 
-            return View(mappedProperties);
+            // Create pagination view model
+            var viewModel = new PropertyIndexViewModel
+            {
+                Properties = new Pagination<PropertyViewModel>
+                {
+                    Items = mappedProperties,
+                    CurrentPage = propertyDtos.CurrentPage,
+                    TotalPages = propertyDtos.TotalPages,
+                    TotalItems = propertyDtos.TotalItems,
+                    PageSize = propertyDtos.PageSize,
+                },
+                SearchCriteria = searchCriteria,
+                PageSizes = new List<int> { 5, 10, 25, 50 }
+            };
+
+            return View(viewModel);
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> ForSale()
+        public async Task<IActionResult> ForSale(int page = 1, int pageSize = 10)
         {
             var searchCriteria = new PropertySearchDto
             {
-                ListingType = PropertyListingType.Sale
+                ListingType = PropertyListingType.Sale,
+                Page = page,
+                PageSize = pageSize
             };
             return await Index(searchCriteria);
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> ForRent()
+        public async Task<IActionResult> ForRent(int page = 1, int pageSize = 10)
         {
             var searchCriteria = new PropertySearchDto
             {
-                ListingType = PropertyListingType.Rent
+                ListingType = PropertyListingType.Rent,
+                Page = page,
+                PageSize = pageSize
             };
             return await Index(searchCriteria);
         }
-
 
         [Authorize]
         public async Task<IActionResult> Add()
@@ -116,10 +138,11 @@ namespace HomeEstate.Web.Controllers
             var model = new AddAndUpdatePropertyViewModel
             {
                 ListingType = PropertyListingType.Sale,
-                Locations = await getLocations() // Default
+                Locations = await getLocations()
             };
             return View(model);
         }
+
         private async Task<IEnumerable<SelectListItem>> getLocations()
         {
             var locations = await propertyService.GetAllLocations();
@@ -132,28 +155,26 @@ namespace HomeEstate.Web.Controllers
                            Text = l.City
                        })
                        .ToList();
-
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(AddAndUpdatePropertyViewModel model)
         {
-            if(model.Images == null)
+            if (model.Images == null)
             {
                 ModelState.AddModelError("Images", "Upload at least 1 image");
                 return View(model);
             }
             if (!ModelState.IsValid)
             {
-                //model.Locations = await getLocations();
                 return View(model);
             }
             if (model.ListingType == PropertyListingType.Rent || model.ListingType == PropertyListingType.Both)
             {
                 if (!model.MonthlyRent.HasValue || model.MonthlyRent <= 0)
                 {
-                    ModelState.AddModelError("MonthlyRent", "Месечният наем е задължителен за имоти под наем");
+                    ModelState.AddModelError("MonthlyRent", "Monthly rent is required for rental properties");
                     model.Locations = await getLocations();
                     return View(model);
                 }
@@ -199,7 +220,7 @@ namespace HomeEstate.Web.Controllers
 
                 await propertyService.CreatePropertyAsync(propertyDto);
 
-                TempData["SuccessMessage"] = "Имотът е създаден успешно!";
+                TempData["SuccessMessage"] = "Property created successfully!";
                 return RedirectToAction("Index", "MyProperty");
             }
             catch (Exception ex)
@@ -246,7 +267,7 @@ namespace HomeEstate.Web.Controllers
             {
                 if (!model.MonthlyRent.HasValue || model.MonthlyRent <= 0)
                 {
-                    ModelState.AddModelError("MonthlyRent", "Месечният наем е задължителен за имоти под наем");
+                    ModelState.AddModelError("MonthlyRent", "Monthly rent is required for rental properties");
                     model.Locations = await getLocations();
                     return View(model);
                 }
@@ -264,14 +285,12 @@ namespace HomeEstate.Web.Controllers
                 var propertyDto = mapper.Map<PropertyDto>(model);
                 propertyDto.OwnerId = userId;
 
-                // Запазване на съществуващите снимки ако няма нови
                 if (model.Images == null || !model.Images.Any())
                 {
                     propertyDto.Images = property.Images;
                 }
                 else
                 {
-                    // Качване на нови снимки
                     var imagePaths = new List<string>();
                     var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 
@@ -304,7 +323,7 @@ namespace HomeEstate.Web.Controllers
 
                 await propertyService.UpdatePropertyAsync(propertyDto);
 
-                TempData["SuccessMessage"] = "Имотът е обновен успешно!";
+                TempData["SuccessMessage"] = "Property updated successfully!";
                 return RedirectToAction("MyProperty");
             }
             catch (CustomValidationException ex)
@@ -322,7 +341,7 @@ namespace HomeEstate.Web.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Възникна грешка при обновяването.");
+                ModelState.AddModelError("", "An error occurred while updating.");
                 model.Locations = await getLocations();
                 return View(model);
             }
@@ -336,7 +355,6 @@ namespace HomeEstate.Web.Controllers
                 var property = await propertyService.GetPropertyAsync(id);
                 var mappedProp = mapper.Map<DetailsViewModel>(property);
 
-                // Добавете similar properties
                 var similarProperties = await propertyService.GetSimilarPropertiesAsync(id, 4);
                 ViewBag.SimilarProperties = similarProperties.Select(p => mapper.Map<PropertyViewModel>(p)).ToList();
 
@@ -348,7 +366,7 @@ namespace HomeEstate.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Възникна грешка при зареждането на имота.";
+                TempData["ErrorMessage"] = "An error occurred while loading the property.";
                 return RedirectToAction("Index");
             };
         }
@@ -379,7 +397,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -402,17 +419,6 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Search(SearchViewModel model)
-        //{
-        //    var search = mapper.Map<SearchPropertyDto>(model);
-        //    var allprop = await propertyService.GetAllPropertiesAsync(search);
-
-        //    return Json(new { Success = true, Properties = allprop });
-
-
-        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(PropertySearchDto searchCriteria)
@@ -443,7 +449,6 @@ namespace HomeEstate.Web.Controllers
             return RedirectToAction("Index", routeValues);
         }
 
-
         [HttpPost]
         public IActionResult ValidateRentalFields([FromBody] RentalValidationRequest request)
         {
@@ -453,17 +458,17 @@ namespace HomeEstate.Web.Controllers
             {
                 if (!request.MonthlyRent.HasValue || request.MonthlyRent <= 0)
                 {
-                    errors.Add("Месечният наем е задължителен");
+                    errors.Add("Monthly rent is required");
                 }
 
                 if (request.MinimumLeasePeriod.HasValue && (request.MinimumLeasePeriod < 1 || request.MinimumLeasePeriod > 60))
                 {
-                    errors.Add("Минималният срок трябва да бъде между 1 и 60 месеца");
+                    errors.Add("Minimum lease period must be between 1 and 60 months");
                 }
 
                 if (request.SecurityDeposit.HasValue && request.SecurityDeposit < 0)
                 {
-                    errors.Add("Депозитът не може да бъде отрицателен");
+                    errors.Add("Security deposit cannot be negative");
                 }
             }
 
@@ -471,163 +476,16 @@ namespace HomeEstate.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SearchProperties([FromBody] PropertySearchDto searchCriteria)
-        {
-            try
-            {
-                if (searchCriteria == null)
-                {
-                    searchCriteria = new PropertySearchDto();
-                }
-
-                // Изпълняване на търсенето чрез PropertyService
-                var searchResults = await propertyService.SearchPropertiesAsync(searchCriteria);
-
-                // Проверка дали потребителят е влязъл в системата
-                var userName = User.Identity?.Name;
-                var favoriteIds = new HashSet<int>();
-
-                if (User.Identity != null && User.Identity.IsAuthenticated && !string.IsNullOrEmpty(userName))
-                {
-                    try
-                    {
-                        var favorites = await favoritePropertyService.GetAllFavoritePropertiesAsync(userName);
-                        favoriteIds = favorites.Select(f => f.PropertyId).ToHashSet();
-                    }
-                    catch (Exception favEx)
-                    {
-                        // Ако има проблем с favorites, продължаваме без тях
-                        Console.WriteLine($"Favorites error: {favEx.Message}");
-                    }
-                }
-
-                // Мапване на резултатите към ViewModel-и
-                var mappedProperties = new List<object>();
-
-                foreach (var property in searchResults.Items)
-                {
-                    try
-                    {
-                        var favoriteCount = 0;
-                        try
-                        {
-                            favoriteCount = await favoritePropertyService.GetFavoriteCountForPropertyAsync(property.Id);
-                        }
-                        catch
-                        {
-                            // Ако има проблем с favorite count, използваме 0
-                        }
-
-                        var propertyViewModel = new
-                        {
-                            id = property.Id,
-                            title = property.Title ?? "",
-                            description = property.Description ?? "",
-                            price = property.Price,
-                            area = property.Area,
-                            createdOn = property.CreatedOn,
-                            listingType = (int)property.ListingType,
-                            propertyType = (int)property.PropertyType,
-                            favoriteCount = favoriteCount,
-                            isFavorite = favoriteIds.Contains(property.Id),
-                            location = property.Location != null ? new
-                            {
-                                city = property.Location.City ?? "",
-                                address = property.Location.Address ?? ""
-                            } : new { city = "", address = "" },
-                            category = property.Category != null ? new
-                            {
-                                name = property.Category.Name ?? ""
-                            } : new { name = "" },
-                            images = property.Images?.Select(img => new
-                            {
-                                imageUrl = img.ImageUrl ?? ""
-                            }).ToList()
-                        };
-
-                        mappedProperties.Add(propertyViewModel);
-                    }
-                    catch (Exception propEx)
-                    {
-                        Console.WriteLine($"Error mapping property {property.Id}: {propEx.Message}");
-                        continue;
-                    }
-                }
-
-                // Връщане на JSON резултат
-                return Json(new
-                {
-                    success = true,
-                    properties = mappedProperties,
-                    totalCount = searchResults.TotalItems,
-                    totalPages = searchResults.TotalPages,
-                    currentPage = searchResults.CurrentPage,
-                    pageSize = searchResults.PageSize,
-                    searchCriteria = searchCriteria
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = $"Възникна грешка при търсенето на имоти: {ex.Message}"
-                });
-            }
-        }
-
-        // Алтернативен метод за тестване с GET заявки
-        [HttpGet]
-        public async Task<IActionResult> TestSearch(string location = "", int? categoryId = null)
-        {
-            try
-            {
-                var searchCriteria = new PropertySearchDto
-                {
-                    Location = location,
-                    CategoryId = categoryId
-                };
-
-                return await SearchProperties(searchCriteria);
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message,
-                    stackTrace = ex.StackTrace
-                });
-            }
-        }
-
-        // Добавете и тази helper метода за лесно търсене по GET (опционално)
-        [HttpGet]
-        public async Task<IActionResult> QuickSearch(string location, int? categoryId, decimal? maxPrice, string sortBy = "newest")
-        {
-            var searchCriteria = new PropertySearchDto
-            {
-                Location = location,
-                CategoryId = categoryId,
-                MaxPrice = maxPrice,
-                SortBy = sortBy
-            };
-
-            return await SearchProperties(searchCriteria);
-        }
-
-        [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> SearchAjax([FromBody] PropertySearchDto searchCriteria)
+        public async Task<IActionResult> SearchAjax([FromBody] PropertySearchDto searchCriteria, int page = 1, int pageSize = 5)
         {
             try
             {
                 searchCriteria ??= new PropertySearchDto();
+                searchCriteria.Page = page;
+                searchCriteria.PageSize = pageSize;
 
-                Pagination<PropertyDto> propertyDtos;
-
-                // Винаги използвай search метода, дори и критериите да са празни
-                propertyDtos = await propertyService.SearchPropertiesAsync(searchCriteria);
+                var propertyDtos = await propertyService.SearchPropertiesAsync(searchCriteria);
 
                 var userName = User.Identity?.Name;
                 var favoriteIds = new HashSet<int>();
@@ -685,6 +543,10 @@ namespace HomeEstate.Web.Controllers
                     success = true,
                     properties = mappedProperties,
                     totalCount = propertyDtos.TotalItems,
+                    currentPage = propertyDtos.CurrentPage,
+                    totalPages = propertyDtos.TotalPages,
+                    hasNextPage = propertyDtos.HasNextPage,
+                    hasPreviousPage = propertyDtos.HasPreviousPage,
                     hasSearchCriteria = !string.IsNullOrEmpty(searchCriteria.Location) ||
                                         searchCriteria.CategoryId.HasValue ||
                                         searchCriteria.MaxPrice.HasValue ||
@@ -704,6 +566,51 @@ namespace HomeEstate.Web.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> TestSearch(string location = "", int? categoryId = null)
+        {
+            try
+            {
+                var searchCriteria = new PropertySearchDto
+                {
+                    Location = location,
+                    CategoryId = categoryId
+                };
+
+                return await SearchAjax(searchCriteria);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> QuickSearch(string location, int? categoryId, decimal? maxPrice, string sortBy = "newest")
+        {
+            var searchCriteria = new PropertySearchDto
+            {
+                Location = location,
+                CategoryId = categoryId,
+                MaxPrice = maxPrice,
+                SortBy = sortBy
+            };
+
+            return await SearchAjax(searchCriteria);
+        }
     }
 
+    // Supporting classes
+    public class RentalValidationRequest
+    {
+        public PropertyListingType ListingType { get; set; }
+        public decimal? MonthlyRent { get; set; }
+        public int? MinimumLeasePeriod { get; set; }
+        public decimal? SecurityDeposit { get; set; }
+    }
 }

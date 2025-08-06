@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using HomeEstate.Data;
 using HomeEstate.Data.Models.Enum;
 using HomeEstate.Models;
@@ -330,18 +331,24 @@ namespace HomeEstate.Services.Core.Services
 
             var properties = await query.ToListAsync();
 
-            var result = properties.Select(p =>
+            var result = properties
+                .OrderBy(x=>x.Price)
+                .Skip((searchCriteria.Page -1) * searchCriteria.PageSize)
+                .Take(searchCriteria.PageSize)
+                .Select(p =>
             {
                 var dto = mapper.Map<PropertyDto>(p);
                 dto.FavoriteCount = p.FavoriteProperties.Count;
                 return dto;
             }).ToList();
 
+            var totalPages = (int)Math.Ceiling((double)properties.Count / searchCriteria.PageSize);
+
             return new Pagination<PropertyDto>
             {
                 Items = result,
-                CurrentPage = 1,
-                TotalPages = 1,
+                CurrentPage = searchCriteria.Page,
+                TotalPages = totalPages,
                 PageSize = result.Count,
                 TotalItems = result.Count
             };

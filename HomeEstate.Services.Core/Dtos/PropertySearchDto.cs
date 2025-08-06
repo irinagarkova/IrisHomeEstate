@@ -23,6 +23,9 @@ namespace HomeEstate.Services.Core.Dtos
         public bool? IsFurnished { get; set; }
         public string? SortBy { get; set; }
 
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+
 
         public bool HasSearchCriteria => 
             !string.IsNullOrEmpty(Location) ||
