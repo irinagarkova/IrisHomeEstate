@@ -5,7 +5,7 @@
 }
 
 .profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary);
     color: white;
     border-radius: 20px;
     padding: 3rem 2rem;
@@ -134,14 +134,18 @@
     justify-content: center;
     font-size: 1.5rem;
     color: white;
+    background: var(--primary);
 }
+    .stat-icon favorite {
+        background: red;
+    }
 
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-}
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
 
 .stat-label {
     color: #5a6c7d;

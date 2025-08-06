@@ -2,11 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using static HomeEstate.HomeEstateCommon.EntityConstants.LocationConstants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HomeEstate.Data.Configurations
 {
@@ -25,12 +20,15 @@ namespace HomeEstate.Data.Configurations
             builder
                 .Property(l => l.Address)
                 .IsRequired(true)
-                .HasMaxLength(200); 
-            
-    
+                .HasMaxLength(200);
+
             builder
-                .Property<bool>("IsDeleted")
+                .Property(l => l.IsDeleted)
                 .HasDefaultValue(false);
+
+            // Add query filter for soft delete
+            builder
+                .HasQueryFilter(l => !l.IsDeleted);
         }
     }
 }

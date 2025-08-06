@@ -10,5 +10,7 @@ namespace HomeEstate.Models
         [Comment("Location CityName")]
         public string City { get; set; } = null!;
         public string Address{ get; set; } = null!;
+        [Comment("Shows if location is deleted")]
+        public bool IsDeleted { get; set; } = false;
     }
 }
