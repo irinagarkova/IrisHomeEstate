@@ -62,6 +62,7 @@
                         <span>Please correct the errors below</span>
                     </div>
 
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group-modern">
@@ -133,25 +134,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="form-group-modern">
-                                <label class="form-label-modern">
-                                    <i class="fas fa-id-card"></i>
-                                    User ID
-                                </label>
-                                <div class="position-relative">
-                                    <input type="text" class="form-control form-control-modern" 
-                                           value="@Model.Id" readonly disabled>
-                                    <div class="input-icon">
-                                        <i class="fas fa-id-card"></i>
-                                    </div>
-                                </div>
-                                <div class="form-hint">
-                                    <i class="fas fa-lock"></i>
-                                    Your unique identifier (cannot be changed)
-                                </div>
-                            </div>
-                        </div>
+                       
                     </div>
 
                     <div class="form-actions">
@@ -590,40 +573,37 @@
             changeBtn.disabled = true;
             changeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
 
-            fetch('@Url.Action("ChangePassword", "Account")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: JSON.stringify({
+            $.ajax({
+                url: '@Url.Action("ChangePassword", "Auth")',
+                type: 'POST',
+                data: {
                     CurrentPassword: currentPassword,
                     NewPassword: newPassword,
-                    ConfirmPassword: confirmPassword
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Password changed successfully!', 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-                    
-                    // Clear form
-                    document.getElementById('changePasswordForm').reset();
-                    document.getElementById('passwordStrengthBar').style.width = '0%';
-                    document.getElementById('passwordStrengthText').innerHTML = '<i class="fas fa-info-circle"></i> Password strength will appear here';
-                } else {
-                    const errorMessage = data.errors ? data.errors.join(', ') : data.message;
-                    showToast(errorMessage, 'error');
+                    ConfirmPassword: confirmPassword,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    if (data.success) {
+                        showToast('Password changed successfully!', 'success');
+                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+
+                        // Clear form
+                        document.getElementById('changePasswordForm').reset();
+                        document.getElementById('passwordStrengthBar').style.width = '0%';
+                        document.getElementById('passwordStrengthText').innerHTML = '<i class="fas fa-info-circle"></i> Password strength will appear here';
+                    } else {
+                        const errorMessage = data.errors ? data.errors.join(', ') : data.message;
+                        showToast(errorMessage, 'error');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    showToast('An error occurred while changing password', 'error');
+                },
+                complete: function () {
+                    changeBtn.disabled = false;
+                    changeBtn.innerHTML = originalHtml;
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('An error occurred while changing password', 'error');
-            })
-            .finally(() => {
-                changeBtn.disabled = false;
-                changeBtn.innerHTML = originalHtml;
             });
         }
 
@@ -633,12 +613,22 @@
                 return;
             }
 
-            showToast('Password reset email sent! Check your inbox.', 'success');
-            
-            // In a real application, you would make an AJAX call to send the reset email
-            // fetch('@Url.Action("SendPasswordReset", "Account")', { method: 'POST' })...
+            $.ajax({
+                url: '@Url.Action("ForgotPassword", "Auth")',
+                type: 'POST',
+                data: {
+                    Email: '@Model.Email',
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    showToast('Password reset email sent! Check your inbox.', 'success');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    showToast('Error sending password reset email.', 'error');
+                }
+            });
         }
-
         function showDeleteAccountModal() {
             const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
             modal.show();

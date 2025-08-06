@@ -46,22 +46,6 @@
 
             <!-- Registration Form -->
             <form class="form" id="registrationForm" asp-action="Register" asp-controller="Auth" asp-area="">
-                <!-- Username Fields -->
-                <div class="input-group">
-                    <div class="input-wrapper">
-                        <input asp-for="FirstName" type="text" class="input-field" placeholder="Име" required>
-                        <i class="input-icon fas fa-user"></i>
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
-                    </div>
-                    
-
-                    <div class="input-wrapper">
-                        <input asp-for="LastName" type="text" class="input-field" placeholder="Име" required>
-                        <i class="input-icon fas fa-user"></i>
-                        <span asp-validation-for="LastName" class="text-danger"></span>
-                    </div>
-                    
-                </div>
                 <!-- Email -->
                 <div class="input-group">
                     <div class="input-wrapper">
